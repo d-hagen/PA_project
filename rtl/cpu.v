@@ -75,6 +75,7 @@ module cpu #(
   wire              D_ld;
   wire              D_str;
   wire              D_brn;
+  wire              D_addi;
 
   decode #(
         .XLEN(XLEN)
@@ -90,7 +91,8 @@ module cpu #(
     .D_alu_op (D_alu_op),
     .D_ld     (D_ld),
     .D_str    (D_str),
-    .D_brn    (D_brn)
+    .D_brn    (D_brn),
+    .D_addi   (D_addi)
   );
 
 
@@ -117,6 +119,7 @@ module cpu #(
     .D_ld       (D_ld),
     .D_str      (D_str),
     .D_brn      (D_brn),
+    .D_addi     (D_addi),
 
     // From Writeback stage
     .WB_we      (WB_we),

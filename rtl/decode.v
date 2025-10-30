@@ -10,7 +10,8 @@ module decode #(parameter XLEN=32)(
   output wire [3:0]        D_alu_op,       // 4-bit ALU op
   output wire              D_ld,
   output wire              D_str,
-  output wire              D_brn
+  output wire              D_brn,
+  output wire              D_addi
 );
 
 
@@ -31,11 +32,14 @@ module decode #(parameter XLEN=32)(
   localparam OPC_NOT   = 6'b000101;
   localparam OPC_SHL   = 6'b000110;
   localparam OPC_SHR   = 6'b000111;
+  localparam OPC_ADDI  = 6'b001000;   // add immediat 
 
-  // Comparisons
-  localparam OPC_EQ    = 6'b001000;   // Equal
-  localparam OPC_LT    = 6'b001001;   // Less than
-  localparam OPC_GT    = 6'b001010;   // Greater than
+  
+
+  // Free obcodes 
+
+  localparam OPC_LT      = 6'b001001;   // Less than
+  localparam OPC_GT      = 6'b001010;   // Greater than
 
   // Memory
   localparam OPC_LOAD  = 6'b001011;
@@ -54,10 +58,11 @@ module decode #(parameter XLEN=32)(
   wire is_blt  = is_ctrl && (D_rd == RD_BLT);
   wire is_bgt  = is_ctrl && (D_rd == RD_BGT);
 
-  assign D_we  = (D_opc <= OPC_GT) || (D_opc == OPC_LOAD);
-  assign D_ld  = (D_opc == OPC_LOAD);
-  assign D_str = (D_opc == OPC_STORE);
-  assign D_brn = is_ctrl;
+  assign D_we   = (D_opc <= OPC_GT) || (D_opc == OPC_LOAD);
+  assign D_ld   = (D_opc == OPC_LOAD);
+  assign D_str  = (D_opc == OPC_STORE);
+  assign D_brn  = is_ctrl;
+  assign D_addi = (D_opc == OPC_ADDI);
 
   assign D_alu_op =
          (D_opc == OPC_ADD)                 ? 4'b0000 :
@@ -68,7 +73,6 @@ module decode #(parameter XLEN=32)(
          (D_opc == OPC_NOT)                 ? 4'b0101 :
          (D_opc == OPC_SHL)                 ? 4'b0110 :
          (D_opc == OPC_SHR)                 ? 4'b0111 :
-         (D_opc == OPC_EQ || is_beq)        ? 4'b1000 : // EQ
          (D_opc == OPC_LT || is_blt)        ? 4'b1001 : // LT
          (D_opc == OPC_GT || is_bgt)        ? 4'b1010 : // GT
                                             4'b0000;  // default (ADD)

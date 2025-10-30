@@ -10,5 +10,6 @@ reg [XLEN-1:0] regs [0:REG_NUM-1];
 initial begin
   $readmemh("program.hex", regs);
 end
+
 assign F_inst = regs[F_pc];
 endmodule

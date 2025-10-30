@@ -22,6 +22,6 @@ module memory #(parameter XLEN=32, parameter REG_NUM=32, parameter ADDR_SIZE=5)(
         regs[addr] <= MEM_b2;
   end
 
-  assign data_mem = MEM_ld ? regs[addr] : MEM_alu_out;
+  assign MEM_data_mem = MEM_ld ? regs[addr] : MEM_alu_out;
 
 endmodule

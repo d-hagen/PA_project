@@ -9,6 +9,7 @@ module regfile #(parameter XLEN=32, parameter REG_NUM=32, parameter ADDR_SIZE=5)
   input wire                  D_ld,
   input wire                  D_str,
   input wire                  D_brn,
+  input wire                  D_addi,
 
 
 
@@ -50,7 +51,7 @@ module regfile #(parameter XLEN=32, parameter REG_NUM=32, parameter ADDR_SIZE=5)
 
   assign D_a2 = regs[D_ra];
   assign D_b2 = regs[D_rb];
-  assign D_b  = (D_str || D_ld ||D_brn) ? offset : regs[D_rb];
+  assign D_b  = (D_str || D_ld ||D_brn || D_addi) ? offset : regs[D_rb]; /// here add addi checker 
   assign D_a  = D_brn ? pc_extended : regs[D_ra];
 
 endmodule
