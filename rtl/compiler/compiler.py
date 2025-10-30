@@ -2,9 +2,6 @@
 import argparse, sys, re, pathlib
 from typing import Optional
 
-
-MAX_WORDS = 32
-
 # ===================== OPCODES (match decode.v) =====================
 OPCODES = {
     "add":   0b000000,
@@ -16,24 +13,24 @@ OPCODES = {
     "shl":   0b000110,
     "shr":   0b000111,
     "addi":  0b001000,   # add immediate
-    "lt":    0b001001,   # set/compare less-than (as per your ALU usage)
-    "gt":    0b001010,   # set/compare greater-than
+    "lt":    0b001001,
+    "gt":    0b001010,
     "load":  0b001011,
     "store": 0b001100,
-    "ctrl":  0b001101,   # generic CONTROL opcode (see below for subops)
-    # Shorthands for ctrl sub-ops (we’ll map to OPC_CTRL + RD_*)
+    "ctrl":  0b001101,   # used internally for jmp/beq/blt/bgt
+
+    # Shorthands for control ops (mapped to OPC_CTRL with rd sub-op):
     "jmp":   0b001101,
     "beq":   0b001101,
     "blt":   0b001101,
     "bgt":   0b001101,
 }
 
-# CTRL subop codes go into the RD field
+# CTRL subop codes in the RD field
 RD_JMP = 0b00000
 RD_BEQ = 0b00001
 RD_BLT = 0b00010
 RD_BGT = 0b00011
-
 CTRL_RD_FOR = {"jmp": RD_JMP, "beq": RD_BEQ, "blt": RD_BLT, "bgt": RD_BGT}
 
 # ============================ utils ================================
@@ -49,16 +46,15 @@ def parse_reg(tok: str) -> int:
     return n
 
 def parse_imm(tok: str) -> int:
-    # allow 0x.., 0b.., decimal
-    val = int(tok, 0)
-    # your immediate is 11-bit zero-extended in current design
-    if not (0 <= val <= 0x7FF):
+    val = int(tok, 0)  # supports 0x.., 0b.., decimal
+    if not (0 <= val <= 0x7FF):  # 11-bit zero-extended immediate
         raise ValueError(f"Immediate out of 11-bit unsigned range (0..2047): {tok}")
     return val
 
 # ========================== assembler ==============================
 def assemble_line(line: str, lineno: int) -> Optional[int]:
     raw = line.rstrip("\n")
+    # strip inline comments
     clean = re.split(r"//|#|;", raw, maxsplit=1)[0].strip()
     if not clean:
         return None
@@ -78,10 +74,10 @@ def assemble_line(line: str, lineno: int) -> Optional[int]:
     rd  = parse_reg(rd_t)
     imm = parse_imm(imm_t)
 
-    # CTRL shorthands: force OPC_CTRL and RD_* regardless of user rd
+    # Map control shorthands to OPC_CTRL and force RD subop
     if op_l in CTRL_RD_FOR:
         opc = OPCODES["ctrl"]
-        rd  = CTRL_RD_FOR[op_l]  # override rd with sub-op code
+        rd  = CTRL_RD_FOR[op_l]
 
     word = ((opc & 0x3F) << 26) \
          | ((ra  & 0x1F) << 21) \
@@ -90,9 +86,15 @@ def assemble_line(line: str, lineno: int) -> Optional[int]:
          | ( imm & 0x7FF)
     return word
 
+# Precompute the bubble NOP: addi r0 r0 r0 0 = 0x20000000
+NOP_BUBBLE = ((OPCODES["addi"] & 0x3F) << 26)  # rest zeros
+NOP_BUBBLE_COMMENT = "NOP (addi r0 r0 r0 0)"
+NOP_END = 0x00000000
+NOP_END_COMMENT = "NOP (end of program)"
+
 # ============================= main ================================
 def main():
-    ap = argparse.ArgumentParser(description="Assembler -> program.hex (32 lines, NOP padded; comments include original asm)")
+    ap = argparse.ArgumentParser(description="Assembler -> program.hex (32 lines; bubble NOP=ADDI r0,r0,r0,0; last NOP=0)")
     ap.add_argument("input", help="assembly source (each line: opcode ra rb rd imm)")
     ap.add_argument("-o", "--output", default="program.hex", help="output hex file (default: program.hex)")
     args = ap.parse_args()
@@ -112,18 +114,21 @@ def main():
             print(f"ERROR line {i}: {e}", file=sys.stderr)
             sys.exit(1)
 
+    MAX_WORDS = 32
 
-    # Pad with NOPs (0) up to 32, or truncate >32 with warning
-    if len(assembled) < MAX_WORDS:
-        for _ in range(MAX_WORDS - len(assembled)):
-            assembled.append((0x00000000, "NOP"))
-    elif len(assembled) > MAX_WORDS:
+    # Ensure at most 32 user words (we’ll force last to END NOP anyway)
+    if len(assembled) > MAX_WORDS:
         print(f"Warning: input has {len(assembled)} instructions; truncating to {MAX_WORDS}.", file=sys.stderr)
         assembled = assembled[:MAX_WORDS]
 
-    # Force the last word to be a clearly labeled NOP
-    assembled[-1] = (0x00000000, "[31] NOP (end of program)")
+    # Pad with bubble NOP (0x20000000) up to slot 31
+    while len(assembled) < MAX_WORDS:
+        assembled.append((NOP_BUBBLE, NOP_BUBBLE_COMMENT))
 
+    # Force the last slot [31] to END NOP (0x00000000)
+    assembled[-1] = (NOP_END, "[31] " + NOP_END_COMMENT)
+
+    # Write out with index and original asm
     with out_path.open("w") as f:
         for idx, (w, original) in enumerate(assembled):
             f.write(f"{w:08x}    // [{idx}] {original}\n")
