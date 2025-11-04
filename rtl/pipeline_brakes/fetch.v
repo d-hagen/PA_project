@@ -8,6 +8,7 @@ module f_to_d_reg #(
     input  wire [XLEN-1:0]        F_inst,
 
     input                         stall_D,
+    input                         EX_taken,
 
     output wire [PC_BITS-1:0]     D_pc,
     output wire [XLEN-1:0]        D_inst
@@ -15,12 +16,13 @@ module f_to_d_reg #(
     reg [PC_BITS-1:0] d_pc;
     reg [XLEN-1:0]    d_inst;
 
+    localparam [XLEN-1:0] NOP = 32'b00100000000000000000000000000000;  // or addi r0 r0 r0 0
+
     // Synchronous reset is fine here
     always @(posedge clk) begin
-        if (rst) begin
+        if (rst || EX_taken) begin
             d_pc   <= {PC_BITS{1'b0}};
-            d_inst <= {XLEN{1'b0}};
-
+            d_inst <= NOP;
         end else if (!stall_D) begin
             d_pc   <= F_pc;
             d_inst <= F_inst;

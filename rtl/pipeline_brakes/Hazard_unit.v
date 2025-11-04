@@ -1,4 +1,4 @@
-////MISSING:  Branch/Jumps , Store Load hazards , Mul
+////MISSING:  Branch/Jumps  , Mul
 
 
 

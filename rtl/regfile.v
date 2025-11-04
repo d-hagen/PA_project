@@ -77,7 +77,7 @@ module regfile #(
   assign D_b2 = rb_fwd;
 
   assign D_a  = D_brn ? {{(XLEN-5){1'b0}}, D_pc} : ra_fwd;
-  assign D_b  = (D_str || D_ld || D_addi)
+  assign D_b  = (D_str || D_ld || D_addi || D_brn)
                 ? {{(XLEN-11){1'b0}}, D_imd}
                 : rb_fwd;
 

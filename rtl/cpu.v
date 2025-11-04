@@ -35,7 +35,7 @@ module cpu #(
     .clk       (clk),
     .rst       (rst),
     .EX_taken  (EX_taken),
-    .EX_alt_pc (EX_alu_out[4:0]),
+    .EX_alt_pc (EX_alu_out[PC_BITS-1:0]),
     .stall_D   (stall_D),
     .pc        (pc_plus_1),
     .F_pc      (F_pc)
@@ -65,6 +65,7 @@ module cpu #(
     .F_pc     (F_pc),
     .F_inst   (F_inst),
     .stall_D  (stall_D),
+    .EX_taken (EX_taken),
     .D_pc     (D_pc),
     .D_inst   (D_inst)
   );
@@ -168,7 +169,7 @@ module cpu #(
     .MEM_D_bp   (MEM_D_bp),
     .WB_D_bp    (WB_D_bp),
 
-    .EX_alu_out (EX_alu_out),   // EX result (valid when EX_D_bp used and not a load-use)
+    .EX_alu_out    (EX_alu_out),   // EX result (valid when EX_D_bp used and not a load-use)
     .MEM_data_mem  (MEM_data_mem), // data a
 
 
@@ -220,6 +221,7 @@ module cpu #(
     .D_we     (D_we),
 
     .stall_D  (stall_D),
+    .EX_taken (EX_taken),
 
 
     // To Execute stage (EX)

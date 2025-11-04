@@ -19,13 +19,14 @@ module pc #(
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             F_pc <= RESET_PC;
-        end else if (EX_taken) begin           
+        end else if (EX_taken) begin
             F_pc <= EX_alt_pc;
         end else if (stall_D) begin
-            F_pc <= F_pc;                          // hold
+            F_pc <= F_pc;   // hold
         end else begin
-            F_pc <= pc;                            // sequential
+            F_pc <= pc;     // sequential
         end
-        end
+    end
+
 
 endmodule
