@@ -17,7 +17,6 @@ module d_to_ex_reg #(
     input  wire             D_we,      // <— missing input for EX_str (write enable)
 
 
-
     // EX stage outputs
     output wire [XLEN-1:0]  EX_a,
     output wire [XLEN-1:0]  EX_a2,
@@ -65,7 +64,7 @@ module d_to_ex_reg #(
             ex_rd_r      <= D_rd;
             ex_ld_r      <= D_ld;
             ex_str_r     <= D_str;
-            ex_we_r      <=  D_we;
+            ex_we_r      <= D_we;
 
         end
     end
