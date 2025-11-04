@@ -18,6 +18,10 @@ module cpu #(
   // ===== Instruction fetch output =====
   wire [XLEN-1:0] F_inst;             // fetched instruction
 
+  // Hazard_unit
+  wire        stall_D;
+
+
 
   // ===== ALU output wires =====
   wire [XLEN-1:0]  EX_alu_out;
@@ -32,6 +36,7 @@ module cpu #(
     .rst       (rst),
     .EX_taken  (EX_taken),
     .EX_alt_pc (EX_alu_out[4:0]),
+    .stall_D   (stall_D),
     .pc        (pc_plus_1),
     .F_pc      (F_pc)
   );
@@ -55,13 +60,15 @@ module cpu #(
     .XLEN(XLEN),
     .PC_BITS(PC_BITS)
   ) u_f2d (
-    .clk   (clk),
-    .rst   (rst),
-    .F_pc  (F_pc),
-    .F_inst(F_inst),
-    .D_pc  (D_pc),
-    .D_inst(D_inst)
+    .clk      (clk),
+    .rst      (rst),
+    .F_pc     (F_pc),
+    .F_inst   (F_inst),
+    .stall_D  (stall_D),
+    .D_pc     (D_pc),
+    .D_inst   (D_inst)
   );
+
 
   //Decoder 
 
@@ -95,6 +102,41 @@ module cpu #(
     .D_addi   (D_addi)
   );
 
+  // ----- Hazard unit wires -----
+  wire [1:0]  EX_D_bp;
+  wire [1:0]  MEM_D_bp;
+  wire [1:0]  WB_D_bp;
+
+  // ----- Hazard unit instance -----
+  Hazard_unit #(
+    .XLEN(XLEN),
+    .ADDR_SIZE(ADDR_SIZE)   // use reg address size, not PC bits
+  ) u_Hazard_unit (
+    // Decode stage
+    .D_ra      (D_ra),
+    .D_rb      (D_rb),
+    .D_rd      (D_rd),
+
+    // EX stage
+    .EX_alu_out(EX_alu_out),  // (not used for detection but fine to pass)
+    .EX_rd     (EX_rd),
+    .EX_we     (EX_we),
+    .EX_ld     (EX_ld),
+
+    // MEM stage
+    .MEM_rd    (MEM_rd),
+    .MEM_we    (MEM_we),
+
+    // WB stage
+    .WB_rd     (WB_rd),
+    .WB_we     (WB_we),
+
+    // Outputs
+    .stall_D   (stall_D),
+    .EX_D_bp   (EX_D_bp),     // {ra, rb}
+    .MEM_D_bp  (MEM_D_bp),    // {ra, rb}
+    .WB_D_bp   (WB_D_bp)      // {ra, rb}
+  );
 
   //Regfile 
   
@@ -121,10 +163,20 @@ module cpu #(
     .D_brn      (D_brn),
     .D_addi     (D_addi),
 
+    //From Hazard_unit
+    .EX_D_bp    (EX_D_bp),
+    .MEM_D_bp   (MEM_D_bp),
+    .WB_D_bp    (WB_D_bp),
+
+    .EX_alu_out (EX_alu_out),   // EX result (valid when EX_D_bp used and not a load-use)
+    .MEM_data_mem  (MEM_data_mem), // data a
+
+
     // From Writeback stage
     .WB_we      (WB_we),
     .WB_rd      (WB_rd),
     .WB_data_mem(WB_data_mem),
+
 
     // Outputs to Execute
     .D_a        (D_a),
@@ -166,6 +218,9 @@ module cpu #(
     .D_ld     (D_ld),
     .D_str    (D_str),
     .D_we     (D_we),
+
+    .stall_D  (stall_D),
+
 
     // To Execute stage (EX)
     .EX_a     (EX_a),
@@ -272,7 +327,7 @@ module cpu #(
     .rst         (rst),
 
     // From Memory stage (MEM)
-    .Mem_data_mem(MEM_data_mem),
+    .MEM_data_mem(MEM_data_mem),
     .MEM_rd      (MEM_rd),
     .MEM_we      (MEM_we),
 

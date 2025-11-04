@@ -1,32 +1,32 @@
-20000000    // [0] addi r0  r0  r0   0
-20210801    // [1] addi r1  r1  r1   1
-20421002    // [2] addi r2  r2  r2   2
-20631803    // [3] addi r3  r3  r3   3
-20842004    // [4] addi r4  r4  r4   4
-20a52805    // [5] addi r5  r5  r5   5
-20c63006    // [6] addi r6  r6  r6   6
-20e73807    // [7] addi r7  r7  r7   7
-21084008    // [8] addi r8  r8  r8   8
-21294809    // [9] addi r9  r9  r9   9
-214a500a    // [10] addi r10 r10 r10 10
-216b580b    // [11] addi r11 r11 r11 11
-218c600c    // [12] addi r12 r12 r12 12
-21ad680d    // [13] addi r13 r13 r13 13
-21ce700e    // [14] addi r14 r14 r14 14
-21ef780f    // [15] addi r15 r15 r15 15
-00210800    // [16] add  r1  r1  r1   0     # r1 = 1+1 = 2
-04421000    // [17] sub  r2  r2  r2   0     # r2 = 2-2 = 0
-08631800    // [18] and  r3  r3  r3   0     # r3 = 3&3 = 3
-0c858000    // [19] or   r4  r5  r16  0     # r16 = 4|5 = 5
-10c58800    // [20] xor  r6  r5  r17  0     # r17 = 6^5 = 3
-14c63000    // [21] not  r6  r6  r6   0     # r6 = ~6 = 0xFFFF_FFF9
-1dc19800    // [22] shr  r14 r1  r19  0     # r19 = 14 >> 2 = 3
-254ca800    // [23] lt   r10 r12 r21  0     # r21 = (10<12)?1:0 = 1
-3007000c    // [24] store r0  r7  r0  12    # MEM[12] = 7
-00000000    // [25] add   r0  r0  r0   0    # NOP
-2c00a00c    // [26] load  r0  r0  r20 12    # r20 = MEM[12] = 7
-00000000    // [27] add   r0  r0  r0   0    # NOP (1)
-00000000    // [28] add   r0  r0  r0   0    # NOP (2)
-0281b800    // [29] add   r20 r1  r23  0    # r23 = 7 + 2 = 9  (consumer after two bubbles)
-114a5800    // [30] xor  r10 r10 r11  0     # r11 = 10 ^ 10 = 0
+20210810    // [0] addi r1  r1  r1  16     # r1 = 16  (base address)
+2042102a    // [1] addi r2  r2  r2  42     # r2 = 42  (data A)
+20631807    // [2] addi r3  r3  r3  7      # r3 = 7   (data B)
+20842001    // [3] addi r4  r4  r4  1      # r4 = 1
+20000000    // [4] addi r0  r0  r0  0      # bubble / NOP
+00434000    // [5] add   r2  r3  r8  0     # r8 = 42 + 7 = 49 (producer in EX)
+30280000    // [6] store r1  r8  r0  0     # MEM[16] = r8 (EX->EX forward for store data)
+2c204800    // [7] load  r1  r0  r9  0     # r9 = MEM[16] = 49
+01245000    // [8] add   r9  r4  r10 0     # r10 = 49 + 1 = 50 (requires 1-cycle stall, then MEM->EX forward)
+2c205800    // [9] load  r1  r0  r11 0     # r11 = 49
+20000000    // [10] addi  r0  r0  r0  0     # bubble
+20000000    // [11] addi  r0  r0  r0  0     # bubble
+01646000    // [12] add   r11 r4  r12 0     # r12 = 49 + 1 = 50 (WB->EX forward)
+2c206800    // [13] load  r1  r0  r13 0     # r13 = 49
+00437000    // [14] add   r2  r3  r14 0     # unrelated ALU op (keeps pipeline busy)
+302d0004    // [15] store r1  r13 r0  4     # MEM[20] = r13 (forward r13 to store data path)
+20000000    // [16] addi  r0  r0  r0  0
+20000000    // [17] NOP (addi r0 r0 r0 0)
+20000000    // [18] NOP (addi r0 r0 r0 0)
+20000000    // [19] NOP (addi r0 r0 r0 0)
+20000000    // [20] NOP (addi r0 r0 r0 0)
+20000000    // [21] NOP (addi r0 r0 r0 0)
+20000000    // [22] NOP (addi r0 r0 r0 0)
+20000000    // [23] NOP (addi r0 r0 r0 0)
+20000000    // [24] NOP (addi r0 r0 r0 0)
+20000000    // [25] NOP (addi r0 r0 r0 0)
+20000000    // [26] NOP (addi r0 r0 r0 0)
+20000000    // [27] NOP (addi r0 r0 r0 0)
+20000000    // [28] NOP (addi r0 r0 r0 0)
+20000000    // [29] NOP (addi r0 r0 r0 0)
+20000000    // [30] NOP (addi r0 r0 r0 0)
 00000000    // [31] [31] NOP (end of program)

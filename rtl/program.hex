@@ -1,20 +1,20 @@
-20210801    // [0] addi r1  r1  r1  1       # r1 = 1
-20421002    // [1] addi r2  r2  r2  2       # r2 = 2
-20631803    // [2] addi r3  r3  r3  3       # r3 = 3
-34210805    // [3] beq  r1  r1  r0  5
-214a5063    // [4] addi r10 r10 r10 99      # (skipped if beq taken)
-20000000    // [5] addi r0  r0  r0  0       # bubble (acts as landing padding)
-34220802    // [6] beq  r1  r2  r0  2
-216b584d    // [7] addi r11 r11 r11 77      # executes (not taken)
-20000000    // [8] addi r0  r0  r0  0       # bubble
-34221002    // [9] blt  r1  r2  r0  2
-218c6037    // [10] addi r12 r12 r12 55      # skipped
-20000000    // [11] addi r0  r0  r0  0       # bubble
-34621802    // [12] bgt  r3  r2  r0  2
-21ad682c    // [13] addi r13 r13 r13 44      # skipped
-20000000    // [14] addi r0  r0  r0  0       # bubble
-20000000    // [15] NOP (addi r0 r0 r0 0)
-20000000    // [16] NOP (addi r0 r0 r0 0)
+20210810    // [0] addi r1  r1  r1  16     # r1 = 16  (base address)
+2042102a    // [1] addi r2  r2  r2  42     # r2 = 42  (data A)
+20631807    // [2] addi r3  r3  r3  7      # r3 = 7   (data B)
+20842001    // [3] addi r4  r4  r4  1      # r4 = 1
+20000000    // [4] addi r0  r0  r0  0      # bubble / NOP
+00434000    // [5] add   r2  r3  r8  0     # r8 = 42 + 7 = 49 (producer in EX)
+30280000    // [6] store r1  r8  r0  0     # MEM[16] = r8 (EX->EX forward for store data)
+2c204800    // [7] load  r1  r0  r9  0     # r9 = MEM[16] = 49
+01245000    // [8] add   r9  r4  r10 0     # r10 = 49 + 1 = 50 (requires 1-cycle stall, then MEM->EX forward)
+2c205800    // [9] load  r1  r0  r11 0     # r11 = 49
+20000000    // [10] addi  r0  r0  r0  0     # bubble
+20000000    // [11] addi  r0  r0  r0  0     # bubble
+01646000    // [12] add   r11 r4  r12 0     # r12 = 49 + 1 = 50 (WB->EX forward)
+2c206800    // [13] load  r1  r0  r13 0     # r13 = 49
+00437000    // [14] add   r2  r3  r14 0     # unrelated ALU op (keeps pipeline busy)
+302d0004    // [15] store r1  r13 r0  4     # MEM[20] = r13 (forward r13 to store data path)
+20000000    // [16] addi  r0  r0  r0  0
 20000000    // [17] NOP (addi r0 r0 r0 0)
 20000000    // [18] NOP (addi r0 r0 r0 0)
 20000000    // [19] NOP (addi r0 r0 r0 0)

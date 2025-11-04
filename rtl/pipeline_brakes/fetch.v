@@ -6,6 +6,9 @@ module f_to_d_reg #(
     input  wire                   rst,
     input  wire [PC_BITS-1:0]     F_pc,
     input  wire [XLEN-1:0]        F_inst,
+
+    input                         stall_D,
+
     output wire [PC_BITS-1:0]     D_pc,
     output wire [XLEN-1:0]        D_inst
 );
@@ -17,7 +20,8 @@ module f_to_d_reg #(
         if (rst) begin
             d_pc   <= {PC_BITS{1'b0}};
             d_inst <= {XLEN{1'b0}};
-        end else begin
+
+        end else if (!stall_D) begin
             d_pc   <= F_pc;
             d_inst <= F_inst;
         end

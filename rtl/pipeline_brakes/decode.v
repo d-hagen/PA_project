@@ -16,6 +16,8 @@ module d_to_ex_reg #(
     input  wire             D_str,      // <— missing input for EX_str (store)
     input  wire             D_we,      // <— missing input for EX_str (write enable)
 
+    input wire             stall_D,
+
 
     // EX stage outputs
     output wire [XLEN-1:0]  EX_a,
@@ -41,7 +43,7 @@ module d_to_ex_reg #(
     reg             ex_ld_r, ex_str_r, ex_we_r;
 
     always @(posedge clk) begin
-        if (rst) begin
+        if (rst || stall_D) begin
             ex_a_r       <= {XLEN{1'b0}};
             ex_a2_r      <= {XLEN{1'b0}};
             ex_b_r       <= {XLEN{1'b0}};
@@ -52,7 +54,6 @@ module d_to_ex_reg #(
             ex_ld_r      <= 1'b0;
             ex_str_r     <= 1'b0;
             ex_we_r     <= 1'b0;
-
 
         end else begin
             ex_a_r       <= D_a;
