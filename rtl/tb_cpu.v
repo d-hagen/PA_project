@@ -52,7 +52,6 @@ module cpu_run_tb;
 
     cycles = 0;
 
-    // Named block so we can 'disable run_loop;' instead of SystemVerilog 'break;'
     begin : run_loop
       forever begin
         @(posedge clk);
@@ -60,6 +59,18 @@ module cpu_run_tb;
 
         // peek fetch-stage PC and instruction (hierarchical)
         curr_inst = dut.F_inst;
+
+        // ---- PC trace per cycle ----
+        // Shows what was fetched (F_pc/F_inst), what's in decode (D_pc),
+        // and whether EX requested a redirect this cycle.
+        $display("C%0d | F_pc=%0d F_inst=0x%08h | D_pc=%0d | EX_taken=%0b -> target=%0d | stall_D=%0b",
+                 cycles,
+                 dut.F_pc,
+                 curr_inst,
+                 dut.D_pc,
+                 dut.EX_taken,
+                 dut.EX_alu_out[PC_BITS-1:0],
+                 dut.stall_D);
 
         // Stop condition: first zero instruction at/after END_PC
         if ((dut.F_pc >= END_PC[PC_BITS-1:0]) && (curr_inst == 32'h00000000)) begin

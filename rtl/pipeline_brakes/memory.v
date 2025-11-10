@@ -5,7 +5,7 @@ module mem_to_wb_reg #(
     input  wire             rst,
 
     // MEM stage inputs
-    input  wire [XLEN-1:0]  Mem_data_mem,
+    input  wire [XLEN-1:0]  MEM_data_mem,
     input  wire [4:0]       MEM_rd,
     input  wire             MEM_we,
 
@@ -26,7 +26,7 @@ module mem_to_wb_reg #(
             wb_rd_r       <= 5'd0;
             wb_we_r       <= 1'b0;
         end else begin
-            wb_data_mem_r <= Mem_data_mem;
+            wb_data_mem_r <= MEM_data_mem;
             wb_rd_r       <= MEM_rd;
             wb_we_r       <= MEM_we;
         end
