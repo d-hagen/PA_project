@@ -6,7 +6,7 @@ addi r0  r0  r0  0       # bubble / NOP
 
 # ---------- BEQ taken (flush next instr) ----------
 # r1 == r1 -> taken; next addi must be flushed
-beq  r1  r1  r0  4
+beq  r1  r1  r0  2
 addi r10 r10 r10 99      # should be SKIPPED if flush works
 addi r0  r0  r0  0       # landing bubble
 

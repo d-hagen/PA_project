@@ -51,7 +51,7 @@ module decode #(parameter XLEN=32)(
   localparam OPC_STORE = 5'b01100;
 
 
-  localparam OPC_CTRL  = 6'b001101;
+  localparam OPC_CTRL  = 6'b001101;  
 
   localparam OPC_MUL   = 6'b001110;
 

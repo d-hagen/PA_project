@@ -12,7 +12,7 @@ module pc #(
 
     input                       stall_D,
 
-    input  wire [XLEN-1:0]      pc,          // sequential next PC when not taken
+    input    wire [4:0]         F_BP_target_pc, 
     output reg  [XLEN-1:0]      F_pc         // current/fetch PC
 );
 
@@ -24,7 +24,7 @@ module pc #(
         end else if (stall_D) begin
             F_pc <= F_pc;   // hold
         end else begin
-            F_pc <= pc;     // sequential
+            F_pc <= F_BP_target_pc;     // sequential
         end
     end
 

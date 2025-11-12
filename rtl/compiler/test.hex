@@ -1,32 +1,32 @@
-10421000    // [0] xor   r2  r2  r2   0
-2042112c    // [1] addi  r2  r2  r2   300     # r2 = 300 -> expect 44
-10631800    // [2] xor   r3  r3  r3   0
-206319a5    // [3] addi  r3  r3  r3   421     # r3 = 421 -> expect 165
-10842000    // [4] xor   r4  r4  r4   0
-20842100    // [5] addi  r4  r4  r4   256     # r4 = 256 -> expect 0
-10a52800    // [6] xor   r5  r5  r5   0
-20a529ff    // [7] addi  r5  r5  r5   511     # r5 = 511 -> expect 255
-b0020028    // [8] strb  r0  r2  r0   40      # MEM[40] = r2 & 0xFF = 44
-b0030029    // [9] strb  r0  r3  r0   41      # MEM[41] = r3 & 0xFF = 165
-b004002a    // [10] strb  r0  r4  r0   42      # MEM[42] = r4 & 0xFF = 0
-b005002b    // [11] strb  r0  r5  r0   43      # MEM[43] = r5 & 0xFF = 255
-20000000    // [12] addi  r0  r0  r0   0       # bubble NOP
-20000000    // [13] addi  r0  r0  r0   0       # bubble NOP
-ac00a028    // [14] ldb   r0  r0  r20  40      # r30 = 44
-ac00a829    // [15] ldb   r0  r0  r21  41      # r31 = 165
-ac00b02a    // [16] ldb   r0  r0  r22  42      # r32 = 0
-ac00b82b    // [17] ldb   r0  r0  r23  43      # r33 = 255
-20000000    // [18] NOP (addi r0 r0 r0 0)
-20000000    // [19] NOP (addi r0 r0 r0 0)
-20000000    // [20] NOP (addi r0 r0 r0 0)
-20000000    // [21] NOP (addi r0 r0 r0 0)
-20000000    // [22] NOP (addi r0 r0 r0 0)
-20000000    // [23] NOP (addi r0 r0 r0 0)
-20000000    // [24] NOP (addi r0 r0 r0 0)
-20000000    // [25] NOP (addi r0 r0 r0 0)
-20000000    // [26] NOP (addi r0 r0 r0 0)
-20000000    // [27] NOP (addi r0 r0 r0 0)
-20000000    // [28] NOP (addi r0 r0 r0 0)
-20000000    // [29] NOP (addi r0 r0 r0 0)
-20000000    // [30] NOP (addi r0 r0 r0 0)
+20421000    // [0] addi r2  r2  r2  0      # r2 = 0
+2063181e    // [1] addi r3  r3  r3  30     # r3 = 30 (stop value)
+20421001    // [2] addi r2  r2  r2  1      # r2++
+3443081c    // [3] beq  r2  r3  r0  28     # if r2 == r3 -> jump to [31] and stop
+3400081e    // [4] beq  r0  r0  r0  30     # wrap: from [04] -> 4+30=34 ≡ [02] mod 32
+20000000    // [5] addi r0  r0  r0  0
+20000000    // [6] addi r0  r0  r0  0
+20000000    // [7] addi r0  r0  r0  0
+20000000    // [8] addi r0  r0  r0  0
+20000000    // [9] addi r0  r0  r0  0
+20000000    // [10] addi r0  r0  r0  0
+20000000    // [11] addi r0  r0  r0  0
+20000000    // [12] addi r0  r0  r0  0
+20000000    // [13] addi r0  r0  r0  0
+20000000    // [14] addi r0  r0  r0  0
+20000000    // [15] addi r0  r0  r0  0
+20000000    // [16] addi r0  r0  r0  0
+20000000    // [17] addi r0  r0  r0  0
+20000000    // [18] addi r0  r0  r0  0
+20000000    // [19] addi r0  r0  r0  0
+20000000    // [20] addi r0  r0  r0  0
+20000000    // [21] addi r0  r0  r0  0
+20000000    // [22] addi r0  r0  r0  0
+20000000    // [23] addi r0  r0  r0  0
+20000000    // [24] addi r0  r0  r0  0
+20000000    // [25] addi r0  r0  r0  0
+20000000    // [26] addi r0  r0  r0  0
+20000000    // [27] addi r0  r0  r0  0
+20000000    // [28] addi r0  r0  r0  0
+20000000    // [29] addi r0  r0  r0  0
+20000000    // [30] addi r0  r0  r0  0
 00000000    // [31] [31] NOP (end of program)

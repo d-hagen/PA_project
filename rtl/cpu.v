@@ -21,6 +21,12 @@ module cpu #(
   // Hazard_unit
   wire        stall_D;
 
+  // Branch Predictor
+  wire       F_BP_taken;        
+  wire [4:0] F_BP_target_pc; 
+
+
+
 
 
   // ===== ALU output wires =====
@@ -36,8 +42,8 @@ module cpu #(
     .rst       (rst),
     .EX_taken  (EX_taken),
     .EX_alt_pc (EX_alu_out[PC_BITS-1:0]),
+    .F_BP_target_pc(F_BP_target_pc),
     .stall_D   (stall_D),
-    .pc        (pc_plus_1),
     .F_pc      (F_pc)
   );
 
@@ -53,8 +59,12 @@ module cpu #(
   );
 
 
+
+
+ 
   wire [XLEN-1:0] D_inst;
   wire [PC_BITS-1:0] D_pc;
+  wire               D_BP_taken;
 
   f_to_d_reg #(
     .XLEN(XLEN),
@@ -64,10 +74,12 @@ module cpu #(
     .rst      (rst),
     .F_pc     (F_pc),
     .F_inst   (F_inst),
+    .F_BP_taken(F_BP_taken),
     .stall_D  (stall_D),
     .EX_taken (EX_taken),
     .D_pc     (D_pc),
-    .D_inst   (D_inst)
+    .D_inst   (D_inst),
+    .D_BP_taken(D_BP_taken)
   );
 
 
@@ -214,7 +226,7 @@ module cpu #(
   wire             EX_we;
   wire             EX_brn;
   wire             EX_mul;
-
+  wire             EX_BP_taken;
 
   d_to_ex_reg #(
     .XLEN(XLEN)
@@ -236,6 +248,7 @@ module cpu #(
 
     .D_we     (D_we),
     .D_mul    (D_mul),
+    .D_BP_taken(D_BP_taken),
 
     .stall_D  (stall_D),
     .EX_taken (EX_taken),
@@ -253,27 +266,48 @@ module cpu #(
     .EX_byt   (EX_byt),
     .EX_we    (EX_we),
     .EX_brn   (EX_brn),
-    .EX_mul   (EX_mul)
+    .EX_mul   (EX_mul),
+    .EX_BP_taken(EX_BP_taken)
   );
 
-
-  // ===== ALU stage =====
 
  
 
 
+  // ===== ALU stage =====
+
+  wire       EX_true_taken;       // resolved direction
+
   alu #(
     .XLEN(XLEN)
   ) u_alu (
-    .EX_a      (EX_a),
-    .EX_a2     (EX_a2),
-    .EX_b      (EX_b),
-    .EX_b2     (EX_b2),
-    .EX_alu_op (EX_alu_op),
-    .EX_brn    (EX_brn),
-    .EX_alu_out(EX_alu_out),
-    .EX_taken  (EX_taken)
+    .EX_a         (EX_a),
+    .EX_a2        (EX_a2),
+    .EX_b         (EX_b),
+    .EX_b2        (EX_b2),
+    .EX_alu_op    (EX_alu_op),
+    .EX_brn       (EX_brn),
+    .EX_BP_taken  (EX_BP_taken),
+    .EX_alu_out   (EX_alu_out),
+    .EX_taken     (EX_taken),
+    .EX_true_taken (EX_true_taken)
   );
+
+
+
+  branch_buffer #(
+  ) u_branch_buffer (
+    .clk             (clk),
+    .rst             (rst),
+    .F_pc            (F_pc),
+    .EX_brn          (EX_brn),
+    .EX_pc           (EX_a[PC_BITS-1:0]),
+    .EX_alu_out      (EX_alu_out[PC_BITS-1:0]),
+    .EX_true_taken    (EX_true_taken),
+    .F_BP_target_pc  (F_BP_target_pc),
+    .F_BP_taken      (F_BP_taken)
+  );
+
 
 
   // ===== EX → MEM pipeline register wires =====
@@ -286,6 +320,7 @@ module cpu #(
   wire             MEM_ld;
   wire             MEM_str;
   wire             MEM_byt;
+
 
   // ===== EX → MEM pipeline register =====
   ex_to_mem_reg #(
@@ -316,6 +351,9 @@ module cpu #(
     .MEM_str    (MEM_str),
     .MEM_byt    (MEM_byt)
   );
+
+
+
 
 
 

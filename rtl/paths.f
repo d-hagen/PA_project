@@ -1,20 +1,28 @@
 # ==== Verilog source file list for Icarus Verilog ====
 # (Do not include .hex or .f files themselves)
 
-memory.v
+
 cpu.v
-alu.v
-decode.v
 pc.v
-regfile.v
-instruct_reg.v
+
+
+# ==== Stages and Registers====
+Stages/memory.v
+Stages/alu.v
+Stages/decode.v
+Stages/regfile.v
+Stages/instruct_reg.v
 
 # ==== Pipeline registers ====
 pipeline_brakes/fetch.v
 pipeline_brakes/memory.v
 pipeline_brakes/execute.v
 pipeline_brakes/decode.v
-pipeline_brakes/Hazard_unit.v
+
+
+# ==== Add ons====
+Extras/Hazard_unit.v
+Extras/Branch_Predictor.v
 
 
 # ==== Testbench ====
