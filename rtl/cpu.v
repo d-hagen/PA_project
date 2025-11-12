@@ -84,6 +84,7 @@ module cpu #(
   wire              D_str;
   wire              D_brn;
   wire              D_addi;
+  wire              D_mul;
 
   decode #(
         .XLEN(XLEN)
@@ -100,7 +101,8 @@ module cpu #(
     .D_ld     (D_ld),
     .D_str    (D_str),
     .D_brn    (D_brn),
-    .D_addi   (D_addi)
+    .D_addi   (D_addi),
+    .D_mul    (D_mul)
   );
 
   // ----- Hazard unit wires -----
@@ -113,16 +115,22 @@ module cpu #(
     .XLEN(XLEN),
     .ADDR_SIZE(ADDR_SIZE)   // use reg address size, not PC bits
   ) u_Hazard_unit (
+    .clk      (clk),
+    .rst      (rst),
     // Decode stage
+   
+
     .D_ra      (D_ra),
     .D_rb      (D_rb),
     .D_rd      (D_rd),
+    
 
     // EX stage
     .EX_alu_out(EX_alu_out),  // (not used for detection but fine to pass)
     .EX_rd     (EX_rd),
     .EX_we     (EX_we),
     .EX_ld     (EX_ld),
+    .EX_mul     (EX_mul),
 
     // MEM stage
     .MEM_rd    (MEM_rd),
@@ -201,6 +209,7 @@ module cpu #(
   wire             EX_str;
   wire             EX_we;
   wire             EX_brn;
+  wire             EX_mul;
 
   d_to_ex_reg #(
     .XLEN(XLEN)
@@ -219,6 +228,7 @@ module cpu #(
     .D_ld     (D_ld),
     .D_str    (D_str),
     .D_we     (D_we),
+    .D_mul    (D_mul),
 
     .stall_D  (stall_D),
     .EX_taken (EX_taken),
@@ -234,7 +244,8 @@ module cpu #(
     .EX_ld    (EX_ld),
     .EX_str   (EX_str),
     .EX_we    (EX_we),
-    .EX_brn   (EX_brn)
+    .EX_brn   (EX_brn),
+    .EX_mul   (EX_mul)
   );
 
 

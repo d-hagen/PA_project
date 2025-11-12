@@ -1,26 +1,26 @@
-20210801    // [0] addi r1  r1  r1  1       # r1 = 1
-20421002    // [1] addi r2  r2  r2  2       # r2 = 2
-20631803    // [2] addi r3  r3  r3  3       # r3 = 3
-20000000    // [3] addi r0  r0  r0  0       # bubble / NOP
-34210804    // [4] beq  r1  r1  r0  4
-214a5063    // [5] addi r10 r10 r10 99      # should be SKIPPED if flush works
-20000000    // [6] addi r0  r0  r0  0       # landing bubble
-34220802    // [7] beq  r1  r2  r0  2
-216b584d    // [8] addi r11 r11 r11 77      # should EXECUTE
-20000000    // [9] addi r0  r0  r0  0       # bubble
-34221002    // [10] blt  r1  r2  r0  2
-218c6037    // [11] addi r12 r12 r12 55      # should be SKIPPED
-20000000    // [12] addi r0  r0  r0  0       # bubble
-34621802    // [13] bgt  r3  r2  r0  2
-21ad682c    // [14] addi r13 r13 r13 44      # should be SKIPPED
-20000000    // [15] addi r0  r0  r0  0       # bubble
-34000802    // [16] beq  r0  r0  r0  2
-21ce707b    // [17] addi r14 r14 r14 123     # should be SKIPPED
-20000000    // [18] addi r0  r0  r0  0       # bubble (landing)
-34611002    // [19] blt  r3  r1  r0  2
-22108008    // [20] addi r16 r16 r16 8       # should EXECUTE
-20000000    // [21] addi r0  r0  r0  0       # bubble
-20000000    // [22] addi r0  r0  r0  0
+20000000    // [0] addi r0  r0  r0  0
+20210801    // [1] addi r1  r1  r1  1
+20421002    // [2] addi r2  r2  r2  2
+20631803    // [3] addi r3  r3  r3  3
+38620804    // [4] mul  r3  r2  r1  4
+00231005    // [5] add  r1  r3  r2  5
+20000000    // [6] NOP (addi r0 r0 r0 0)
+20000000    // [7] NOP (addi r0 r0 r0 0)
+20000000    // [8] NOP (addi r0 r0 r0 0)
+20000000    // [9] NOP (addi r0 r0 r0 0)
+20000000    // [10] NOP (addi r0 r0 r0 0)
+20000000    // [11] NOP (addi r0 r0 r0 0)
+20000000    // [12] NOP (addi r0 r0 r0 0)
+20000000    // [13] NOP (addi r0 r0 r0 0)
+20000000    // [14] NOP (addi r0 r0 r0 0)
+20000000    // [15] NOP (addi r0 r0 r0 0)
+20000000    // [16] NOP (addi r0 r0 r0 0)
+20000000    // [17] NOP (addi r0 r0 r0 0)
+20000000    // [18] NOP (addi r0 r0 r0 0)
+20000000    // [19] NOP (addi r0 r0 r0 0)
+20000000    // [20] NOP (addi r0 r0 r0 0)
+20000000    // [21] NOP (addi r0 r0 r0 0)
+20000000    // [22] NOP (addi r0 r0 r0 0)
 20000000    // [23] NOP (addi r0 r0 r0 0)
 20000000    // [24] NOP (addi r0 r0 r0 0)
 20000000    // [25] NOP (addi r0 r0 r0 0)

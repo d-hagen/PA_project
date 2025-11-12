@@ -15,6 +15,7 @@ module d_to_ex_reg #(
     input  wire             D_ld,       // <— missing input for EX_ld (load)
     input  wire             D_str,      // <— missing input for EX_str (store)
     input  wire             D_we,      // <— missing input for EX_str (write enable)
+    input  wire              D_mul,
 
     input wire             stall_D,
     input                  EX_taken,
@@ -33,7 +34,8 @@ module d_to_ex_reg #(
     output wire             EX_ld,
     output wire             EX_str,
     output wire             EX_we,
-    output wire             EX_brn    // branch mode
+    output wire             EX_brn,    // branch mode
+    output wire             EX_mul
 
 
 );
@@ -43,7 +45,7 @@ module d_to_ex_reg #(
     reg [3:0]       ex_alu_op_r;
     reg             ex_brn_r;
     reg [4:0]       ex_rd_r;
-    reg             ex_ld_r, ex_str_r, ex_we_r;
+    reg             ex_ld_r, ex_str_r, ex_we_r, ex_mul_r;
 
     always @(posedge clk) begin
         if (rst || stall_D || EX_taken) begin
@@ -57,7 +59,8 @@ module d_to_ex_reg #(
             ex_ld_r      <= 1'b0;
             ex_str_r     <= 1'b0;
             ex_we_r      <= 1'b0;
-
+            ex_mul_r     <= 1'b0;
+            
         end else begin
             ex_a_r       <= D_a;
             ex_a2_r      <= D_a2;
@@ -69,7 +72,7 @@ module d_to_ex_reg #(
             ex_ld_r      <= D_ld;
             ex_str_r     <= D_str;
             ex_we_r      <= D_we;
-
+            ex_mul_r     <= D_mul;
         end
     end
 
@@ -84,6 +87,7 @@ module d_to_ex_reg #(
     assign EX_ld     = ex_ld_r;
     assign EX_str    = ex_str_r;
     assign EX_we     = ex_we_r;
+    assign EX_mul    = ex_mul_r;
 
 
 endmodule
