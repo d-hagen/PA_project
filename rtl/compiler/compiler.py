@@ -18,6 +18,7 @@ OPCODES = {
     "load":  0b001011,
     "store": 0b001100,
     "ctrl":  0b001101,   # used internally for jmp/beq/blt/bgt
+    "mul":   0b001110,   
 
     # Shorthands for control ops (mapped to OPC_CTRL with rd sub-op):
     "jmp":   0b001101,

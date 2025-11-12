@@ -40,6 +40,7 @@ module alu #(parameter XLEN = 32) (
         4'b1000: EX_alu_out = {{(XLEN-1){1'b0}}, (EX_a == EX_b)};           // EQ -> boolean in LSB
         4'b1001: EX_alu_out = {{(XLEN-1){1'b0}}, (EX_a <  EX_b)};           // LT (unsigned)
         4'b1010: EX_alu_out = {{(XLEN-1){1'b0}}, (EX_a >  EX_b)};           // GT (unsigned)
+        4'b1011: EX_alu_out = EX_a * EX_b;        
         default: EX_alu_out = EX_a + EX_b;
       endcase
 

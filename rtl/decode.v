@@ -11,7 +11,8 @@ module decode #(parameter XLEN=32)(
   output wire              D_ld,
   output wire              D_str,
   output wire              D_brn,
-  output wire              D_addi
+  output wire              D_addi,
+  output wire              D_mul
 );
 
 
@@ -47,6 +48,8 @@ module decode #(parameter XLEN=32)(
 
   localparam OPC_CTRL  = 6'b001101;
 
+  localparam OPC_MUL   = 6'b001110;
+
   localparam RD_JMP    = 5'b00000;    // unconditional jump
   localparam RD_BEQ    = 5'b00001;    // branch if equal
   localparam RD_BLT    = 5'b00010;    // branch if less-than
@@ -58,8 +61,11 @@ module decode #(parameter XLEN=32)(
   wire is_blt  = is_ctrl && (D_rd == RD_BLT);
   wire is_bgt  = is_ctrl && (D_rd == RD_BGT);
 
-  assign D_we   = (D_opc <= OPC_GT) || (D_opc == OPC_LOAD);
+
+  
   assign D_ld   = (D_opc == OPC_LOAD);
+  assign D_mul  = (D_opc == OPC_MUL);
+  assign D_we   = ((D_opc <= OPC_GT) || D_ld || D_mul);
   assign D_str  = (D_opc == OPC_STORE);
   assign D_brn  = is_ctrl;
   assign D_addi = (D_opc == OPC_ADDI);
@@ -73,8 +79,11 @@ module decode #(parameter XLEN=32)(
          (D_opc == OPC_NOT)                 ? 4'b0101 :
          (D_opc == OPC_SHL)                 ? 4'b0110 :
          (D_opc == OPC_SHR)                 ? 4'b0111 :
+         (is_beq)                           ? 4'b1000:
          (D_opc == OPC_LT || is_blt)        ? 4'b1001 : // LT
          (D_opc == OPC_GT || is_bgt)        ? 4'b1010 : // GT
+         (D_mul)                            ? 4'b1011 :
+
                                             4'b0000;  // default (ADD)
 
 endmodule
