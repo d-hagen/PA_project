@@ -13,6 +13,7 @@ module ex_to_mem_reg #(
     input  wire             EX_we,
     input  wire             EX_ld,
     input  wire             EX_str,
+    input  wire             EX_byt,
 
     // MEM stage outputs
     output wire [XLEN-1:0]  MEM_alu_out,
@@ -22,12 +23,13 @@ module ex_to_mem_reg #(
     output wire [4:0]       MEM_rd,
     output wire             MEM_we,
     output wire             MEM_ld,
-    output wire             MEM_str
+    output wire             MEM_str,
+    output wire             MEM_byt
 );
 
     // Pipeline flops
     reg [XLEN-1:0]  mem_alu_out_r, mem_b2_r, mem_a2_r;
-    reg             mem_taken_r, mem_we_r, mem_ld_r, mem_str_r;
+    reg             mem_taken_r, mem_we_r, mem_ld_r, mem_str_r, mem_byt_r;
     reg [4:0]       mem_rd_r;
 
     always @(posedge clk) begin
@@ -40,6 +42,7 @@ module ex_to_mem_reg #(
             mem_we_r      <= 1'b0;
             mem_ld_r      <= 1'b0;
             mem_str_r     <= 1'b0;
+            mem_byt_r     <= 1'b0;
         end else begin
             mem_alu_out_r <= EX_alu_out;
             mem_taken_r   <= EX_taken;
@@ -49,6 +52,7 @@ module ex_to_mem_reg #(
             mem_we_r      <= EX_we;
             mem_ld_r      <= EX_ld;
             mem_str_r     <= EX_str;
+            mem_byt_r     <= EX_byt;
         end
     end
 
@@ -61,6 +65,7 @@ module ex_to_mem_reg #(
     assign MEM_we      = mem_we_r;
     assign MEM_ld      = mem_ld_r;
     assign MEM_str     = mem_str_r;
+    assign MEM_byt     = mem_byt_r;
 
 endmodule
 

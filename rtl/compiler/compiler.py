@@ -17,6 +17,8 @@ OPCODES = {
     "gt":    0b001010,
     "load":  0b001011,
     "store": 0b001100,
+    "ldb":    0b101011,
+    "strb":   0b101100,
     "ctrl":  0b001101,   # used internally for jmp/beq/blt/bgt
     "mul":   0b001110,   
 

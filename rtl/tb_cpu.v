@@ -50,7 +50,7 @@ module cpu_run_tb;
         curr_inst = dut.F_inst;
 
         // Added EX_mul display here
-        $display("C%0d | F_pc=%0d F_inst=0x%08h | D_pc=%0d | EX_taken=%0b -> target=%0d | stall_D=%0b | EX_we=%0b",
+        $display("C%0d | F_pc=%0d F_inst=0x%08h | D_pc=%0d | EX_taken=%0b -> target=%0d | stall_D=%0b | MEM_byt=%0b",
                  cycles,
                  dut.F_pc,
                  curr_inst,
@@ -58,7 +58,7 @@ module cpu_run_tb;
                  dut.EX_taken,
                  dut.EX_alu_out[PC_BITS-1:0],
                  dut.stall_D,
-                 dut.EX_we);
+                 dut.D_byt);
 
         if ((dut.F_pc >= END_PC[PC_BITS-1:0]) && (curr_inst == 32'h00000000)) begin
           repeat (5) @(posedge clk);

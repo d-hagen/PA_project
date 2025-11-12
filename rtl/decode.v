@@ -8,11 +8,15 @@ module decode #(parameter XLEN=32)(
   output wire [10:0]       D_imd,
   output wire              D_we,
   output wire [3:0]        D_alu_op,       // 4-bit ALU op
+  
   output wire              D_ld,
   output wire              D_str,
+  output wire              D_byt,
+
   output wire              D_brn,
   output wire              D_addi,
   output wire              D_mul
+
 );
 
 
@@ -43,8 +47,9 @@ module decode #(parameter XLEN=32)(
   localparam OPC_GT      = 6'b001010;   // Greater than
 
   // Memory
-  localparam OPC_LOAD  = 6'b001011;
-  localparam OPC_STORE = 6'b001100;
+  localparam OPC_LOAD  = 5'b01011;
+  localparam OPC_STORE = 5'b01100;
+
 
   localparam OPC_CTRL  = 6'b001101;
 
@@ -63,12 +68,16 @@ module decode #(parameter XLEN=32)(
 
 
   
-  assign D_ld   = (D_opc == OPC_LOAD);
+  assign D_ld   = (D_opc[4:0] == OPC_LOAD);
+  assign D_str  = (D_opc[4:0] == OPC_STORE);
+  assign D_byt  =  D_opc[5];
+
   assign D_mul  = (D_opc == OPC_MUL);
   assign D_we   = ((D_opc <= OPC_GT) || D_ld || D_mul);
-  assign D_str  = (D_opc == OPC_STORE);
   assign D_brn  = is_ctrl;
   assign D_addi = (D_opc == OPC_ADDI);
+
+  
 
   assign D_alu_op =
          (D_opc == OPC_ADD)                 ? 4'b0000 :

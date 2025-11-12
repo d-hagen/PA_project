@@ -14,8 +14,9 @@ module d_to_ex_reg #(
     input  wire [4:0]       D_rd,       
     input  wire             D_ld,       // <— missing input for EX_ld (load)
     input  wire             D_str,      // <— missing input for EX_str (store)
+    input  wire             D_byt,   
     input  wire             D_we,      // <— missing input for EX_str (write enable)
-    input  wire              D_mul,
+    input  wire             D_mul,
 
     input wire             stall_D,
     input                  EX_taken,
@@ -31,11 +32,15 @@ module d_to_ex_reg #(
     output wire [3:0]       EX_alu_op,  // 4-bit opcode
    
     output wire [4:0]       EX_rd,
+
     output wire             EX_ld,
     output wire             EX_str,
+    output wire             EX_byt,
+
     output wire             EX_we,
     output wire             EX_brn,    // branch mode
     output wire             EX_mul
+
 
 
 );
@@ -45,7 +50,7 @@ module d_to_ex_reg #(
     reg [3:0]       ex_alu_op_r;
     reg             ex_brn_r;
     reg [4:0]       ex_rd_r;
-    reg             ex_ld_r, ex_str_r, ex_we_r, ex_mul_r;
+    reg             ex_ld_r, ex_str_r,ex_byt_r, ex_we_r, ex_mul_r;
 
     always @(posedge clk) begin
         if (rst || stall_D || EX_taken) begin
@@ -58,6 +63,7 @@ module d_to_ex_reg #(
             ex_rd_r      <= 5'd0;
             ex_ld_r      <= 1'b0;
             ex_str_r     <= 1'b0;
+            ex_byt_r     <= 1'b0;
             ex_we_r      <= 1'b0;
             ex_mul_r     <= 1'b0;
             
@@ -71,6 +77,7 @@ module d_to_ex_reg #(
             ex_rd_r      <= D_rd;
             ex_ld_r      <= D_ld;
             ex_str_r     <= D_str;
+            ex_byt_r     <= D_byt;
             ex_we_r      <= D_we;
             ex_mul_r     <= D_mul;
         end
@@ -86,6 +93,7 @@ module d_to_ex_reg #(
     assign EX_rd     = ex_rd_r;
     assign EX_ld     = ex_ld_r;
     assign EX_str    = ex_str_r;
+    assign EX_byt    = ex_byt_r;
     assign EX_we     = ex_we_r;
     assign EX_mul    = ex_mul_r;
 

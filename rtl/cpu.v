@@ -85,6 +85,7 @@ module cpu #(
   wire              D_brn;
   wire              D_addi;
   wire              D_mul;
+  wire              D_byt;
 
   decode #(
         .XLEN(XLEN)
@@ -100,6 +101,7 @@ module cpu #(
     .D_alu_op (D_alu_op),
     .D_ld     (D_ld),
     .D_str    (D_str),
+    .D_byt    (D_byt),
     .D_brn    (D_brn),
     .D_addi   (D_addi),
     .D_mul    (D_mul)
@@ -123,6 +125,7 @@ module cpu #(
     .D_ra      (D_ra),
     .D_rb      (D_rb),
     .D_rd      (D_rd),
+    
     
 
     // EX stage
@@ -207,9 +210,11 @@ module cpu #(
   wire [4:0]       EX_rd;
   wire             EX_ld;
   wire             EX_str;
+  wire             EX_byt;
   wire             EX_we;
   wire             EX_brn;
   wire             EX_mul;
+
 
   d_to_ex_reg #(
     .XLEN(XLEN)
@@ -227,6 +232,8 @@ module cpu #(
     .D_rd     (D_rd),
     .D_ld     (D_ld),
     .D_str    (D_str),
+    .D_byt    (D_byt),
+
     .D_we     (D_we),
     .D_mul    (D_mul),
 
@@ -243,6 +250,7 @@ module cpu #(
     .EX_rd    (EX_rd),
     .EX_ld    (EX_ld),
     .EX_str   (EX_str),
+    .EX_byt   (EX_byt),
     .EX_we    (EX_we),
     .EX_brn   (EX_brn),
     .EX_mul   (EX_mul)
@@ -277,6 +285,7 @@ module cpu #(
   wire             MEM_we;
   wire             MEM_ld;
   wire             MEM_str;
+  wire             MEM_byt;
 
   // ===== EX → MEM pipeline register =====
   ex_to_mem_reg #(
@@ -294,6 +303,7 @@ module cpu #(
     .EX_we      (EX_we),
     .EX_ld      (EX_ld),
     .EX_str     (EX_str),
+    .EX_byt     (EX_byt),
 
     // To Memory stage (MEM)
     .MEM_alu_out(MEM_alu_out),
@@ -303,7 +313,8 @@ module cpu #(
     .MEM_rd     (MEM_rd),
     .MEM_we     (MEM_we),
     .MEM_ld     (MEM_ld),
-    .MEM_str    (MEM_str)
+    .MEM_str    (MEM_str),
+    .MEM_byt    (MEM_byt)
   );
 
 
@@ -320,6 +331,7 @@ module cpu #(
     .clk         (clk),
     .MEM_ld      (MEM_ld),
     .MEM_str     (MEM_str),
+    .MEM_byt     (MEM_byt),
     .MEM_alu_out (MEM_alu_out),
     .MEM_b2      (MEM_b2),
     .MEM_data_mem(MEM_data_mem)
@@ -328,7 +340,7 @@ module cpu #(
 
 
   // ===== MEM → WB pipeline register wires =====
-  wire [XLEN-1:0] WB_data_mem;
+  wire [XLEN-1:0]  WB_data_mem;
   wire [4:0]       WB_rd;
   wire             WB_we;
 
