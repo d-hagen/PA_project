@@ -25,5 +25,8 @@ Extras/Hazard_unit.v
 Extras/Branch_Predictor.v
 
 
+# ==== Caches====
+Extras/Caches/Icache.v
+
 # ==== Testbench ====
 tb_cpu.v

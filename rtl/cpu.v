@@ -47,16 +47,48 @@ module cpu #(
     .F_pc      (F_pc)
   );
 
-  // ===== Instruction Register (Instruction Memory) =====
-  instruct_reg #(
-    .XLEN(XLEN),
-    .REG_NUM(REG_NUM),
-    .ADDR_SIZE(PC_BITS)
-  ) u_instruct_reg (
-    .clk   (clk),
-    .F_pc  (F_pc),
-    .F_inst(F_inst)
+
+  
+
+  // ===== I-Cache <-> Instruction Memory wires =====
+  wire        F_mem_req;
+  wire [2:0]  F_mem_addr;
+  wire [127:0] F_mem_inst;
+  wire        F_mem_valid;
+  wire        F_stall;      // from I-cache to your F-stage control
+
+  // ===== I-Cache =====
+  icache_simple u_icache (
+    .clk       (clk),
+    .rst       (rst),
+
+    .F_pc        (F_pc),        // PC from F stage
+
+    .F_mem_inst  (F_mem_inst),  // data from instruction memory
+    .F_mem_valid (F_mem_valid), // valid from instruction memory
+
+    .F_mem_req   (F_mem_req),   // request to instruction memory
+    .F_mem_addr  (F_mem_addr),  // address to instruction memory
+
+    .F_inst      (F_inst),      // instruction to F stage
+    .F_stall     (F_stall)      // stall signal to F-stage/pipeline
   );
+
+  // ===== Instruction Memory (backing store) =====
+  instruct_mem #(
+    .XLEN    (XLEN),
+    .LATENCY (2)           // or whatever you want
+  ) u_instruct_mem (
+    .clk       (clk),
+    .rst       (rst),
+
+    .F_mem_req   (F_mem_req),    // from I-cache
+    .F_mem_addr  (F_mem_addr),   // from I-cache
+
+    .F_mem_inst  (F_mem_inst),   // to I-cache
+    .F_mem_valid (F_mem_valid)   // to I-cache
+  );
+
 
 
 
@@ -301,6 +333,7 @@ module cpu #(
     .rst             (rst),
     .F_pc            (F_pc),
     .EX_brn          (EX_brn),
+    .F_stall         (F_stall),
     .EX_pc           (EX_a[PC_BITS-1:0]),
     .EX_alu_out      (EX_alu_out[PC_BITS-1:0]),
     .EX_true_taken    (EX_true_taken),
