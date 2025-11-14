@@ -51,20 +51,20 @@ module cpu_run_tb;
 
         // Added EX_mul display here
        if (cycles <= 70) begin
-          $display("C%0d | F_pc=%0d F_inst=0x%08h | F_pc=%0d | EX_taken=%0b -> target=%0d | F_mem_req=%0b | F_stall=%0b F_mem_valid=%0b",
+          $display("C%0d | F_pc=%0d F_inst=0x%08h | F_BP_target_pc=%0d | EX_taken=%0b -> EX_alu_out=%0d | F_BP_taken=%0b | stall_d=%0b EX_true_taken=%0b",
                   cycles,
                   dut.F_pc,
                   curr_inst,
-                  dut.F_pc,
+                  dut.F_BP_target_pc,
                   dut.EX_taken,
                   dut.EX_alu_out[PC_BITS-1:0],
-                  dut.F_mem_req,
-                  dut.F_stall,
-                  dut.F_mem_valid);
+                  dut.F_BP_taken,
+                  dut.stall_D,
+                  dut.EX_true_taken);
         end
 
 
-        if ( (curr_inst == 32'h200000ee)) begin
+        if ( (curr_inst == 32'h00000000)) begin
           repeat (5) @(posedge clk);
           $display("---- End of program reached at PC=%0d after %0d cycles ----",
                    dut.F_pc, cycles);

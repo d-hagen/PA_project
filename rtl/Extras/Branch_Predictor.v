@@ -32,6 +32,10 @@ module branch_buffer (
   reg              f_hit;
   reg [INDX-1:0]   f_hit_idx;
 
+
+  /// also give through  jump and compare to alu branch location can change 
+  /// handle if pc not branch anymore (alu_out + 4)
+
   always @(*) begin
     f_hit     = 1'b0;
     f_hit_idx = {INDX{1'b0}};
