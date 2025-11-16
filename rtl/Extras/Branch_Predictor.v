@@ -12,6 +12,7 @@ module branch_buffer (
   input  wire [4:0] EX_alu_out,     // resolved target PC
   input  wire       EX_true_taken,       // resolved direction
   input  wire       F_stall,
+  input  wire       MEM_stall,
 
   // Predicted outputs to IF
   output wire [4:0] F_BP_target_pc,   // predicted next PC
@@ -52,7 +53,7 @@ module branch_buffer (
 
   assign F_BP_taken       = taken_on_hit;
   assign F_BP_target_pc = (f_hit && taken_on_hit) ? target_buf[f_hit_idx]
-                                                : (F_pc + !F_stall);
+                                                : (F_pc + (!F_stall & !MEM_stall));
 
   /// EX lookup
   reg            ex_hit;

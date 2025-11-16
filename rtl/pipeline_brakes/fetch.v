@@ -9,6 +9,7 @@ module f_to_d_reg #(
     input  wire                   F_BP_taken,          
 
     input                         stall_D,
+    input                         MEM_stall,
     input                         EX_taken,
 
     output wire [PC_BITS-1:0]     D_pc,
@@ -24,11 +25,11 @@ module f_to_d_reg #(
 
     // Synchronous reset is fine here
     always @(posedge clk) begin
-        if (rst || EX_taken) begin
+        if (rst) begin
             d_pc       <= {PC_BITS{1'b0}};
             d_inst     <= NOP;
             d_bp_taken <= 0;
-        end else if (!stall_D) begin
+        end else if (!stall_D & !MEM_stall) begin
             d_pc       <= F_pc;
             d_inst     <= F_inst;
             d_bp_taken <= F_BP_taken;

@@ -20,6 +20,7 @@ module d_to_ex_reg #(
     input  wire             D_BP_taken,          
 
     input wire             stall_D,
+    input wire             MEM_stall,
     input                  EX_taken,
 
     
@@ -70,7 +71,7 @@ module d_to_ex_reg #(
             ex_we_r         <= 1'b0;
             ex_mul_r        <= 1'b0;
             
-        end else begin
+        end else if(!MEM_stall)  begin
             ex_a_r          <= D_a;
             ex_a2_r         <= D_a2;
             ex_b_r          <= D_b;

@@ -17,8 +17,8 @@ OPCODES = {
     "gt":    0b001010,
     "load":  0b001011,
     "store": 0b001100,
-    "ldb":    0b101011,
-    "strb":   0b101100,
+    "ldb":   0b101011,
+    "strb":  0b101100,
     "ctrl":  0b001101,   # used internally for jmp/beq/blt/bgt
     "mul":   0b001110,   
 
@@ -49,10 +49,15 @@ def parse_reg(tok: str) -> int:
     return n
 
 def parse_imm(tok: str) -> int:
-    val = int(tok, 0)  # supports 0x.., 0b.., decimal
-    if not (0 <= val <= 0x7FF):  # 11-bit zero-extended immediate
-        raise ValueError(f"Immediate out of 11-bit unsigned range (0..2047): {tok}")
-    return val
+    # supports 0x.., 0b.., decimal, and negative values
+    val = int(tok, 0)
+
+    # 11-bit *signed* immediate range: -1024..1023
+    if not (-0x400 <= val <= 0x3FF):
+        raise ValueError(f"Immediate out of 11-bit signed range (-1024..1023): {tok}")
+
+    # Encode as 11-bit two's complement
+    return val & 0x7FF
 
 # ========================== assembler ==============================
 def assemble_line(line: str, lineno: int) -> Optional[int]:
@@ -77,7 +82,7 @@ def assemble_line(line: str, lineno: int) -> Optional[int]:
     rd  = parse_reg(rd_t)
     imm = parse_imm(imm_t)
 
-    # Map control shorthands to OPC_CTRL and force RD subop
+    # Map control shorthands to OPC_CTRL and force RD sub-op
     if op_l in CTRL_RD_FOR:
         opc = OPCODES["ctrl"]
         rd  = CTRL_RD_FOR[op_l]

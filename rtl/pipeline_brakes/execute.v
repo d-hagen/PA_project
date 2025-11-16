@@ -14,6 +14,7 @@ module ex_to_mem_reg #(
     input  wire             EX_ld,
     input  wire             EX_str,
     input  wire             EX_byt,
+    input  wire             MEM_stall,
 
     // MEM stage outputs
     output wire [XLEN-1:0]  MEM_alu_out,
@@ -33,7 +34,7 @@ module ex_to_mem_reg #(
     reg [4:0]       mem_rd_r;
 
     always @(posedge clk) begin
-        if (rst) begin
+        if (rst ) begin
             mem_alu_out_r <= {XLEN{1'b0}};
             mem_taken_r   <= 1'b0;
             mem_b2_r      <= {XLEN{1'b0}};
@@ -43,7 +44,7 @@ module ex_to_mem_reg #(
             mem_ld_r      <= 1'b0;
             mem_str_r     <= 1'b0;
             mem_byt_r     <= 1'b0;
-        end else begin
+        end else if (!MEM_stall) begin
             mem_alu_out_r <= EX_alu_out;
             mem_taken_r   <= EX_taken;
             mem_b2_r      <= EX_b2;

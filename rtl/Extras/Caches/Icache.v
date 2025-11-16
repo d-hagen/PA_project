@@ -2,7 +2,7 @@ module icache_simple (
     input  wire        clk,
     input  wire        rst,
 
-    input  wire [4:0]  F_pc,         // 0..31, word index
+    input  wire [4:0]   F_pc,         // 0..31, word index
     input  wire [127:0] F_mem_inst,  // full line from memory
     input  wire         F_mem_valid,
 

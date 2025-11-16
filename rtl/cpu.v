@@ -108,6 +108,7 @@ module cpu #(
     .F_inst   (F_inst),
     .F_BP_taken(F_BP_taken),
     .stall_D  (stall_D),
+    .MEM_stall (MEM_stall),
     .EX_taken (EX_taken),
     .D_pc     (D_pc),
     .D_inst   (D_inst),
@@ -283,6 +284,7 @@ module cpu #(
     .D_BP_taken(D_BP_taken),
 
     .stall_D  (stall_D),
+    .MEM_stall (MEM_stall),
     .EX_taken (EX_taken),
 
 
@@ -334,6 +336,7 @@ module cpu #(
     .F_pc            (F_pc),
     .EX_brn          (EX_brn),
     .F_stall         (F_stall),
+    .MEM_stall       (MEM_stall),
     .EX_pc           (EX_a[PC_BITS-1:0]),
     .EX_alu_out      (EX_alu_out[PC_BITS-1:0]),
     .EX_true_taken    (EX_true_taken),
@@ -372,6 +375,7 @@ module cpu #(
     .EX_ld      (EX_ld),
     .EX_str     (EX_str),
     .EX_byt     (EX_byt),
+    .MEM_stall (MEM_stall),
 
     // To Memory stage (MEM)
     .MEM_alu_out(MEM_alu_out),
@@ -390,23 +394,68 @@ module cpu #(
 
 
 
-  // ===== Memory stage output wires =====
-  wire [XLEN-1:0] MEM_data_mem;
+  // ============ D-cache <-> backing data memory ===============
+  wire             Dc_rd_req;
+  wire [3:0]       Dc_rd_addr;     // 16 lines in backing memory
+  wire [127:0]     Dc_rline;
+  wire             Dc_rd_valid;
 
-  // ===== Memory stage =====
-  memory #(
-    .XLEN(XLEN),
-    .REG_NUM(REG_NUM),
-    .ADDR_SIZE(ADDR_SIZE)
-  ) u_memory (
+  wire             Dc_wb_we;
+  wire [3:0]       Dc_wb_addr;
+  wire [127:0]     Dc_wb_wline;
+  wire [XLEN-1:0]  MEM_data_mem;
+
+
+
+  dcache #(
+    .XLEN(XLEN)
+  ) u_dcache (
     .clk         (clk),
+    .rst         (rst),
     .MEM_ld      (MEM_ld),
     .MEM_str     (MEM_str),
     .MEM_byt     (MEM_byt),
     .MEM_alu_out (MEM_alu_out),
     .MEM_b2      (MEM_b2),
-    .MEM_data_mem(MEM_data_mem)
+
+    // To MEM stage
+    .MEM_data_mem(MEM_data_mem),
+    .MEM_stall   (MEM_stall),
+
+    // Backing memory: line read
+    .Dc_rd_req   (Dc_rd_req),
+    .Dc_rd_addr  (Dc_rd_addr),
+    .Dc_rline    (Dc_rline),
+    .Dc_rd_valid (Dc_rd_valid),
+
+    // Backing memory: line write-back
+    .Dc_wb_we    (Dc_wb_we),
+    .Dc_wb_addr  (Dc_wb_addr),
+    .Dc_wb_wline (Dc_wb_wline)
+
   );
+
+    data_mem #(
+          .XLEN   (XLEN),
+          .LATENCY(3)       // or whatever latency you want
+      ) u_data_mem (
+          .clk        (clk),
+          .rst        (rst),
+
+          // Line read
+          .Dc_rd_req  (Dc_rd_req),
+          .Dc_rd_addr (Dc_rd_addr),
+          .Dc_rline   (Dc_rline),
+          .Dc_rd_valid(Dc_rd_valid),
+
+          // Line write-back
+          .Dc_wb_we   (Dc_wb_we),
+          .Dc_wb_addr (Dc_wb_addr),
+          .Dc_wb_wline(Dc_wb_wline)
+      );
+
+  
+  
 
 
 
