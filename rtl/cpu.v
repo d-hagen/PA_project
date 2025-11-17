@@ -4,7 +4,7 @@ module cpu #(
   parameter integer XLEN      = 32,
   parameter integer REG_NUM   = 32,
   parameter integer ADDR_SIZE = 5,
-  parameter integer PC_BITS   = 5,
+  parameter integer PC_BITS   = 12,
   parameter [PC_BITS-1:0] RESET_PC = {PC_BITS{1'b0}}
 )(
   input  wire clk,
@@ -23,7 +23,7 @@ module cpu #(
 
   // Branch Predictor
   wire       F_BP_taken;        
-  wire [4:0] F_BP_target_pc; 
+  wire [PC_BITS-1:0] F_BP_target_pc; 
 
 
 
@@ -35,7 +35,7 @@ module cpu #(
 
   // ===== PC Register =====
   pc #(
-    .XLEN(PC_BITS),
+    .PCLEN(PC_BITS),
     .RESET_PC(RESET_PC)
   ) u_pc (
     .clk       (clk),
@@ -51,8 +51,8 @@ module cpu #(
   
 
   // ===== I-Cache <-> Instruction Memory wires =====
-  wire        F_mem_req;
-  wire [2:0]  F_mem_addr;
+  wire        Ic_mem_req;
+  wire [9:0]  Ic_mem_addr;
   wire [127:0] F_mem_inst;
   wire        F_mem_valid;
   wire        F_stall;      // from I-cache to your F-stage control
@@ -67,8 +67,8 @@ module cpu #(
     .F_mem_inst  (F_mem_inst),  // data from instruction memory
     .F_mem_valid (F_mem_valid), // valid from instruction memory
 
-    .F_mem_req   (F_mem_req),   // request to instruction memory
-    .F_mem_addr  (F_mem_addr),  // address to instruction memory
+    .Ic_mem_req   (Ic_mem_req),   // request to instruction memory
+    .Ic_mem_addr  (Ic_mem_addr),  // address to instruction memory
 
     .F_inst      (F_inst),      // instruction to F stage
     .F_stall     (F_stall)      // stall signal to F-stage/pipeline
@@ -82,8 +82,8 @@ module cpu #(
     .clk       (clk),
     .rst       (rst),
 
-    .F_mem_req   (F_mem_req),    // from I-cache
-    .F_mem_addr  (F_mem_addr),   // from I-cache
+    .Ic_mem_req   (Ic_mem_req),    // from I-cache
+    .Ic_mem_addr  (Ic_mem_addr),   // from I-cache
 
     .F_mem_inst  (F_mem_inst),   // to I-cache
     .F_mem_valid (F_mem_valid)   // to I-cache
@@ -207,7 +207,7 @@ module cpu #(
   regfile #(
     .XLEN(XLEN),
     .REG_NUM(REG_NUM),
-    .ADDR_SIZE(PC_BITS)
+    .ADDR_SIZE(ADDR_SIZE)
   ) u_regfile (
     // From Decode
     .clk        (clk),
@@ -395,13 +395,13 @@ module cpu #(
 
 
   // ============ D-cache <-> backing data memory ===============
-  wire             Dc_rd_req;
-  wire [3:0]       Dc_rd_addr;     // 16 lines in backing memory
-  wire [127:0]     Dc_rline;
-  wire             Dc_rd_valid;
+  wire             Dc_mem_req;
+  wire [9:0]       Dc_mem_addr;     // 16 lines in backing memory
+  wire [127:0]     MEM_data_line;
+  wire             MEM_mem_valid;
 
   wire             Dc_wb_we;
-  wire [3:0]       Dc_wb_addr;
+  wire [9:0]       Dc_wb_addr;
   wire [127:0]     Dc_wb_wline;
   wire [XLEN-1:0]  MEM_data_mem;
 
@@ -423,10 +423,10 @@ module cpu #(
     .MEM_stall   (MEM_stall),
 
     // Backing memory: line read
-    .Dc_rd_req   (Dc_rd_req),
-    .Dc_rd_addr  (Dc_rd_addr),
-    .Dc_rline    (Dc_rline),
-    .Dc_rd_valid (Dc_rd_valid),
+    .Dc_mem_req   (Dc_mem_req),
+    .Dc_mem_addr  (Dc_mem_addr),
+    .MEM_data_line    (MEM_data_line),
+    .MEM_mem_valid (MEM_mem_valid),
 
     // Backing memory: line write-back
     .Dc_wb_we    (Dc_wb_we),
@@ -443,10 +443,10 @@ module cpu #(
           .rst        (rst),
 
           // Line read
-          .Dc_rd_req  (Dc_rd_req),
-          .Dc_rd_addr (Dc_rd_addr),
-          .Dc_rline   (Dc_rline),
-          .Dc_rd_valid(Dc_rd_valid),
+          .Dc_mem_req  (Dc_mem_req),
+          .Dc_mem_addr (Dc_mem_addr),
+          .MEM_data_line   (MEM_data_line),
+          .MEM_mem_valid(MEM_mem_valid),
 
           // Line write-back
           .Dc_wb_we   (Dc_wb_we),

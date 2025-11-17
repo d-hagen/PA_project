@@ -14,14 +14,14 @@ module dcache #(
     output reg              MEM_stall,
 
     // Backing memory read interface
-    output reg              Dc_rd_req,
-    output reg  [3:0]       Dc_rd_addr,
-    input  wire [127:0]     Dc_rline,
-    input  wire             Dc_rd_valid,
+    output reg              Dc_mem_req,
+    output reg  [9:0]       Dc_mem_addr,
+    input  wire [127:0]     MEM_data_line,
+    input  wire             MEM_mem_valid,
 
     // Backing memory write-back interface
     output reg              Dc_wb_we,
-    output reg  [3:0]       Dc_wb_addr,
+    output reg  [9:0]       Dc_wb_addr,
     output reg  [127:0]     Dc_wb_wline
 );
 
@@ -35,13 +35,13 @@ module dcache #(
     reg [1:0] fifo_ptr;
     reg       hit;
     reg [1:0] hit_idx;
-    reg [3:0] miss_line;
+    reg [9:0] miss_line;
 
     integer i;
 
     // Address decode
-    wire [5:0] addr_word = MEM_alu_out[5:0];
-    wire [3:0] addr_line = addr_word[5:2];
+    wire [11:0] addr_word = MEM_alu_out[10:0];
+    wire [9:0] addr_line = addr_word[11:2];
     wire [1:0] addr_off  = addr_word[1:0];
 
     wire op_active = MEM_ld | MEM_str;
@@ -55,7 +55,7 @@ module dcache #(
                 tag[i]   <= 4'd0;
             end
             fifo_ptr    <= 2'd0;
-            miss_line   <= 4'd0;
+            miss_line   <= 9'd0;
             Dc_wb_we    <= 1'b0;
             Dc_wb_addr  <= 4'd0;
             Dc_wb_wline <= 128'd0;
@@ -64,11 +64,11 @@ module dcache #(
             Dc_wb_we <= 1'b0;
 
             // Track miss line
-            if (Dc_rd_req && !hit && op_active)
+            if (Dc_mem_req && !hit && op_active)
                 miss_line <= addr_line;
 
             // Refill
-            if (Dc_rd_valid) begin
+            if (MEM_mem_valid) begin
                 // Optional write-back
                 if (valid[fifo_ptr] && dirty[fifo_ptr]) begin
                     Dc_wb_we            <= 1'b1;
@@ -84,10 +84,10 @@ module dcache #(
                 dirty[fifo_ptr] <= 1'b0;
                 tag[fifo_ptr]   <= miss_line;
 
-                data[fifo_ptr][0] <= Dc_rline[31:0];
-                data[fifo_ptr][1] <= Dc_rline[63:32];
-                data[fifo_ptr][2] <= Dc_rline[95:64];
-                data[fifo_ptr][3] <= Dc_rline[127:96];
+                data[fifo_ptr][0] <= MEM_data_line[31:0];
+                data[fifo_ptr][1] <= MEM_data_line[63:32];
+                data[fifo_ptr][2] <= MEM_data_line[95:64];
+                data[fifo_ptr][3] <= MEM_data_line[127:96];
 
                 fifo_ptr <= fifo_ptr + 1'b1;
             end
@@ -111,11 +111,11 @@ module dcache #(
         MEM_stall    = 1'b0;
         MEM_data_mem = MEM_alu_out;
 
-        Dc_rd_req    = 1'b0;
-        Dc_rd_addr   = addr_line;
+        Dc_mem_req    = 1'b0;
+        Dc_mem_addr   = addr_line;
 
         // Tag lookup
-        if (op_active && !Dc_rd_valid) begin
+        if (op_active && !MEM_mem_valid) begin
             for (i = 0; i < 4; i = i + 1) begin
                 if (valid[i] && (tag[i] == addr_line)) begin
                     hit     = 1'b1;
@@ -132,8 +132,8 @@ module dcache #(
                                data[hit_idx][addr_off];
             end else begin
                 MEM_stall  = 1'b1;
-                Dc_rd_req  = Dc_rd_valid ? 1'b0 : 1'b1;
-                Dc_rd_addr = addr_line;
+                Dc_mem_req  = MEM_mem_valid ? 1'b0 : 1'b1;
+                Dc_mem_addr = addr_line;
             end
         end
 
@@ -141,8 +141,8 @@ module dcache #(
         if (MEM_str) begin
             if (!hit) begin
                 MEM_stall  = 1'b1;
-                Dc_rd_req  = Dc_rd_valid ? 1'b0 : 1'b1;
-                Dc_rd_addr = addr_line;
+                Dc_mem_req  = MEM_mem_valid ? 1'b0 : 1'b1;
+                Dc_mem_addr = addr_line;
             end
         end
     end

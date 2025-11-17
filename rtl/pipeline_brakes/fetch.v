@@ -1,6 +1,6 @@
 module f_to_d_reg #(
     parameter integer XLEN    = 32,
-    parameter integer PC_BITS = 5
+    parameter integer PC_BITS = 12
 )(
     input  wire                   clk,
     input  wire                   rst,
