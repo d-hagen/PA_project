@@ -14,6 +14,8 @@ Stages/decode.v
 Memory/regfile.v
 Memory/instruct_reg.v
 Memory/data_mem.v
+Memory/joined_mem.v
+
 
 
 

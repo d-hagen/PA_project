@@ -84,15 +84,30 @@ module cpu_run_tb;
     end
     $display("============================\n");
 
-    $display("\n==== INSTRUCTION MEMORY LINES (0..3) ====");
+    $display("\n==== MEMORY LINES (0..3) ====");
     for (i = 0; i < 8; i = i + 1) begin
       $display("Line %0d: %08h  %08h  %08h  %08h",
                 i,
-                dut.u_instruct_mem.line[i][0],
-                dut.u_instruct_mem.line[i][1],
-                dut.u_instruct_mem.line[i][2],
-                dut.u_instruct_mem.line[i][3]);
+                dut.u_unified_mem.line[i][0],
+                dut.u_unified_mem.line[i][1],
+                dut.u_unified_mem.line[i][2],
+                dut.u_unified_mem.line[i][3]);
     end
+
+     // =====================================================
+    // BACKING DATA MEMORY PRINT (16 lines)
+    // =====================================================
+    $display("\n==== BACKING DATA MEMORY (u_data_mem) ====");
+    for (i = 8; i < 24; i = i + 1)
+      $display("Line %0d: %08d %08d %08d %08d",
+                i,
+                dut.u_unified_mem.line[i][0],
+                dut.u_unified_mem.line[i][1],
+                dut.u_unified_mem.line[i][2],
+                dut.u_unified_mem.line[i][3]);
+
+ 
+
     // =====================================================
     // D-CACHE CONTENTS
     // =====================================================
@@ -111,23 +126,10 @@ module cpu_run_tb;
                 dut.u_dcache.data[i][3]);
     end
 
-
-    // =====================================================
-    // BACKING DATA MEMORY PRINT (16 lines)
-    // =====================================================
-    $display("\n==== BACKING DATA MEMORY (u_data_mem) ====");
-    for (i = 0; i < 16; i = i + 1)
-      $display("Line %0d: %08d %08d %08d %08d",
-                i,
-                dut.u_data_mem.line[i][0],
-                dut.u_data_mem.line[i][1],
-                dut.u_data_mem.line[i][2],
-                dut.u_data_mem.line[i][3]);
-
     $display("==========================================");
     $display("               END OF TEST");
     $display("==========================================");
-
+   
     $finish;
   end
 

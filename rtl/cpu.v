@@ -58,7 +58,7 @@ module cpu #(
   wire        F_stall;      // from I-cache to your F-stage control
 
   // ===== I-Cache =====
-  icache_simple u_icache (
+  icache u_icache (
     .clk       (clk),
     .rst       (rst),
 
@@ -74,21 +74,7 @@ module cpu #(
     .F_stall     (F_stall)      // stall signal to F-stage/pipeline
   );
 
-  // ===== Instruction Memory (backing store) =====
-  instruct_mem #(
-    .XLEN    (XLEN),
-    .LATENCY (2)           // or whatever you want
-  ) u_instruct_mem (
-    .clk       (clk),
-    .rst       (rst),
-
-    .Ic_mem_req   (Ic_mem_req),    // from I-cache
-    .Ic_mem_addr  (Ic_mem_addr),   // from I-cache
-
-    .F_mem_inst  (F_mem_inst),   // to I-cache
-    .F_mem_valid (F_mem_valid)   // to I-cache
-  );
-
+ 
 
 
 
@@ -435,24 +421,33 @@ module cpu #(
 
   );
 
-    data_mem #(
-          .XLEN   (XLEN),
-          .LATENCY(3)       // or whatever latency you want
-      ) u_data_mem (
-          .clk        (clk),
-          .rst        (rst),
+    // Unified instruction + data memory
+unified_mem #(
+    .XLEN    (XLEN),
+    .LATENCY (3)       // same latency you used before
+) u_unified_mem (
+    .clk  (clk),
+    .rst  (rst),
 
-          // Line read
-          .Dc_mem_req  (Dc_mem_req),
-          .Dc_mem_addr (Dc_mem_addr),
-          .MEM_data_line   (MEM_data_line),
-          .MEM_mem_valid(MEM_mem_valid),
+    // ================== Instruction side ==================
+    .Ic_mem_req  (Ic_mem_req),   // from your fetch/I-cache
+    .Ic_mem_addr (Ic_mem_addr),  // line index
+    .F_mem_inst  (F_mem_inst),   // 128-bit instruction line
+    .F_mem_valid (F_mem_valid),
 
-          // Line write-back
-          .Dc_wb_we   (Dc_wb_we),
-          .Dc_wb_addr (Dc_wb_addr),
-          .Dc_wb_wline(Dc_wb_wline)
-      );
+    // ====================== Data side ======================
+    // Line read
+    .Dc_mem_req    (Dc_mem_req),
+    .Dc_mem_addr   (Dc_mem_addr),
+    .MEM_data_line (MEM_data_line),
+    .MEM_mem_valid (MEM_mem_valid),
+
+    // Line write-back
+    .Dc_wb_we    (Dc_wb_we),
+    .Dc_wb_addr  (Dc_wb_addr),
+    .Dc_wb_wline (Dc_wb_wline)
+);
+
 
   
   

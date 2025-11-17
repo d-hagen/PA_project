@@ -1,4 +1,4 @@
-module icache_simple  #(
+module icache #(
   parameter integer PC_BITS = 12
   )(
     input  wire        clk,
