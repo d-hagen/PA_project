@@ -98,6 +98,7 @@ module branch_buffer #(
       end else if (EX_brn) begin
         if (ex_hit) begin // 
           taken_buf[ex_hit_idx]  <= EX_true_taken; //update taken
+          target_buf[ex_hit_idx] <= EX_alu_out;
         end else begin
           fifo_insert_new();
         end

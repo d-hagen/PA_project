@@ -80,9 +80,10 @@ module cpu #(
 
 
  
-  wire [XLEN-1:0] D_inst;
+  wire [XLEN-1:0]    D_inst;
   wire [PC_BITS-1:0] D_pc;
   wire               D_BP_taken;
+  wire [PC_BITS-1:0] D_BP_target_pc;
 
   f_to_d_reg #(
     .XLEN(XLEN),
@@ -93,12 +94,15 @@ module cpu #(
     .F_pc     (F_pc),
     .F_inst   (F_inst),
     .F_BP_taken(F_BP_taken),
+    .F_BP_target_pc(F_BP_target_pc),
     .stall_D  (stall_D),
     .MEM_stall (MEM_stall),
     .EX_taken (EX_taken),
     .D_pc     (D_pc),
     .D_inst   (D_inst),
-    .D_BP_taken(D_BP_taken)
+    .D_BP_taken(D_BP_taken),
+    .D_BP_target_pc(D_BP_target_pc)
+   
   );
 
 
@@ -233,19 +237,21 @@ module cpu #(
   // ===== D → EX pipeline register =====
 
 
-  wire [XLEN-1:0] EX_a;
-  wire [XLEN-1:0] EX_a2;
-  wire [XLEN-1:0] EX_b;
-  wire [XLEN-1:0] EX_b2;
-  wire [3:0]       EX_alu_op;
-  wire [4:0]       EX_rd;
-  wire             EX_ld;
-  wire             EX_str;
-  wire             EX_byt;
-  wire             EX_we;
-  wire             EX_brn;
-  wire             EX_mul;
-  wire             EX_BP_taken;
+  wire [XLEN-1:0]       EX_a;
+  wire [XLEN-1:0]       EX_a2;
+  wire [XLEN-1:0]       EX_b;
+  wire [XLEN-1:0]       EX_b2;
+  wire [3:0]            EX_alu_op;
+  wire [4:0]            EX_rd;
+  wire                  EX_ld;
+  wire                  EX_str;
+  wire                  EX_byt;
+  wire                  EX_we;
+  wire                  EX_brn;
+  wire                  EX_mul;
+  wire                  EX_BP_taken;
+  wire [PC_BITS-1:0]    EX_BP_target_pc;
+
 
   d_to_ex_reg #(
     .XLEN(XLEN)
@@ -268,6 +274,8 @@ module cpu #(
     .D_we     (D_we),
     .D_mul    (D_mul),
     .D_BP_taken(D_BP_taken),
+    .D_BP_target_pc(D_BP_target_pc),
+
 
     .stall_D  (stall_D),
     .MEM_stall (MEM_stall),
@@ -287,7 +295,8 @@ module cpu #(
     .EX_we    (EX_we),
     .EX_brn   (EX_brn),
     .EX_mul   (EX_mul),
-    .EX_BP_taken(EX_BP_taken)
+    .EX_BP_taken(EX_BP_taken),
+    .EX_BP_target_pc(EX_BP_target_pc)
   );
 
 
@@ -301,16 +310,17 @@ module cpu #(
   alu #(
     .XLEN(XLEN)
   ) u_alu (
-    .EX_a         (EX_a),
-    .EX_a2        (EX_a2),
-    .EX_b         (EX_b),
-    .EX_b2        (EX_b2),
-    .EX_alu_op    (EX_alu_op),
-    .EX_brn       (EX_brn),
-    .EX_BP_taken  (EX_BP_taken),
-    .EX_alu_out   (EX_alu_out),
-    .EX_taken     (EX_taken),
-    .EX_true_taken (EX_true_taken)
+    .EX_a           (EX_a),
+    .EX_a2          (EX_a2),
+    .EX_b           (EX_b),
+    .EX_b2          (EX_b2),
+    .EX_alu_op      (EX_alu_op),
+    .EX_brn         (EX_brn),
+    .EX_BP_taken    (EX_BP_taken),
+    .EX_BP_target_pc(EX_BP_target_pc),
+    .EX_alu_out     (EX_alu_out),
+    .EX_taken       (EX_taken),
+    .EX_true_taken  (EX_true_taken)
   );
 
 
@@ -325,7 +335,7 @@ module cpu #(
     .MEM_stall       (MEM_stall),
     .EX_pc           (EX_a[PC_BITS-1:0]),
     .EX_alu_out      (EX_alu_out[PC_BITS-1:0]),
-    .EX_true_taken    (EX_true_taken),
+    .EX_true_taken   (EX_true_taken),
     .F_BP_target_pc  (F_BP_target_pc),
     .F_BP_taken      (F_BP_taken)
   );

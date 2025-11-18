@@ -1,15 +1,20 @@
-module alu #(parameter XLEN = 32) (
-  input  wire [XLEN-1:0] EX_a,
-  input  wire [XLEN-1:0] EX_a2,
-  input  wire [XLEN-1:0] EX_b,
-  input  wire [XLEN-1:0] EX_b2,
-  input  wire [3:0]      EX_alu_op,
-  input  wire            EX_brn,
-  input  wire            EX_BP_taken,
+module alu #(
+  parameter XLEN = 32,
+  parameter integer PC_BITS = 12
+) (
+  input  wire [XLEN-1:0]     EX_a,
+  input  wire [XLEN-1:0]     EX_a2,
+  input  wire [XLEN-1:0]     EX_b,
+  input  wire [XLEN-1:0]     EX_b2,
+  input  wire [3:0]          EX_alu_op,
+  input  wire                EX_brn,
+  input  wire                EX_BP_taken,
+  input wire [PC_BITS-1:0]   EX_BP_target_pc, // BP: Flopped target PC
 
-  output reg  [XLEN-1:0] EX_alu_out,
-  output reg             EX_taken, //flush or no flush 
-  output reg             EX_true_taken //true taken independent of flushing
+
+  output reg  [XLEN-1:0]     EX_alu_out,
+  output reg                 EX_taken, //flush or no flush 
+  output reg                 EX_true_taken //true taken independent of flushing
 );
 
   localparam SHW = (XLEN <= 1) ? 1 : $clog2(XLEN);
@@ -32,12 +37,12 @@ module alu #(parameter XLEN = 32) (
       endcase
 
       if (EX_true_taken)                        
-        next_pc = EX_a + EX_b;            ///branch target
+        next_pc = EX_a + EX_b;   ///branch target
       else
         next_pc = EX_a + {{(XLEN-1){1'b0}}, 1'b1}; //next instruction after branch
 
-      EX_alu_out =  next_pc;                              /// correct location to jump to
-      EX_taken   = (EX_BP_taken ^ EX_true_taken);         /// if they dont match -> flush the pipeline
+      EX_alu_out =  next_pc;     /// correct location to jump to
+      EX_taken   = (EX_BP_taken ^ EX_true_taken || EX_BP_target_pc ^  EX_alu_out);   /// if they dont match -> flush the pipeline
 
     end else begin   // non jump operations
       case (EX_alu_op)
