@@ -7,7 +7,7 @@ addi r0  r0  r0  0      # nop / bubble style you use
 # ---------- 1 EX->EX forward (single operand) ----------
 # r3 = r1 + r2; then use r3 immediately as a source
 add  r1  r2  r3  0      # r3 = 5 + 7 = 12  (producer in EX)
-add  r3  r4  r5  0      # needs EX->EX forward of r3; r5 = 12 + 3 = 15
+add  r3  r3  r5  0      # needs EX->EX forward of r3; r5 = 12 + 3 = 15
 
 # ---------- 2 EX->EX forward (both operands from prior dest) ----------
 # r6 = r1 + r2; then r7 = r6 + r6 immediately
@@ -32,3 +32,5 @@ add  r7  r9  r12 0      # depends on earlier results, should forward as needed
 
 # End
 addi r0  r0  r0  0      # final bubble / NOP
+
+

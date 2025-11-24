@@ -5,22 +5,32 @@ module instruct_mem #(
     input  wire         clk,
     input  wire         rst,
 
-    input  wire         F_mem_req,    // start memory fetch
-    input  wire [2:0]   F_mem_addr,   // LINE index 0..7
+    input  wire         Ic_mem_req,    // start memory fetch
+    input  wire [9:0]   Ic_mem_addr,   // LINE index 0..7
 
     output reg  [127:0] F_mem_inst,   // full line: 4×32 bits
     output reg          F_mem_valid
 );
 
     // 8 lines, each 4 words of 32 bits
-    reg [XLEN-1:0] line [0:7][0:3];   // [line][word]
+    reg [XLEN-1:0] line [0:1024][0:3];   // [line][word]
 
     reg [$clog2(LATENCY+1)-1:0] counter;
-    reg [2:0]                   saved_line;
+    reg [9:0]                   saved_line;
 
-
+    integer i, j;
+    
     initial begin
-        $readmemh("program.hex", line);
+        // Initialize whole memory to 0
+        for (i = 0; i <= 1024; i = i + 1) begin
+            for (j = 0; j < 4; j = j + 1) begin
+                line[i][j] = {XLEN{1'b0}};
+            end
+        end
+
+        // Now load only the first 32 words from the hex file
+        // (i.e. locations 0 .. 31 in the flattened array)
+        $readmemh("program.hex", line, 0, 31);
     end
 
     always @(posedge clk) begin
@@ -31,8 +41,8 @@ module instruct_mem #(
             F_mem_valid <= 1'b0;
 
             // start only when idle
-            if (F_mem_req && (counter == 0)) begin
-                saved_line <= F_mem_addr;
+            if (Ic_mem_req && (counter == 0)) begin
+                saved_line <= Ic_mem_addr;
                 counter    <= LATENCY[$clog2(LATENCY+1)-1:0];
             end
 

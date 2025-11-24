@@ -5,7 +5,7 @@ module cpu_run_tb;
   localparam integer XLEN      = 32;
   localparam integer REG_NUM   = 32;
   localparam integer ADDR_SIZE = 5;
-  localparam integer PC_BITS   = 5;
+  localparam integer PC_BITS   = 12;
   localparam integer END_PC    = 22;
 
   reg clk = 1'b0;
@@ -51,14 +51,14 @@ module cpu_run_tb;
 
         // Added EX_mul display here
        if (cycles <= 70) begin
-          $display("C%0d | F_pc=%0d F_inst=0x%08h | F_BP_target_pc=%0d | EX_taken=%0b -> EX_alu_out=%0d | F_BP_taken=%0b | stall_d=%0b EX_true_taken=%0b",
+          $display("C%0d | F_pc=%0d F_inst=0x%08h | EX_alu_out=%0d | EX_taken=%0b -> EX_ra=%0b | EX_rb=%0b | stall_d=%0b EX_true_taken=%0b",
                   cycles,
                   dut.F_pc,
                   curr_inst,
-                  dut.F_BP_target_pc,
+                  dut.EX_alu_out,
                   dut.EX_taken,
-                  dut.EX_alu_out[PC_BITS-1:0],
-                  dut.F_BP_taken,
+                  dut.EX_a,
+                  dut.EX_b,
                   dut.stall_D,
                   dut.EX_true_taken);
         end
@@ -84,16 +84,52 @@ module cpu_run_tb;
     end
     $display("============================\n");
 
-    $display("\n==== INSTRUCTION MEMORY LINES (0..3) ====");
+    $display("\n==== MEMORY LINES (0..3) ====");
     for (i = 0; i < 8; i = i + 1) begin
       $display("Line %0d: %08h  %08h  %08h  %08h",
                 i,
-                dut.u_instruct_mem.line[i][0],
-                dut.u_instruct_mem.line[i][1],
-                dut.u_instruct_mem.line[i][2],
-                dut.u_instruct_mem.line[i][3]);
+                dut.u_unified_mem.line[i][0],
+                dut.u_unified_mem.line[i][1],
+                dut.u_unified_mem.line[i][2],
+                dut.u_unified_mem.line[i][3]);
     end
 
+     // =====================================================
+    // BACKING DATA MEMORY PRINT (16 lines)
+    // =====================================================
+    $display("\n==== BACKING DATA MEMORY (u_data_mem) ====");
+    for (i = 8; i < 24; i = i + 1)
+      $display("Line %0d: %08d %08d %08d %08d",
+                i,
+                dut.u_unified_mem.line[i][0],
+                dut.u_unified_mem.line[i][1],
+                dut.u_unified_mem.line[i][2],
+                dut.u_unified_mem.line[i][3]);
+
+ 
+
+    // =====================================================
+    // D-CACHE CONTENTS
+    // =====================================================
+    $display("\n==== D-CACHE CONTENT ====");
+    for (i = 0; i < 4; i = i + 1) begin
+      $display("Entry %0d | valid=%0b dirty=%0b tag=%0d",
+                i,
+                dut.u_dcache.valid[i],
+                dut.u_dcache.dirty[i],
+                dut.u_dcache.tag[i]);
+
+      $display("    DATA: %08h %08h %08h %08h",
+                dut.u_dcache.data[i][0],
+                dut.u_dcache.data[i][1],
+                dut.u_dcache.data[i][2],
+                dut.u_dcache.data[i][3]);
+    end
+
+    $display("==========================================");
+    $display("               END OF TEST");
+    $display("==========================================");
+   
     $finish;
   end
 

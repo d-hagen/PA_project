@@ -6,12 +6,18 @@ cpu.v
 pc.v
 
 
-# ==== Stages and Registers====
-Stages/memory.v
+# ==== Stages====
 Stages/alu.v
 Stages/decode.v
-Stages/regfile.v
-Stages/instruct_reg.v
+
+# ==== Reg and Mem====
+Memory/regfile.v
+Memory/instruct_reg.v
+Memory/data_mem.v
+Memory/joined_mem.v
+
+
+
 
 # ==== Pipeline registers ====
 pipeline_brakes/fetch.v
@@ -27,6 +33,7 @@ Extras/Branch_Predictor.v
 
 # ==== Caches====
 Extras/Caches/Icache.v
+Extras/Caches/Dcache.v
 
 # ==== Testbench ====
 tb_cpu.v

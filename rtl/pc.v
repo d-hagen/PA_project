@@ -2,18 +2,18 @@
 // `default_nettype none
 
 module pc #(
-    parameter integer XLEN = 5,
-    parameter [XLEN-1:0] RESET_PC = {XLEN{1'b0}}
+    parameter integer PCLEN = 12,
+    parameter [PCLEN-1:0] RESET_PC = {PCLEN{1'b0}}
 )(
     input  wire                 clk,
     input  wire                 rst,         // async reset, active high
     input  wire                 EX_taken,    // branch/jump taken
-    input  wire [XLEN-1:0]      EX_alt_pc,   // alternate PC when taken
+    input  wire [PCLEN-1:0]     EX_alt_pc,   // alternate PC when taken
 
     input                       stall_D,
 
-    input    wire [4:0]         F_BP_target_pc, 
-    output reg  [XLEN-1:0]      F_pc         // current/fetch PC
+    input    wire [PCLEN-1:0]          F_BP_target_pc, 
+    output reg    [PCLEN-1:0]      F_pc         // current/fetch PC
 );
 
     always @(posedge clk or posedge rst) begin
