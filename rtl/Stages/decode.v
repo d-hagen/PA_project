@@ -15,7 +15,8 @@ module decode #(parameter XLEN=32)(
 
   output wire              D_brn,
   output wire              D_addi,
-  output wire              D_mul
+  output wire              D_mul,
+  output wire              D_jmp   
 
 );
 
@@ -76,7 +77,7 @@ module decode #(parameter XLEN=32)(
   assign D_we   = ((D_opc <= OPC_GT) || D_ld || D_mul);
   assign D_brn  = is_ctrl;
   assign D_addi = (D_opc == OPC_ADDI);
-
+  assign D_jmp = is_jmp;
   
 
   assign D_alu_op =

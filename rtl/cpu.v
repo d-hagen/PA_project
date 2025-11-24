@@ -139,7 +139,8 @@ module cpu #(
     .D_byt    (D_byt),
     .D_brn    (D_brn),
     .D_addi   (D_addi),
-    .D_mul    (D_mul)
+    .D_mul    (D_mul),
+    .D_jmp    (D_jmp)
   );
 
   // ----- Hazard unit wires -----
@@ -209,6 +210,8 @@ module cpu #(
     .D_str      (D_str),
     .D_brn      (D_brn),
     .D_addi     (D_addi),
+    .D_jmp      (D_jmp),
+    .D_mul      (D_mul),
 
     //From Hazard_unit
     .EX_D_bp    (EX_D_bp),
@@ -270,7 +273,7 @@ module cpu #(
     .D_ld     (D_ld),
     .D_str    (D_str),
     .D_byt    (D_byt),
-
+    .D_jmp    (D_jmp),  
     .D_we     (D_we),
     .D_mul    (D_mul),
     .D_BP_taken(D_BP_taken),
@@ -316,6 +319,7 @@ module cpu #(
     .EX_b2          (EX_b2),
     .EX_alu_op      (EX_alu_op),
     .EX_brn         (EX_brn),
+    .EX_jmp         (EX_jmp),
     .EX_BP_taken    (EX_BP_taken),
     .EX_BP_target_pc(EX_BP_target_pc),
     .EX_alu_out     (EX_alu_out),

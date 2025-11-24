@@ -14,6 +14,8 @@ module regfile #(
   input  wire                 D_str,
   input  wire                 D_brn,
   input  wire                 D_addi,
+  input  wire                 D_jmp,
+  input  wire                 D_mul,
 
   // Bypass enables (encoding: {forward_ra, forward_rb})
   input  wire [1:0]           EX_D_bp,
@@ -76,7 +78,9 @@ module regfile #(
   assign D_a2 = ra_fwd;
   assign D_b2 = rb_fwd;
 
-  assign D_a  = D_brn ? {{(XLEN-12){D_pc[11]}}, D_pc} : ra_fwd;
+  assign D_a  = D_jmp?  ra_fwd :
+                D_brn ? {{(XLEN-12){D_pc[11]}}, D_pc} : 
+                ra_fwd;
   assign D_b  = (D_str || D_ld || D_addi || D_brn)
                 ? {{(XLEN-11){D_imd[10]}}, D_imd}  //{{(XLEN-11){D_imd[10]}}
                 : rb_fwd;

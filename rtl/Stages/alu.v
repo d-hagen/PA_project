@@ -8,6 +8,7 @@ module alu #(
   input  wire [XLEN-1:0]     EX_b2,
   input  wire [3:0]          EX_alu_op,
   input  wire                EX_brn,
+  input  wire                EX_jmp,
   input  wire                EX_BP_taken,
   input wire [PC_BITS-1:0]   EX_BP_target_pc, // BP: Flopped target PC
 
@@ -28,14 +29,16 @@ module alu #(
     next_pc       = {XLEN{1'b0}};
 
     if (EX_brn) begin
-     
+     if (EX_jmp) begin
+      EX_true_taken = 1'b1; 
+     end else begin
       case (EX_alu_op)
         4'b1000: EX_true_taken = (EX_a2 == EX_b2);
         4'b1001: EX_true_taken = (EX_a2 <  EX_b2);
         4'b1010: EX_true_taken = (EX_a2 >  EX_b2);
         default: EX_true_taken = 1'b1;
       endcase
-
+      end
       if (EX_true_taken)                        
         next_pc = EX_a + EX_b;   ///branch target
       else
