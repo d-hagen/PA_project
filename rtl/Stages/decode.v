@@ -79,7 +79,7 @@ module decode #(parameter XLEN=32)(
   assign D_addi = (D_opc == OPC_ADDI);
   assign D_jmp = is_jmp;
   
-
+ 
   assign D_alu_op =
          (D_opc == OPC_ADD)                 ? 4'b0000 :
          (D_opc == OPC_SUB)                 ? 4'b0001 :
