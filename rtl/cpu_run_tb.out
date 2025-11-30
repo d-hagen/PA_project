@@ -7,6 +7,7 @@
 :vpi_module "/usr/lib/x86_64-linux-gnu/ivl/vhdl_textio.vpi";
 :vpi_module "/usr/lib/x86_64-linux-gnu/ivl/v2005_math.vpi";
 :vpi_module "/usr/lib/x86_64-linux-gnu/ivl/va_math.vpi";
+<<<<<<< HEAD
 S_0x6522f8fbe700 .scope module, "cpu_run_tb" "cpu_run_tb" 2 3;
  .timescale -9 -12;
 P_0x6522f8f927c0 .param/l "ADDR_SIZE" 1 2 7, +C4<00000000000000000000000000000101>;
@@ -113,6 +114,124 @@ L_0x6522f90407e0 .part v0x6522f900fdb0_0, 0, 12;
 L_0x6522f904b660 .part v0x6522f9015010_0, 0, 12;
 L_0x6522f904b790 .part v0x6522f900fdb0_0, 0, 12;
 S_0x6522f8fda5a0 .scope module, "u_Hazard_unit" "Hazard_unit" 3 155, 4 1 0, S_0x6522f8fda1c0;
+=======
+S_0x5bd6333a34f0 .scope module, "cpu_run_tb" "cpu_run_tb" 2 3;
+ .timescale -9 -12;
+P_0x5bd6333730f0 .param/l "ADDR_SIZE" 1 2 7, +C4<00000000000000000000000000000101>;
+P_0x5bd633373130 .param/l "END_PC" 1 2 9, +C4<00000000000000000000000000010110>;
+P_0x5bd633373170 .param/l "PC_BITS" 1 2 8, +C4<00000000000000000000000000001100>;
+P_0x5bd6333731b0 .param/l "REG_NUM" 1 2 6, +C4<00000000000000000000000000100000>;
+P_0x5bd6333731f0 .param/l "XLEN" 1 2 5, +C4<00000000000000000000000000100000>;
+v0x5bd633414f90_0 .var "clk", 0 0;
+v0x5bd633415030_0 .var "curr_inst", 31 0;
+v0x5bd6334150d0_0 .var/i "cycles", 31 0;
+v0x5bd633415170_0 .var/i "i", 31 0;
+v0x5bd633415210_0 .var "rst", 0 0;
+S_0x5bd6333bf650 .scope module, "dut" "cpu" 2 19, 3 3 0, S_0x5bd6333a34f0;
+ .timescale -9 -12;
+    .port_info 0 /INPUT 1 "clk";
+    .port_info 1 /INPUT 1 "rst";
+P_0x5bd633372770 .param/l "ADDR_SIZE" 0 3 6, +C4<00000000000000000000000000000101>;
+P_0x5bd6333727b0 .param/l "PC_BITS" 0 3 7, +C4<00000000000000000000000000001100>;
+P_0x5bd6333727f0 .param/l "REG_NUM" 0 3 5, +C4<00000000000000000000000000100000>;
+P_0x5bd633372830 .param/l "RESET_PC" 0 3 8, C4<000000000000>;
+P_0x5bd633372870 .param/l "XLEN" 0 3 4, +C4<00000000000000000000000000100000>;
+v0x5bd63340ff40_0 .net "D_BP_taken", 0 0, L_0x5bd6333bd4d0;  1 drivers
+v0x5bd633410000_0 .net "D_BP_target_pc", 11 0, L_0x5bd6332c2150;  1 drivers
+v0x5bd633410110_0 .net "D_a", 31 0, L_0x5bd63342fe40;  1 drivers
+v0x5bd633410200_0 .net "D_a2", 31 0, L_0x5bd63342ea90;  1 drivers
+v0x5bd633410310_0 .net "D_addi", 0 0, L_0x5bd633428f30;  1 drivers
+v0x5bd633410450_0 .net "D_alu_op", 3 0, L_0x5bd63342bf60;  1 drivers
+v0x5bd633410560_0 .net "D_b", 31 0, L_0x5bd6334307e0;  1 drivers
+v0x5bd633410670_0 .net "D_b2", 31 0, L_0x5bd63342fb20;  1 drivers
+v0x5bd633410780_0 .net "D_brn", 0 0, L_0x5bd633428e60;  1 drivers
+v0x5bd633410820_0 .net "D_byt", 0 0, L_0x5bd6334285c0;  1 drivers
+v0x5bd6334108c0_0 .net "D_imd", 10 0, L_0x5bd633427580;  1 drivers
+v0x5bd6334109d0_0 .net "D_inst", 31 0, v0x5bd633405f20_0;  1 drivers
+v0x5bd633410ae0_0 .net "D_jmp", 0 0, L_0x5bd6334287c0;  1 drivers
+v0x5bd633410b80_0 .net "D_ld", 0 0, L_0x5bd6334281f0;  1 drivers
+v0x5bd633410c20_0 .net "D_link_addr", 31 0, L_0x5bd6332db570;  1 drivers
+v0x5bd633410ce0_0 .net "D_link_we", 0 0, L_0x5bd633428150;  1 drivers
+v0x5bd633410d80_0 .net "D_mul", 0 0, L_0x5bd6334288c0;  1 drivers
+v0x5bd633410f30_0 .net "D_opc", 5 0, L_0x5bd6334270c0;  1 drivers
+v0x5bd633410ff0_0 .net "D_pc", 11 0, v0x5bd6334060e0_0;  1 drivers
+v0x5bd6334110e0_0 .net "D_ra", 4 0, L_0x5bd6334271f0;  1 drivers
+v0x5bd6334111a0_0 .net "D_rb", 4 0, L_0x5bd633427320;  1 drivers
+v0x5bd633411260_0 .net "D_rd", 4 0, L_0x5bd633427450;  1 drivers
+v0x5bd633411320_0 .net "D_str", 0 0, L_0x5bd633428440;  1 drivers
+v0x5bd6334113c0_0 .net "D_we", 0 0, L_0x5bd633428da0;  1 drivers
+v0x5bd6334114b0_0 .net "Dc_mem_addr", 9 0, v0x5bd6333fa640_0;  1 drivers
+v0x5bd6334115c0_0 .net "Dc_mem_req", 0 0, v0x5bd6333fa740_0;  1 drivers
+v0x5bd6334116b0_0 .net "Dc_wb_addr", 9 0, v0x5bd6333fa800_0;  1 drivers
+v0x5bd6334117c0_0 .net "Dc_wb_we", 0 0, v0x5bd6333fa8c0_0;  1 drivers
+v0x5bd6334118b0_0 .net "Dc_wb_wline", 127 0, v0x5bd6333fa980_0;  1 drivers
+v0x5bd6334119c0_0 .net "EX_BP_taken", 0 0, L_0x5bd633430e20;  1 drivers
+v0x5bd633411ab0_0 .net "EX_BP_target_pc", 11 0, L_0x5bd6334313f0;  1 drivers
+v0x5bd633411bc0_0 .net "EX_D_bp", 1 0, L_0x5bd63342d590;  1 drivers
+v0x5bd633411cd0_0 .net "EX_a", 31 0, v0x5bd6333f8c10_0;  1 drivers
+v0x5bd633411de0_0 .net "EX_a2", 31 0, L_0x5bd633430a90;  1 drivers
+v0x5bd633411ea0_0 .net "EX_alu_op", 3 0, L_0x5bd633430c70;  1 drivers
+v0x5bd633411fb0_0 .net "EX_alu_out", 31 0, v0x5bd6333f38e0_0;  1 drivers
+v0x5bd633412070_0 .net "EX_b", 31 0, L_0x5bd633430b00;  1 drivers
+v0x5bd633412130_0 .net "EX_b2", 31 0, L_0x5bd633430b70;  1 drivers
+v0x5bd6334121f0_0 .net "EX_brn", 0 0, L_0x5bd633430ce0;  1 drivers
+v0x5bd633412290_0 .net "EX_byt", 0 0, L_0x5bd633431090;  1 drivers
+v0x5bd633412380_0 .net "EX_ld", 0 0, v0x5bd6333f9370_0;  1 drivers
+v0x5bd633412420_0 .net "EX_link_addr", 31 0, L_0x5bd633431350;  1 drivers
+v0x5bd633412530_0 .net "EX_link_we", 0 0, L_0x5bd633431170;  1 drivers
+v0x5bd633412620_0 .net "EX_mul", 0 0, v0x5bd6333f95b0_0;  1 drivers
+v0x5bd633412710_0 .net "EX_rd", 4 0, v0x5bd6333f9670_0;  1 drivers
+v0x5bd6334127d0_0 .net "EX_str", 0 0, L_0x5bd633430fc0;  1 drivers
+v0x5bd6334128c0_0 .net "EX_taken", 0 0, v0x5bd6333f3c00_0;  1 drivers
+v0x5bd633412960_0 .net "EX_true_taken", 0 0, v0x5bd6333f3cc0_0;  1 drivers
+v0x5bd633412a50_0 .net "EX_we", 0 0, v0x5bd6333f9810_0;  1 drivers
+v0x5bd633412af0_0 .net "F_BP_taken", 0 0, L_0x5bd6334316d0;  1 drivers
+v0x5bd633412be0_0 .net "F_BP_target_pc", 11 0, L_0x5bd633432190;  1 drivers
+v0x5bd633412ca0_0 .net "F_inst", 31 0, v0x5bd6334069d0_0;  1 drivers
+v0x5bd633412db0_0 .net "F_mem_inst", 127 0, v0x5bd63340f400_0;  1 drivers
+v0x5bd633412ec0_0 .net "F_mem_valid", 0 0, v0x5bd63340f4d0_0;  1 drivers
+v0x5bd633412fb0_0 .net "F_pc", 11 0, v0x5bd633409c60_0;  1 drivers
+v0x5bd633413100_0 .net "F_stall", 0 0, v0x5bd633406d80_0;  1 drivers
+v0x5bd6334131a0_0 .net "Ic_mem_addr", 9 0, v0x5bd633406e70_0;  1 drivers
+v0x5bd6334132b0_0 .net "Ic_mem_req", 0 0, v0x5bd633406f30_0;  1 drivers
+v0x5bd6334133a0_0 .net "MEM_D_bp", 1 0, L_0x5bd63342d6d0;  1 drivers
+v0x5bd6334134b0_0 .net "MEM_a2", 31 0, L_0x5bd633432640;  1 drivers
+v0x5bd633413570_0 .net "MEM_alu_out", 31 0, v0x5bd633404280_0;  1 drivers
+v0x5bd633413660_0 .net "MEM_b2", 31 0, L_0x5bd6334325d0;  1 drivers
+v0x5bd633413770_0 .net "MEM_byt", 0 0, L_0x5bd633432910;  1 drivers
+v0x5bd633413860_0 .net "MEM_data_line", 127 0, v0x5bd63340f8a0_0;  1 drivers
+v0x5bd633413970_0 .net "MEM_data_mem", 31 0, v0x5bd6333faea0_0;  1 drivers
+v0x5bd633413e20_0 .net "MEM_ld", 0 0, v0x5bd633404500_0;  1 drivers
+v0x5bd633413ec0_0 .net "MEM_link_addr", 31 0, L_0x5bd6334329b0;  1 drivers
+v0x5bd633413f60_0 .net "MEM_link_we", 0 0, L_0x5bd633432ad0;  1 drivers
+v0x5bd633414000_0 .net "MEM_mem_valid", 0 0, v0x5bd63340f970_0;  1 drivers
+v0x5bd6334140a0_0 .net "MEM_rd", 4 0, v0x5bd633404760_0;  1 drivers
+v0x5bd633414140_0 .net "MEM_stall", 0 0, v0x5bd6333fb100_0;  1 drivers
+v0x5bd6334141e0_0 .net "MEM_str", 0 0, v0x5bd633404840_0;  1 drivers
+v0x5bd6334142d0_0 .net "MEM_taken", 0 0, L_0x5bd633432560;  1 drivers
+v0x5bd633414370_0 .net "MEM_we", 0 0, v0x5bd6334049c0_0;  1 drivers
+v0x5bd633414410_0 .net "WB_D_bp", 1 0, L_0x5bd63342d880;  1 drivers
+v0x5bd633414500_0 .net "WB_data_mem", 31 0, v0x5bd633408fa0_0;  1 drivers
+v0x5bd6334145f0_0 .net "WB_link_addr", 31 0, v0x5bd633409040_0;  1 drivers
+v0x5bd6334146e0_0 .net "WB_link_we", 0 0, v0x5bd633409120_0;  1 drivers
+v0x5bd6334147d0_0 .net "WB_rd", 4 0, v0x5bd6334091e0_0;  1 drivers
+v0x5bd633414870_0 .net "WB_we", 0 0, v0x5bd6334092c0_0;  1 drivers
+L_0x7b2201d57018 .functor BUFT 1, C4<000000000001>, C4<0>, C4<0>, C4<0>;
+v0x5bd633414910_0 .net/2u *"_ivl_0", 11 0, L_0x7b2201d57018;  1 drivers
+L_0x7b2201d57060 .functor BUFT 1, C4<00000000000000000000>, C4<0>, C4<0>, C4<0>;
+v0x5bd6334149b0_0 .net/2u *"_ivl_4", 19 0, L_0x7b2201d57060;  1 drivers
+v0x5bd633414a50_0 .net "clk", 0 0, v0x5bd633414f90_0;  1 drivers
+v0x5bd633414af0_0 .net "pc_plus_1", 11 0, L_0x5bd633426ae0;  1 drivers
+v0x5bd633414b90_0 .net "pc_plus_1_ext", 31 0, L_0x5bd633426b80;  1 drivers
+v0x5bd633414c30_0 .net "rst", 0 0, v0x5bd633415210_0;  1 drivers
+v0x5bd633414cd0_0 .net "stall_D", 0 0, L_0x5bd63342d130;  1 drivers
+L_0x5bd633426ae0 .arith/sum 12, v0x5bd633409c60_0, L_0x7b2201d57018;
+L_0x5bd633426b80 .concat [ 12 20 0 0], L_0x5bd633426ae0, L_0x7b2201d57060;
+L_0x5bd633426d10 .part v0x5bd6333f38e0_0, 0, 12;
+L_0x5bd633432280 .part v0x5bd6333f8c10_0, 0, 12;
+L_0x5bd6334323b0 .part v0x5bd6333f38e0_0, 0, 12;
+S_0x5bd6333bfa30 .scope module, "u_Hazard_unit" "Hazard_unit" 3 166, 4 1 0, S_0x5bd6333bf650;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
  .timescale -9 -12;
     .port_info 0 /INPUT 1 "clk";
     .port_info 1 /INPUT 1 "rst";
@@ -132,6 +251,7 @@ S_0x6522f8fda5a0 .scope module, "u_Hazard_unit" "Hazard_unit" 3 155, 4 1 0, S_0x
     .port_info 15 /OUTPUT 2 "EX_D_bp";
     .port_info 16 /OUTPUT 2 "MEM_D_bp";
     .port_info 17 /OUTPUT 2 "WB_D_bp";
+<<<<<<< HEAD
 P_0x6522f8fd9090 .param/l "ADDR_SIZE" 0 4 3, +C4<00000000000000000000000000000101>;
 P_0x6522f8fd90d0 .param/l "MUL_STALLS" 0 4 4, +C4<00000000000000000000000000000100>;
 P_0x6522f8fd9110 .param/l "XLEN" 0 4 2, +C4<00000000000000000000000000100000>;
@@ -206,6 +326,82 @@ L_0x6522f9046980 .concat [ 1 1 0 0], L_0x6522f90468a0, L_0x6522f9046730;
 L_0x6522f9046ac0 .concat [ 1 1 0 0], L_0x6522f9045e80, L_0x6522f9045ca0;
 L_0x6522f9046c70 .concat [ 1 1 0 0], L_0x6522f9046250, L_0x6522f9046020;
 S_0x6522f8fda980 .scope module, "u_alu" "alu" 3 315, 5 1 0, S_0x6522f8fda1c0;
+=======
+P_0x5bd6332e4e50 .param/l "ADDR_SIZE" 0 4 3, +C4<00000000000000000000000000000101>;
+P_0x5bd6332e4e90 .param/l "MUL_STALLS" 0 4 4, +C4<00000000000000000000000000000100>;
+P_0x5bd6332e4ed0 .param/l "XLEN" 0 4 2, +C4<00000000000000000000000000100000>;
+L_0x5bd63342a460 .functor AND 1, v0x5bd6333f95b0_0, L_0x5bd63342c250, C4<1>, C4<1>;
+L_0x5bd63342c570 .functor AND 1, v0x5bd6333f9810_0, L_0x5bd63342c4d0, C4<1>, C4<1>;
+L_0x5bd63342c710 .functor AND 1, v0x5bd6333f9810_0, L_0x5bd63342c670, C4<1>, C4<1>;
+L_0x5bd63342c8b0 .functor AND 1, v0x5bd6334049c0_0, L_0x5bd63342c780, C4<1>, C4<1>;
+L_0x5bd63342ca90 .functor AND 1, v0x5bd6334049c0_0, L_0x5bd63342c9b0, C4<1>, C4<1>;
+L_0x5bd63342cc30 .functor AND 1, v0x5bd6334092c0_0, L_0x5bd63342cb00, C4<1>, C4<1>;
+L_0x5bd63342ce60 .functor AND 1, v0x5bd6334092c0_0, L_0x5bd63342cd70, C4<1>, C4<1>;
+L_0x5bd63342ced0 .functor OR 1, L_0x5bd63342c570, L_0x5bd63342c710, C4<0>, C4<0>;
+L_0x5bd63342d030 .functor AND 1, v0x5bd6333f9370_0, L_0x5bd63342ced0, C4<1>, C4<1>;
+L_0x5bd63342d130 .functor OR 1, L_0x5bd63342d030, L_0x5bd63342c390, C4<0>, C4<0>;
+L_0x5bd63342d340 .functor AND 1, L_0x5bd63342c570, L_0x5bd63342d2a0, C4<1>, C4<1>;
+L_0x5bd63342d4b0 .functor AND 1, L_0x5bd63342c710, L_0x5bd63342d3b0, C4<1>, C4<1>;
+v0x5bd6333c2050_0 .net "D_ra", 4 0, L_0x5bd6334271f0;  alias, 1 drivers
+v0x5bd6333c9830_0 .net "D_rb", 4 0, L_0x5bd633427320;  alias, 1 drivers
+v0x5bd6333af2a0_0 .net "D_rd", 4 0, L_0x5bd633427450;  alias, 1 drivers
+v0x5bd6333bd670_0 .net "EX_D_bp", 1 0, L_0x5bd63342d590;  alias, 1 drivers
+v0x5bd6333030c0_0 .net "EX_alu_out", 31 0, v0x5bd6333f38e0_0;  alias, 1 drivers
+v0x5bd6333f13f0_0 .net "EX_ld", 0 0, v0x5bd6333f9370_0;  alias, 1 drivers
+v0x5bd6333f14b0_0 .net "EX_mul", 0 0, v0x5bd6333f95b0_0;  alias, 1 drivers
+v0x5bd6333f1570_0 .net "EX_rd", 4 0, v0x5bd6333f9670_0;  alias, 1 drivers
+v0x5bd6333f1650_0 .net "EX_we", 0 0, v0x5bd6333f9810_0;  alias, 1 drivers
+v0x5bd6333f1710_0 .net "MEM_D_bp", 1 0, L_0x5bd63342d6d0;  alias, 1 drivers
+v0x5bd6333f17f0_0 .net "MEM_rd", 4 0, v0x5bd633404760_0;  alias, 1 drivers
+v0x5bd6333f18d0_0 .net "MEM_we", 0 0, v0x5bd6334049c0_0;  alias, 1 drivers
+v0x5bd6333f1990_0 .net "WB_D_bp", 1 0, L_0x5bd63342d880;  alias, 1 drivers
+v0x5bd6333f1a70_0 .net "WB_rd", 4 0, v0x5bd6334091e0_0;  alias, 1 drivers
+v0x5bd6333f1b50_0 .net "WB_we", 0 0, v0x5bd6334092c0_0;  alias, 1 drivers
+L_0x7b2201d57ac8 .functor BUFT 1, C4<000>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333f1c10_0 .net/2u *"_ivl_0", 2 0, L_0x7b2201d57ac8;  1 drivers
+v0x5bd6333f1cf0_0 .net *"_ivl_10", 0 0, L_0x5bd63342c4d0;  1 drivers
+v0x5bd6333f1db0_0 .net *"_ivl_14", 0 0, L_0x5bd63342c670;  1 drivers
+v0x5bd6333f1e70_0 .net *"_ivl_18", 0 0, L_0x5bd63342c780;  1 drivers
+v0x5bd6333f1f30_0 .net *"_ivl_2", 0 0, L_0x5bd63342c250;  1 drivers
+v0x5bd6333f1ff0_0 .net *"_ivl_22", 0 0, L_0x5bd63342c9b0;  1 drivers
+v0x5bd6333f20b0_0 .net *"_ivl_26", 0 0, L_0x5bd63342cb00;  1 drivers
+v0x5bd6333f2170_0 .net *"_ivl_30", 0 0, L_0x5bd63342cd70;  1 drivers
+v0x5bd6333f2230_0 .net *"_ivl_35", 0 0, L_0x5bd63342ced0;  1 drivers
+v0x5bd6333f22f0_0 .net *"_ivl_37", 0 0, L_0x5bd63342d030;  1 drivers
+v0x5bd6333f23b0_0 .net *"_ivl_41", 0 0, L_0x5bd63342d2a0;  1 drivers
+v0x5bd6333f2470_0 .net *"_ivl_43", 0 0, L_0x5bd63342d340;  1 drivers
+v0x5bd6333f2530_0 .net *"_ivl_45", 0 0, L_0x5bd63342d3b0;  1 drivers
+v0x5bd6333f25f0_0 .net *"_ivl_47", 0 0, L_0x5bd63342d4b0;  1 drivers
+L_0x7b2201d57b10 .functor BUFT 1, C4<000>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333f26b0_0 .net/2u *"_ivl_6", 2 0, L_0x7b2201d57b10;  1 drivers
+v0x5bd6333f2790_0 .net "clk", 0 0, v0x5bd633414f90_0;  alias, 1 drivers
+v0x5bd6333f2850_0 .net "ex_hit_ra", 0 0, L_0x5bd63342c570;  1 drivers
+v0x5bd6333f2910_0 .net "ex_hit_rb", 0 0, L_0x5bd63342c710;  1 drivers
+v0x5bd6333f29d0_0 .net "mem_hit_ra", 0 0, L_0x5bd63342c8b0;  1 drivers
+v0x5bd6333f2a90_0 .net "mem_hit_rb", 0 0, L_0x5bd63342ca90;  1 drivers
+v0x5bd6333f2b50_0 .var "mul_cnt", 2 0;
+v0x5bd6333f2c30_0 .net "mul_stall", 0 0, L_0x5bd63342c390;  1 drivers
+v0x5bd6333f2cf0_0 .net "mul_start", 0 0, L_0x5bd63342a460;  1 drivers
+v0x5bd6333f2db0_0 .net "rst", 0 0, v0x5bd633415210_0;  alias, 1 drivers
+v0x5bd6333f2e70_0 .net "stall_D", 0 0, L_0x5bd63342d130;  alias, 1 drivers
+v0x5bd6333f2f30_0 .net "wb_hit_ra", 0 0, L_0x5bd63342cc30;  1 drivers
+v0x5bd6333f2ff0_0 .net "wb_hit_rb", 0 0, L_0x5bd63342ce60;  1 drivers
+E_0x5bd63324b310 .event posedge, v0x5bd6333f2790_0;
+L_0x5bd63342c250 .cmp/eq 3, v0x5bd6333f2b50_0, L_0x7b2201d57ac8;
+L_0x5bd63342c390 .cmp/ne 3, v0x5bd6333f2b50_0, L_0x7b2201d57b10;
+L_0x5bd63342c4d0 .cmp/eq 5, v0x5bd6333f9670_0, L_0x5bd6334271f0;
+L_0x5bd63342c670 .cmp/eq 5, v0x5bd6333f9670_0, L_0x5bd633427320;
+L_0x5bd63342c780 .cmp/eq 5, v0x5bd633404760_0, L_0x5bd6334271f0;
+L_0x5bd63342c9b0 .cmp/eq 5, v0x5bd633404760_0, L_0x5bd633427320;
+L_0x5bd63342cb00 .cmp/eq 5, v0x5bd6334091e0_0, L_0x5bd6334271f0;
+L_0x5bd63342cd70 .cmp/eq 5, v0x5bd6334091e0_0, L_0x5bd633427320;
+L_0x5bd63342d2a0 .reduce/nor v0x5bd6333f9370_0;
+L_0x5bd63342d3b0 .reduce/nor v0x5bd6333f9370_0;
+L_0x5bd63342d590 .concat [ 1 1 0 0], L_0x5bd63342d4b0, L_0x5bd63342d340;
+L_0x5bd63342d6d0 .concat [ 1 1 0 0], L_0x5bd63342ca90, L_0x5bd63342c8b0;
+L_0x5bd63342d880 .concat [ 1 1 0 0], L_0x5bd63342ce60, L_0x5bd63342cc30;
+S_0x5bd6333bfe10 .scope module, "u_alu" "alu" 3 334, 5 1 0, S_0x5bd6333bf650;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
  .timescale -9 -12;
     .port_info 0 /INPUT 32 "EX_a";
     .port_info 1 /INPUT 32 "EX_a2";
@@ -213,6 +409,7 @@ S_0x6522f8fda980 .scope module, "u_alu" "alu" 3 315, 5 1 0, S_0x6522f8fda1c0;
     .port_info 3 /INPUT 32 "EX_b2";
     .port_info 4 /INPUT 4 "EX_alu_op";
     .port_info 5 /INPUT 1 "EX_brn";
+<<<<<<< HEAD
     .port_info 6 /INPUT 1 "EX_jmp";
     .port_info 7 /INPUT 1 "EX_BP_taken";
     .port_info 8 /INPUT 12 "EX_BP_target_pc";
@@ -240,6 +437,33 @@ E_0x6522f8e7a2b0/1 .event anyedge, v0x6522f900ff30_0, v0x6522f9010250_0, v0x6522
 E_0x6522f8e7a2b0/2 .event anyedge, v0x6522f9010310_0, v0x6522f8f9b020_0, v0x6522f900fa00_0, v0x6522f8f26290_0;
 E_0x6522f8e7a2b0 .event/or E_0x6522f8e7a2b0/0, E_0x6522f8e7a2b0/1, E_0x6522f8e7a2b0/2;
 S_0x6522f8fd9740 .scope module, "u_branch_buffer" "branch_buffer" 3 333, 6 2 0, S_0x6522f8fda1c0;
+=======
+    .port_info 6 /INPUT 1 "EX_BP_taken";
+    .port_info 7 /INPUT 12 "EX_BP_target_pc";
+    .port_info 8 /OUTPUT 32 "EX_alu_out";
+    .port_info 9 /OUTPUT 1 "EX_taken";
+    .port_info 10 /OUTPUT 1 "EX_true_taken";
+P_0x5bd6333be190 .param/l "PC_BITS" 0 5 3, +C4<00000000000000000000000000001100>;
+P_0x5bd6333be1d0 .param/l "SHW" 1 5 20, +C4<00000000000000000000000000000101>;
+P_0x5bd6333be210 .param/l "XLEN" 0 5 2, +C4<00000000000000000000000000100000>;
+v0x5bd63337d400_0 .net "EX_BP_taken", 0 0, L_0x5bd633430e20;  alias, 1 drivers
+v0x5bd6333f3530_0 .net "EX_BP_target_pc", 11 0, L_0x5bd6334313f0;  alias, 1 drivers
+v0x5bd6333f3610_0 .net "EX_a", 31 0, v0x5bd6333f8c10_0;  alias, 1 drivers
+v0x5bd6333f36d0_0 .net "EX_a2", 31 0, L_0x5bd633430a90;  alias, 1 drivers
+v0x5bd6333f37b0_0 .net "EX_alu_op", 3 0, L_0x5bd633430c70;  alias, 1 drivers
+v0x5bd6333f38e0_0 .var "EX_alu_out", 31 0;
+v0x5bd6333f39a0_0 .net "EX_b", 31 0, L_0x5bd633430b00;  alias, 1 drivers
+v0x5bd6333f3a60_0 .net "EX_b2", 31 0, L_0x5bd633430b70;  alias, 1 drivers
+v0x5bd6333f3b40_0 .net "EX_brn", 0 0, L_0x5bd633430ce0;  alias, 1 drivers
+v0x5bd6333f3c00_0 .var "EX_taken", 0 0;
+v0x5bd6333f3cc0_0 .var "EX_true_taken", 0 0;
+v0x5bd6333f3d80_0 .var "next_pc", 31 0;
+E_0x5bd63324b2d0/0 .event anyedge, v0x5bd6333f3b40_0, v0x5bd6333f37b0_0, v0x5bd6333f36d0_0, v0x5bd6333f3a60_0;
+E_0x5bd63324b2d0/1 .event anyedge, v0x5bd6333f3cc0_0, v0x5bd6333f3610_0, v0x5bd6333f39a0_0, v0x5bd6333f3d80_0;
+E_0x5bd63324b2d0/2 .event anyedge, v0x5bd63337d400_0;
+E_0x5bd63324b2d0 .event/or E_0x5bd63324b2d0/0, E_0x5bd63324b2d0/1, E_0x5bd63324b2d0/2;
+S_0x5bd6333c01f0 .scope module, "u_branch_buffer" "branch_buffer" 3 351, 6 2 0, S_0x5bd6333bf650;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
  .timescale -9 -12;
     .port_info 0 /INPUT 1 "clk";
     .port_info 1 /INPUT 1 "rst";
@@ -252,6 +476,7 @@ S_0x6522f8fd9740 .scope module, "u_branch_buffer" "branch_buffer" 3 333, 6 2 0, 
     .port_info 8 /INPUT 1 "MEM_stall";
     .port_info 9 /OUTPUT 12 "F_BP_target_pc";
     .port_info 10 /OUTPUT 1 "F_BP_taken";
+<<<<<<< HEAD
 P_0x6522f90105a0 .param/l "DEPTH" 1 6 24, +C4<00000000000000000000000000001000>;
 P_0x6522f90105e0 .param/l "INDX" 1 6 25, +C4<00000000000000000000000000000011>;
 P_0x6522f9010620 .param/l "PC_BITS" 0 6 3, +C4<00000000000000000000000000001100>;
@@ -334,10 +559,95 @@ TD_cpu_run_tb.dut.u_branch_buffer.fifo_insert_new ;
     %store/vec4 v0x6522f9010920_0, 0, 32;
 T_0.0 ;
     %load/vec4 v0x6522f9010920_0;
+=======
+P_0x5bd6333f3ff0 .param/l "DEPTH" 1 6 24, +C4<00000000000000000000000000001000>;
+P_0x5bd6333f4030 .param/l "INDX" 1 6 25, +C4<00000000000000000000000000000011>;
+P_0x5bd6333f4070 .param/l "PC_BITS" 0 6 3, +C4<00000000000000000000000000001100>;
+L_0x5bd6334316d0 .functor BUFZ 1, L_0x5bd633431630, C4<0>, C4<0>, C4<0>;
+L_0x5bd633431790 .functor AND 1, v0x5bd6333f5ce0_0, L_0x5bd633431630, C4<1>, C4<1>;
+L_0x5bd633431ec0 .functor AND 12, L_0x5bd633431b50, L_0x5bd633431d80, C4<111111111111>, C4<111111111111>;
+v0x5bd6333f4470_0 .net "EX_alu_out", 11 0, L_0x5bd6334323b0;  1 drivers
+v0x5bd6333f4570_0 .net "EX_brn", 0 0, L_0x5bd633430ce0;  alias, 1 drivers
+v0x5bd6333f4660_0 .net "EX_pc", 11 0, L_0x5bd633432280;  1 drivers
+v0x5bd6333f4730_0 .net "EX_true_taken", 0 0, v0x5bd6333f3cc0_0;  alias, 1 drivers
+v0x5bd6333f4800_0 .net "F_BP_taken", 0 0, L_0x5bd6334316d0;  alias, 1 drivers
+v0x5bd6333f48f0_0 .net "F_BP_target_pc", 11 0, L_0x5bd633432190;  alias, 1 drivers
+v0x5bd6333f49b0_0 .net "F_pc", 11 0, v0x5bd633409c60_0;  alias, 1 drivers
+v0x5bd6333f4a90_0 .net "F_stall", 0 0, v0x5bd633406d80_0;  alias, 1 drivers
+v0x5bd6333f4b50_0 .net "MEM_stall", 0 0, v0x5bd6333fb100_0;  alias, 1 drivers
+v0x5bd6333f4c10_0 .net *"_ivl_0", 0 0, L_0x5bd6334314f0;  1 drivers
+v0x5bd6333f4cf0_0 .net *"_ivl_13", 0 0, L_0x5bd633431790;  1 drivers
+v0x5bd6333f4db0_0 .net *"_ivl_14", 11 0, L_0x5bd633431850;  1 drivers
+v0x5bd6333f4e90_0 .net *"_ivl_16", 4 0, L_0x5bd633431920;  1 drivers
+L_0x7b2201d57cc0 .functor BUFT 1, C4<00>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333f4f70_0 .net *"_ivl_19", 1 0, L_0x7b2201d57cc0;  1 drivers
+v0x5bd6333f5050_0 .net *"_ivl_2", 4 0, L_0x5bd633431590;  1 drivers
+v0x5bd6333f5130_0 .net *"_ivl_21", 0 0, L_0x5bd633431ab0;  1 drivers
+v0x5bd6333f51f0_0 .net *"_ivl_22", 11 0, L_0x5bd633431b50;  1 drivers
+L_0x7b2201d57d08 .functor BUFT 1, C4<00000000000>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333f53e0_0 .net *"_ivl_25", 10 0, L_0x7b2201d57d08;  1 drivers
+v0x5bd6333f54c0_0 .net *"_ivl_27", 0 0, L_0x5bd633431c90;  1 drivers
+v0x5bd6333f5580_0 .net *"_ivl_28", 11 0, L_0x5bd633431d80;  1 drivers
+L_0x7b2201d57d50 .functor BUFT 1, C4<00000000000>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333f5660_0 .net *"_ivl_31", 10 0, L_0x7b2201d57d50;  1 drivers
+v0x5bd6333f5740_0 .net *"_ivl_32", 11 0, L_0x5bd633431ec0;  1 drivers
+v0x5bd6333f5820_0 .net *"_ivl_34", 11 0, L_0x5bd633431fd0;  1 drivers
+L_0x7b2201d57c30 .functor BUFT 1, C4<00>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333f5900_0 .net *"_ivl_5", 1 0, L_0x7b2201d57c30;  1 drivers
+L_0x7b2201d57c78 .functor BUFT 1, C4<0>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333f59e0_0 .net/2u *"_ivl_6", 0 0, L_0x7b2201d57c78;  1 drivers
+v0x5bd6333f5ac0_0 .net "clk", 0 0, v0x5bd633414f90_0;  alias, 1 drivers
+v0x5bd6333f5b60_0 .var "ex_hit", 0 0;
+v0x5bd6333f5c00_0 .var "ex_hit_idx", 2 0;
+v0x5bd6333f5ce0_0 .var "f_hit", 0 0;
+v0x5bd6333f5da0_0 .var "f_hit_idx", 2 0;
+v0x5bd6333f5e80_0 .var/i "i", 31 0;
+v0x5bd6333f5f60 .array "pc_buf", 7 0, 11 0;
+v0x5bd6333f6120_0 .net "rst", 0 0, v0x5bd633415210_0;  alias, 1 drivers
+v0x5bd6333f6400 .array "taken_buf", 7 0, 0 0;
+v0x5bd6333f64a0_0 .net "taken_on_hit", 0 0, L_0x5bd633431630;  1 drivers
+v0x5bd6333f6540 .array "target_buf", 7 0, 11 0;
+v0x5bd6333f5f60_0 .array/port v0x5bd6333f5f60, 0;
+v0x5bd6333f5f60_1 .array/port v0x5bd6333f5f60, 1;
+v0x5bd6333f5f60_2 .array/port v0x5bd6333f5f60, 2;
+E_0x5bd6333ef730/0 .event anyedge, v0x5bd6333f5b60_0, v0x5bd6333f5f60_0, v0x5bd6333f5f60_1, v0x5bd6333f5f60_2;
+v0x5bd6333f5f60_3 .array/port v0x5bd6333f5f60, 3;
+v0x5bd6333f5f60_4 .array/port v0x5bd6333f5f60, 4;
+v0x5bd6333f5f60_5 .array/port v0x5bd6333f5f60, 5;
+v0x5bd6333f5f60_6 .array/port v0x5bd6333f5f60, 6;
+E_0x5bd6333ef730/1 .event anyedge, v0x5bd6333f5f60_3, v0x5bd6333f5f60_4, v0x5bd6333f5f60_5, v0x5bd6333f5f60_6;
+v0x5bd6333f5f60_7 .array/port v0x5bd6333f5f60, 7;
+E_0x5bd6333ef730/2 .event anyedge, v0x5bd6333f5f60_7, v0x5bd6333f4660_0;
+E_0x5bd6333ef730 .event/or E_0x5bd6333ef730/0, E_0x5bd6333ef730/1, E_0x5bd6333ef730/2;
+E_0x5bd6333ef050/0 .event anyedge, v0x5bd6333f5ce0_0, v0x5bd6333f5f60_0, v0x5bd6333f5f60_1, v0x5bd6333f5f60_2;
+E_0x5bd6333ef050/1 .event anyedge, v0x5bd6333f5f60_3, v0x5bd6333f5f60_4, v0x5bd6333f5f60_5, v0x5bd6333f5f60_6;
+E_0x5bd6333ef050/2 .event anyedge, v0x5bd6333f5f60_7, v0x5bd6333f49b0_0;
+E_0x5bd6333ef050 .event/or E_0x5bd6333ef050/0, E_0x5bd6333ef050/1, E_0x5bd6333ef050/2;
+L_0x5bd6334314f0 .array/port v0x5bd6333f6400, L_0x5bd633431590;
+L_0x5bd633431590 .concat [ 3 2 0 0], v0x5bd6333f5da0_0, L_0x7b2201d57c30;
+L_0x5bd633431630 .functor MUXZ 1, L_0x7b2201d57c78, L_0x5bd6334314f0, v0x5bd6333f5ce0_0, C4<>;
+L_0x5bd633431850 .array/port v0x5bd6333f6540, L_0x5bd633431920;
+L_0x5bd633431920 .concat [ 3 2 0 0], v0x5bd6333f5da0_0, L_0x7b2201d57cc0;
+L_0x5bd633431ab0 .reduce/nor v0x5bd633406d80_0;
+L_0x5bd633431b50 .concat [ 1 11 0 0], L_0x5bd633431ab0, L_0x7b2201d57d08;
+L_0x5bd633431c90 .reduce/nor v0x5bd6333fb100_0;
+L_0x5bd633431d80 .concat [ 1 11 0 0], L_0x5bd633431c90, L_0x7b2201d57d50;
+L_0x5bd633431fd0 .arith/sum 12, v0x5bd633409c60_0, L_0x5bd633431ec0;
+L_0x5bd633432190 .functor MUXZ 12, L_0x5bd633431fd0, L_0x5bd633431850, L_0x5bd633431790, C4<>;
+S_0x5bd6333beb40 .scope autotask, "fifo_insert_new" "fifo_insert_new" 6 76, 6 76 0, S_0x5bd6333c01f0;
+ .timescale -9 -12;
+v0x5bd6333f4370_0 .var/i "k", 31 0;
+TD_cpu_run_tb.dut.u_branch_buffer.fifo_insert_new ;
+    %pushi/vec4 7, 0, 32;
+    %store/vec4 v0x5bd6333f4370_0, 0, 32;
+T_0.0 ;
+    %load/vec4 v0x5bd6333f4370_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %cmpi/s 0, 0, 32;
     %flag_or 5, 4; GT is !LE
     %flag_inv 5;
     %jmp/0xz T_0.1, 5;
+<<<<<<< HEAD
     %load/vec4 v0x6522f9010920_0;
     %subi 1, 0, 32;
     %ix/vec4/s 4;
@@ -381,6 +691,51 @@ T_0.1 ;
     %assign/vec4/a/d v0x6522f90128a0, 0, 4;
     %end;
 S_0x6522f9012c60 .scope module, "u_d_to_ex_reg" "d_to_ex_reg" 3 261, 7 1 0, S_0x6522f8fda1c0;
+=======
+    %load/vec4 v0x5bd6333f4370_0;
+    %subi 1, 0, 32;
+    %ix/vec4/s 4;
+    %load/vec4a v0x5bd6333f5f60, 4;
+    %ix/getv/s 3, v0x5bd6333f4370_0;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd6333f5f60, 0, 4;
+    %load/vec4 v0x5bd6333f4370_0;
+    %subi 1, 0, 32;
+    %ix/vec4/s 4;
+    %load/vec4a v0x5bd6333f6540, 4;
+    %ix/getv/s 3, v0x5bd6333f4370_0;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd6333f6540, 0, 4;
+    %load/vec4 v0x5bd6333f4370_0;
+    %subi 1, 0, 32;
+    %ix/vec4/s 4;
+    %load/vec4a v0x5bd6333f6400, 4;
+    %ix/getv/s 3, v0x5bd6333f4370_0;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd6333f6400, 0, 4;
+    %load/vec4 v0x5bd6333f4370_0;
+    %subi 1, 0, 32;
+    %store/vec4 v0x5bd6333f4370_0, 0, 32;
+    %jmp T_0.0;
+T_0.1 ;
+    %load/vec4 v0x5bd6333f4660_0;
+    %ix/load 3, 0, 0;
+    %flag_set/imm 4, 0;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd6333f5f60, 0, 4;
+    %load/vec4 v0x5bd6333f4470_0;
+    %ix/load 3, 0, 0;
+    %flag_set/imm 4, 0;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd6333f6540, 0, 4;
+    %load/vec4 v0x5bd6333f4730_0;
+    %ix/load 3, 0, 0;
+    %flag_set/imm 4, 0;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd6333f6400, 0, 4;
+    %end;
+S_0x5bd6333f67c0 .scope module, "u_d_to_ex_reg" "d_to_ex_reg" 3 277, 7 1 0, S_0x5bd6333bf650;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
  .timescale -9 -12;
     .port_info 0 /INPUT 1 "clk";
     .port_info 1 /INPUT 1 "rst";
@@ -399,6 +754,7 @@ S_0x6522f9012c60 .scope module, "u_d_to_ex_reg" "d_to_ex_reg" 3 261, 7 1 0, S_0x
     .port_info 14 /INPUT 1 "D_jmp";
     .port_info 15 /INPUT 1 "D_BP_taken";
     .port_info 16 /INPUT 12 "D_BP_target_pc";
+<<<<<<< HEAD
     .port_info 17 /INPUT 1 "stall_D";
     .port_info 18 /INPUT 1 "MEM_stall";
     .port_info 19 /INPUT 1 "EX_taken";
@@ -479,6 +835,104 @@ v0x6522f9015a50_0 .var "ex_we_r", 0 0;
 v0x6522f9015b10_0 .net "rst", 0 0, v0x6522f902eeb0_0;  alias, 1 drivers
 v0x6522f9015c00_0 .net "stall_D", 0 0, L_0x6522f9046520;  alias, 1 drivers
 S_0x6522f90160c0 .scope module, "u_dcache" "dcache" 3 412, 8 1 0, S_0x6522f8fda1c0;
+=======
+    .port_info 17 /INPUT 1 "D_link_we";
+    .port_info 18 /INPUT 32 "D_link_addr";
+    .port_info 19 /INPUT 1 "stall_D";
+    .port_info 20 /INPUT 1 "MEM_stall";
+    .port_info 21 /INPUT 1 "EX_taken";
+    .port_info 22 /OUTPUT 32 "EX_a";
+    .port_info 23 /OUTPUT 32 "EX_a2";
+    .port_info 24 /OUTPUT 32 "EX_b";
+    .port_info 25 /OUTPUT 32 "EX_b2";
+    .port_info 26 /OUTPUT 4 "EX_alu_op";
+    .port_info 27 /OUTPUT 5 "EX_rd";
+    .port_info 28 /OUTPUT 1 "EX_ld";
+    .port_info 29 /OUTPUT 1 "EX_str";
+    .port_info 30 /OUTPUT 1 "EX_byt";
+    .port_info 31 /OUTPUT 1 "EX_we";
+    .port_info 32 /OUTPUT 1 "EX_brn";
+    .port_info 33 /OUTPUT 1 "EX_BP_taken";
+    .port_info 34 /OUTPUT 12 "EX_BP_target_pc";
+    .port_info 35 /OUTPUT 1 "EX_jmp";
+    .port_info 36 /OUTPUT 32 "EX_link_addr";
+    .port_info 37 /OUTPUT 1 "EX_link_we";
+    .port_info 38 /OUTPUT 1 "EX_mul";
+P_0x5bd6333edf50 .param/l "PC_BITS" 0 7 3, +C4<00000000000000000000000000001100>;
+P_0x5bd6333edf90 .param/l "XLEN" 0 7 2, +C4<00000000000000000000000000100000>;
+L_0x5bd633430a90 .functor BUFZ 32, v0x5bd6333f8b50_0, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>;
+L_0x5bd633430b00 .functor BUFZ 32, v0x5bd6333f8eb0_0, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>;
+L_0x5bd633430b70 .functor BUFZ 32, v0x5bd6333f8dd0_0, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>;
+L_0x5bd633430c70 .functor BUFZ 4, v0x5bd6333f8cf0_0, C4<0000>, C4<0000>, C4<0000>;
+L_0x5bd633430ce0 .functor BUFZ 1, v0x5bd6333f9130_0, C4<0>, C4<0>, C4<0>;
+L_0x5bd633430e20 .functor BUFZ 1, v0x5bd6333f8f90_0, C4<0>, C4<0>, C4<0>;
+L_0x5bd633430fc0 .functor BUFZ 1, v0x5bd6333f9750_0, C4<0>, C4<0>, C4<0>;
+L_0x5bd633431090 .functor BUFZ 1, v0x5bd6333f91f0_0, C4<0>, C4<0>, C4<0>;
+L_0x5bd6334312e0 .functor BUFZ 1, v0x5bd6333f92b0_0, C4<0>, C4<0>, C4<0>;
+L_0x5bd633431170 .functor BUFZ 1, v0x5bd6333f94f0_0, C4<0>, C4<0>, C4<0>;
+L_0x5bd6334313f0 .functor BUFZ 12, v0x5bd6333f9050_0, C4<000000000000>, C4<000000000000>, C4<000000000000>;
+v0x5bd6333f6b30_0 .net "D_BP_taken", 0 0, L_0x5bd6333bd4d0;  alias, 1 drivers
+v0x5bd6333f6c10_0 .net "D_BP_target_pc", 11 0, L_0x5bd6332c2150;  alias, 1 drivers
+v0x5bd6333f6cf0_0 .net "D_a", 31 0, L_0x5bd63342fe40;  alias, 1 drivers
+v0x5bd6333f6de0_0 .net "D_a2", 31 0, L_0x5bd63342ea90;  alias, 1 drivers
+v0x5bd6333f6ec0_0 .net "D_alu_op", 3 0, L_0x5bd63342bf60;  alias, 1 drivers
+v0x5bd6333f6ff0_0 .net "D_b", 31 0, L_0x5bd6334307e0;  alias, 1 drivers
+v0x5bd6333f70d0_0 .net "D_b2", 31 0, L_0x5bd63342fb20;  alias, 1 drivers
+v0x5bd6333f71b0_0 .net "D_brn", 0 0, L_0x5bd633428e60;  alias, 1 drivers
+v0x5bd6333f7270_0 .net "D_byt", 0 0, L_0x5bd6334285c0;  alias, 1 drivers
+v0x5bd6333f7330_0 .net "D_jmp", 0 0, L_0x5bd6334287c0;  alias, 1 drivers
+v0x5bd6333f73f0_0 .net "D_ld", 0 0, L_0x5bd6334281f0;  alias, 1 drivers
+v0x5bd6333f74b0_0 .net "D_link_addr", 31 0, L_0x5bd6332db570;  alias, 1 drivers
+o0x7b2201da1ae8 .functor BUFZ 1, C4<z>; HiZ drive
+v0x5bd6333f7590_0 .net "D_link_we", 0 0, o0x7b2201da1ae8;  0 drivers
+v0x5bd6333f7650_0 .net "D_mul", 0 0, L_0x5bd6334288c0;  alias, 1 drivers
+v0x5bd6333f7710_0 .net "D_rd", 4 0, L_0x5bd633427450;  alias, 1 drivers
+v0x5bd6333f77d0_0 .net "D_str", 0 0, L_0x5bd633428440;  alias, 1 drivers
+v0x5bd6333f7870_0 .net "D_we", 0 0, L_0x5bd633428da0;  alias, 1 drivers
+v0x5bd6333f7930_0 .net "EX_BP_taken", 0 0, L_0x5bd633430e20;  alias, 1 drivers
+v0x5bd6333f7a00_0 .net "EX_BP_target_pc", 11 0, L_0x5bd6334313f0;  alias, 1 drivers
+v0x5bd6333f7ad0_0 .net "EX_a", 31 0, v0x5bd6333f8c10_0;  alias, 1 drivers
+v0x5bd6333f7ba0_0 .net "EX_a2", 31 0, L_0x5bd633430a90;  alias, 1 drivers
+v0x5bd6333f7c70_0 .net "EX_alu_op", 3 0, L_0x5bd633430c70;  alias, 1 drivers
+v0x5bd6333f7d40_0 .net "EX_b", 31 0, L_0x5bd633430b00;  alias, 1 drivers
+v0x5bd6333f7e10_0 .net "EX_b2", 31 0, L_0x5bd633430b70;  alias, 1 drivers
+v0x5bd6333f7ee0_0 .net "EX_brn", 0 0, L_0x5bd633430ce0;  alias, 1 drivers
+v0x5bd6333f7f80_0 .net "EX_byt", 0 0, L_0x5bd633431090;  alias, 1 drivers
+v0x5bd6333f8020_0 .net "EX_jmp", 0 0, L_0x5bd6334312e0;  1 drivers
+v0x5bd6333f80e0_0 .net "EX_ld", 0 0, v0x5bd6333f9370_0;  alias, 1 drivers
+v0x5bd6333f8180_0 .net "EX_link_addr", 31 0, L_0x5bd633431350;  alias, 1 drivers
+v0x5bd6333f8240_0 .net "EX_link_we", 0 0, L_0x5bd633431170;  alias, 1 drivers
+v0x5bd6333f8300_0 .net "EX_mul", 0 0, v0x5bd6333f95b0_0;  alias, 1 drivers
+v0x5bd6333f83d0_0 .net "EX_rd", 4 0, v0x5bd6333f9670_0;  alias, 1 drivers
+v0x5bd6333f84a0_0 .net "EX_str", 0 0, L_0x5bd633430fc0;  alias, 1 drivers
+v0x5bd6333f8750_0 .net "EX_taken", 0 0, v0x5bd6333f3c00_0;  alias, 1 drivers
+v0x5bd6333f8820_0 .net "EX_we", 0 0, v0x5bd6333f9810_0;  alias, 1 drivers
+v0x5bd6333f88f0_0 .net "MEM_stall", 0 0, v0x5bd6333fb100_0;  alias, 1 drivers
+L_0x7b2201d57be8 .functor BUFT 1, C4<0000000000000000000000000000000>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333f89c0_0 .net *"_ivl_33", 30 0, L_0x7b2201d57be8;  1 drivers
+v0x5bd6333f8a60_0 .net "clk", 0 0, v0x5bd633414f90_0;  alias, 1 drivers
+v0x5bd6333f8b50_0 .var "ex_a2_r", 31 0;
+v0x5bd6333f8c10_0 .var "ex_a_r", 31 0;
+v0x5bd6333f8cf0_0 .var "ex_alu_op_r", 3 0;
+v0x5bd6333f8dd0_0 .var "ex_b2_r", 31 0;
+v0x5bd6333f8eb0_0 .var "ex_b_r", 31 0;
+v0x5bd6333f8f90_0 .var "ex_bp_taken_r", 0 0;
+v0x5bd6333f9050_0 .var "ex_bp_target_pc_r", 11 0;
+v0x5bd6333f9130_0 .var "ex_brn_r", 0 0;
+v0x5bd6333f91f0_0 .var "ex_byt_r", 0 0;
+v0x5bd6333f92b0_0 .var "ex_jmp_r", 0 0;
+v0x5bd6333f9370_0 .var "ex_ld_r", 0 0;
+v0x5bd6333f9430_0 .var "ex_link_addr_r", 0 0;
+v0x5bd6333f94f0_0 .var "ex_link_we_r", 0 0;
+v0x5bd6333f95b0_0 .var "ex_mul_r", 0 0;
+v0x5bd6333f9670_0 .var "ex_rd_r", 4 0;
+v0x5bd6333f9750_0 .var "ex_str_r", 0 0;
+v0x5bd6333f9810_0 .var "ex_we_r", 0 0;
+v0x5bd6333f98d0_0 .net "rst", 0 0, v0x5bd633415210_0;  alias, 1 drivers
+v0x5bd6333f99c0_0 .net "stall_D", 0 0, L_0x5bd63342d130;  alias, 1 drivers
+L_0x5bd633431350 .concat [ 1 31 0 0], v0x5bd6333f9430_0, L_0x7b2201d57be8;
+S_0x5bd6333fa060 .scope module, "u_dcache" "dcache" 3 436, 8 1 0, S_0x5bd6333bf650;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
  .timescale -9 -12;
     .port_info 0 /INPUT 1 "clk";
     .port_info 1 /INPUT 1 "rst";
@@ -496,6 +950,7 @@ S_0x6522f90160c0 .scope module, "u_dcache" "dcache" 3 412, 8 1 0, S_0x6522f8fda1
     .port_info 13 /OUTPUT 1 "Dc_wb_we";
     .port_info 14 /OUTPUT 10 "Dc_wb_addr";
     .port_info 15 /OUTPUT 128 "Dc_wb_wline";
+<<<<<<< HEAD
 P_0x6522f90162f0 .param/l "XLEN" 0 8 2, +C4<00000000000000000000000000100000>;
 L_0x6522f904c170 .functor OR 1, v0x6522f901f9d0_0, v0x6522f901fb70_0, C4<0>, C4<0>;
 v0x6522f90166a0_0 .var "Dc_mem_addr", 9 0;
@@ -569,6 +1024,81 @@ L_0x6522f904be90 .concat [ 11 1 0 0], L_0x6522f904bdc0, L_0x71f3318cec78;
 L_0x6522f904bfb0 .part L_0x6522f904be90, 2, 10;
 L_0x6522f904c0a0 .part L_0x6522f904be90, 0, 2;
 S_0x6522f90185b0 .scope module, "u_decode" "decode" 3 127, 9 1 0, S_0x6522f8fda1c0;
+=======
+P_0x5bd6333fa290 .param/l "XLEN" 0 8 2, +C4<00000000000000000000000000100000>;
+L_0x5bd633432ef0 .functor OR 1, v0x5bd633404500_0, v0x5bd633404840_0, C4<0>, C4<0>;
+v0x5bd6333fa640_0 .var "Dc_mem_addr", 9 0;
+v0x5bd6333fa740_0 .var "Dc_mem_req", 0 0;
+v0x5bd6333fa800_0 .var "Dc_wb_addr", 9 0;
+v0x5bd6333fa8c0_0 .var "Dc_wb_we", 0 0;
+v0x5bd6333fa980_0 .var "Dc_wb_wline", 127 0;
+v0x5bd6333faab0_0 .net "MEM_alu_out", 31 0, v0x5bd633404280_0;  alias, 1 drivers
+v0x5bd6333fab90_0 .net "MEM_b2", 31 0, L_0x5bd6334325d0;  alias, 1 drivers
+v0x5bd6333fac70_0 .net "MEM_byt", 0 0, L_0x5bd633432910;  alias, 1 drivers
+v0x5bd6333fad30_0 .net "MEM_data_line", 127 0, v0x5bd63340f8a0_0;  alias, 1 drivers
+v0x5bd6333faea0_0 .var "MEM_data_mem", 31 0;
+v0x5bd6333faf80_0 .net "MEM_ld", 0 0, v0x5bd633404500_0;  alias, 1 drivers
+v0x5bd6333fb040_0 .net "MEM_mem_valid", 0 0, v0x5bd63340f970_0;  alias, 1 drivers
+v0x5bd6333fb100_0 .var "MEM_stall", 0 0;
+v0x5bd6333fb1a0_0 .net "MEM_str", 0 0, v0x5bd633404840_0;  alias, 1 drivers
+v0x5bd6333fb260_0 .net *"_ivl_1", 10 0, L_0x5bd633432b40;  1 drivers
+L_0x7b2201d57d98 .functor BUFT 1, C4<0>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333fb340_0 .net *"_ivl_5", 0 0, L_0x7b2201d57d98;  1 drivers
+v0x5bd6333fb420_0 .net "addr_line", 9 0, L_0x5bd633432d30;  1 drivers
+v0x5bd6333fb500_0 .net "addr_off", 1 0, L_0x5bd633432e20;  1 drivers
+v0x5bd6333fb5e0_0 .net "addr_word", 11 0, L_0x5bd633432c10;  1 drivers
+v0x5bd6333fb6c0_0 .net "clk", 0 0, v0x5bd633414f90_0;  alias, 1 drivers
+v0x5bd6333fb760 .array "data", 15 0, 31 0;
+v0x5bd6333fba20 .array "dirty", 3 0, 0 0;
+v0x5bd6333fbac0_0 .var "fifo_ptr", 1 0;
+v0x5bd6333fbba0_0 .var "hit", 0 0;
+v0x5bd6333fbc60_0 .var "hit_idx", 1 0;
+v0x5bd6333fbd40_0 .var/i "i", 31 0;
+v0x5bd6333fbe20_0 .var "miss_line", 9 0;
+v0x5bd6333fbf00_0 .net "op_active", 0 0, L_0x5bd633432ef0;  1 drivers
+v0x5bd6333fbfc0_0 .net "rst", 0 0, v0x5bd633415210_0;  alias, 1 drivers
+v0x5bd6333fc060 .array "tag", 3 0, 3 0;
+v0x5bd6333fc1a0 .array "valid", 3 0, 0 0;
+E_0x5bd6333fa4c0/0 .event anyedge, v0x5bd6333faab0_0, v0x5bd6333fb420_0, v0x5bd6333fbf00_0, v0x5bd6333fb040_0;
+v0x5bd6333fc1a0_0 .array/port v0x5bd6333fc1a0, 0;
+v0x5bd6333fc1a0_1 .array/port v0x5bd6333fc1a0, 1;
+v0x5bd6333fc1a0_2 .array/port v0x5bd6333fc1a0, 2;
+v0x5bd6333fc1a0_3 .array/port v0x5bd6333fc1a0, 3;
+E_0x5bd6333fa4c0/1 .event anyedge, v0x5bd6333fc1a0_0, v0x5bd6333fc1a0_1, v0x5bd6333fc1a0_2, v0x5bd6333fc1a0_3;
+v0x5bd6333fc060_0 .array/port v0x5bd6333fc060, 0;
+v0x5bd6333fc060_1 .array/port v0x5bd6333fc060, 1;
+v0x5bd6333fc060_2 .array/port v0x5bd6333fc060, 2;
+v0x5bd6333fc060_3 .array/port v0x5bd6333fc060, 3;
+E_0x5bd6333fa4c0/2 .event anyedge, v0x5bd6333fc060_0, v0x5bd6333fc060_1, v0x5bd6333fc060_2, v0x5bd6333fc060_3;
+E_0x5bd6333fa4c0/3 .event anyedge, v0x5bd6333faf80_0, v0x5bd6333fbba0_0, v0x5bd6333fac70_0, v0x5bd6333fbc60_0;
+v0x5bd6333fb760_0 .array/port v0x5bd6333fb760, 0;
+v0x5bd6333fb760_1 .array/port v0x5bd6333fb760, 1;
+v0x5bd6333fb760_2 .array/port v0x5bd6333fb760, 2;
+E_0x5bd6333fa4c0/4 .event anyedge, v0x5bd6333fb500_0, v0x5bd6333fb760_0, v0x5bd6333fb760_1, v0x5bd6333fb760_2;
+v0x5bd6333fb760_3 .array/port v0x5bd6333fb760, 3;
+v0x5bd6333fb760_4 .array/port v0x5bd6333fb760, 4;
+v0x5bd6333fb760_5 .array/port v0x5bd6333fb760, 5;
+v0x5bd6333fb760_6 .array/port v0x5bd6333fb760, 6;
+E_0x5bd6333fa4c0/5 .event anyedge, v0x5bd6333fb760_3, v0x5bd6333fb760_4, v0x5bd6333fb760_5, v0x5bd6333fb760_6;
+v0x5bd6333fb760_7 .array/port v0x5bd6333fb760, 7;
+v0x5bd6333fb760_8 .array/port v0x5bd6333fb760, 8;
+v0x5bd6333fb760_9 .array/port v0x5bd6333fb760, 9;
+v0x5bd6333fb760_10 .array/port v0x5bd6333fb760, 10;
+E_0x5bd6333fa4c0/6 .event anyedge, v0x5bd6333fb760_7, v0x5bd6333fb760_8, v0x5bd6333fb760_9, v0x5bd6333fb760_10;
+v0x5bd6333fb760_11 .array/port v0x5bd6333fb760, 11;
+v0x5bd6333fb760_12 .array/port v0x5bd6333fb760, 12;
+v0x5bd6333fb760_13 .array/port v0x5bd6333fb760, 13;
+v0x5bd6333fb760_14 .array/port v0x5bd6333fb760, 14;
+E_0x5bd6333fa4c0/7 .event anyedge, v0x5bd6333fb760_11, v0x5bd6333fb760_12, v0x5bd6333fb760_13, v0x5bd6333fb760_14;
+v0x5bd6333fb760_15 .array/port v0x5bd6333fb760, 15;
+E_0x5bd6333fa4c0/8 .event anyedge, v0x5bd6333fb760_15, v0x5bd6333fb1a0_0;
+E_0x5bd6333fa4c0 .event/or E_0x5bd6333fa4c0/0, E_0x5bd6333fa4c0/1, E_0x5bd6333fa4c0/2, E_0x5bd6333fa4c0/3, E_0x5bd6333fa4c0/4, E_0x5bd6333fa4c0/5, E_0x5bd6333fa4c0/6, E_0x5bd6333fa4c0/7, E_0x5bd6333fa4c0/8;
+L_0x5bd633432b40 .part v0x5bd633404280_0, 0, 11;
+L_0x5bd633432c10 .concat [ 11 1 0 0], L_0x5bd633432b40, L_0x7b2201d57d98;
+L_0x5bd633432d30 .part L_0x5bd633432c10, 2, 10;
+L_0x5bd633432e20 .part L_0x5bd633432c10, 0, 2;
+S_0x5bd6333fc550 .scope module, "u_decode" "decode" 3 137, 9 1 0, S_0x5bd6333bf650;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
  .timescale -9 -12;
     .port_info 0 /INPUT 1 "clk";
     .port_info 1 /INPUT 32 "D_inst";
@@ -586,6 +1116,7 @@ S_0x6522f90185b0 .scope module, "u_decode" "decode" 3 127, 9 1 0, S_0x6522f8fda1
     .port_info 13 /OUTPUT 1 "D_addi";
     .port_info 14 /OUTPUT 1 "D_mul";
     .port_info 15 /OUTPUT 1 "D_jmp";
+<<<<<<< HEAD
 P_0x6522f9018790 .param/l "OPC_ADD" 1 9 33, C4<000000>;
 P_0x6522f90187d0 .param/l "OPC_ADDI" 1 9 41, C4<001000>;
 P_0x6522f9018810 .param/l "OPC_AND" 1 9 35, C4<000010>;
@@ -775,6 +1306,215 @@ L_0x6522f9044e90 .functor MUXZ 4, L_0x6522f9044d00, L_0x71f3318ce4e0, L_0x6522f9
 L_0x6522f9045160 .functor MUXZ 4, L_0x6522f9044e90, L_0x71f3318ce450, L_0x6522f90427e0, C4<>;
 L_0x6522f90452f0 .functor MUXZ 4, L_0x6522f9045160, L_0x71f3318ce3c0, L_0x6522f90426f0, C4<>;
 S_0x6522f901e2e0 .scope module, "u_ex_to_mem_reg" "ex_to_mem_reg" 3 364, 10 1 0, S_0x6522f8fda1c0;
+=======
+    .port_info 16 /OUTPUT 1 "D_link_we";
+P_0x5bd6333fc730 .param/l "OPC_ADD" 1 9 34, C4<000000>;
+P_0x5bd6333fc770 .param/l "OPC_ADDI" 1 9 42, C4<001000>;
+P_0x5bd6333fc7b0 .param/l "OPC_AND" 1 9 36, C4<000010>;
+P_0x5bd6333fc7f0 .param/l "OPC_CTRL" 1 9 56, C4<001101>;
+P_0x5bd6333fc830 .param/l "OPC_GT" 1 9 49, C4<001010>;
+P_0x5bd6333fc870 .param/l "OPC_LOAD" 1 9 52, C4<01011>;
+P_0x5bd6333fc8b0 .param/l "OPC_LT" 1 9 48, C4<001001>;
+P_0x5bd6333fc8f0 .param/l "OPC_MUL" 1 9 58, C4<001110>;
+P_0x5bd6333fc930 .param/l "OPC_NOT" 1 9 39, C4<000101>;
+P_0x5bd6333fc970 .param/l "OPC_OR" 1 9 37, C4<000011>;
+P_0x5bd6333fc9b0 .param/l "OPC_SHL" 1 9 40, C4<000110>;
+P_0x5bd6333fc9f0 .param/l "OPC_SHR" 1 9 41, C4<000111>;
+P_0x5bd6333fca30 .param/l "OPC_STORE" 1 9 53, C4<01100>;
+P_0x5bd6333fca70 .param/l "OPC_SUB" 1 9 35, C4<000001>;
+P_0x5bd6333fcab0 .param/l "OPC_XOR" 1 9 38, C4<000100>;
+P_0x5bd6333fcaf0 .param/l "RD_BEQ" 1 9 61, C4<00001>;
+P_0x5bd6333fcb30 .param/l "RD_BGT" 1 9 63, C4<00011>;
+P_0x5bd6333fcb70 .param/l "RD_BLT" 1 9 62, C4<00010>;
+P_0x5bd6333fcbb0 .param/l "RD_JALX" 1 9 64, C4<00100>;
+P_0x5bd6333fcbf0 .param/l "RD_JMP" 1 9 60, C4<00000>;
+P_0x5bd6333fcc30 .param/l "XLEN" 0 9 1, +C4<00000000000000000000000000100000>;
+L_0x5bd6334277a0 .functor AND 1, L_0x5bd633427620, L_0x5bd633427700, C4<1>, C4<1>;
+L_0x5bd6334279a0 .functor AND 1, L_0x5bd633427620, L_0x5bd633427860, C4<1>, C4<1>;
+L_0x5bd633427b50 .functor AND 1, L_0x5bd633427620, L_0x5bd633427a60, C4<1>, C4<1>;
+L_0x5bd633427e20 .functor AND 1, L_0x5bd633427620, L_0x5bd633427bc0, C4<1>, C4<1>;
+L_0x5bd633427f60 .functor AND 1, L_0x5bd633427620, L_0x5bd633427ec0, C4<1>, C4<1>;
+L_0x5bd633428150 .functor BUFZ 1, L_0x5bd6334279a0, C4<0>, C4<0>, C4<0>;
+L_0x5bd6334287c0 .functor BUFZ 1, L_0x5bd6334277a0, C4<0>, C4<0>, C4<0>;
+L_0x5bd633428c90 .functor OR 1, L_0x5bd6334289f0, L_0x5bd6334281f0, C4<0>, C4<0>;
+L_0x5bd633428da0 .functor OR 1, L_0x5bd633428c90, L_0x5bd6334288c0, C4<0>, C4<0>;
+L_0x5bd633428e60 .functor BUFZ 1, L_0x5bd633427620, C4<0>, C4<0>, C4<0>;
+L_0x5bd633429f10 .functor OR 1, L_0x5bd633429d00, L_0x5bd633427e20, C4<0>, C4<0>;
+L_0x5bd63342a350 .functor OR 1, L_0x5bd63342a230, L_0x5bd633427f60, C4<0>, C4<0>;
+L_0x5bd63342a4d0 .functor OR 1, L_0x5bd6334277a0, L_0x5bd6334279a0, C4<0>, C4<0>;
+L_0x5bd63342a570 .functor OR 1, L_0x5bd63342a4d0, L_0x5bd633428f30, C4<0>, C4<0>;
+v0x5bd6333fd780_0 .net "D_addi", 0 0, L_0x5bd633428f30;  alias, 1 drivers
+v0x5bd6333fd840_0 .net "D_alu_op", 3 0, L_0x5bd63342bf60;  alias, 1 drivers
+v0x5bd6333fd930_0 .net "D_brn", 0 0, L_0x5bd633428e60;  alias, 1 drivers
+v0x5bd6333fda30_0 .net "D_byt", 0 0, L_0x5bd6334285c0;  alias, 1 drivers
+v0x5bd6333fdb00_0 .net "D_imd", 10 0, L_0x5bd633427580;  alias, 1 drivers
+v0x5bd6333fdbf0_0 .net "D_inst", 31 0, v0x5bd633405f20_0;  alias, 1 drivers
+v0x5bd6333fdc90_0 .net "D_jmp", 0 0, L_0x5bd6334287c0;  alias, 1 drivers
+v0x5bd6333fdd30_0 .net "D_ld", 0 0, L_0x5bd6334281f0;  alias, 1 drivers
+v0x5bd6333fde00_0 .net "D_link_we", 0 0, L_0x5bd633428150;  alias, 1 drivers
+v0x5bd6333fdf30_0 .net "D_mul", 0 0, L_0x5bd6334288c0;  alias, 1 drivers
+v0x5bd6333fe000_0 .net "D_opc", 5 0, L_0x5bd6334270c0;  alias, 1 drivers
+v0x5bd6333fe0a0_0 .net "D_ra", 4 0, L_0x5bd6334271f0;  alias, 1 drivers
+v0x5bd6333fe190_0 .net "D_rb", 4 0, L_0x5bd633427320;  alias, 1 drivers
+v0x5bd6333fe260_0 .net "D_rd", 4 0, L_0x5bd633427450;  alias, 1 drivers
+v0x5bd6333fe300_0 .net "D_str", 0 0, L_0x5bd633428440;  alias, 1 drivers
+v0x5bd6333fe3a0_0 .net "D_we", 0 0, L_0x5bd633428da0;  alias, 1 drivers
+L_0x7b2201d570f0 .functor BUFT 1, C4<001101>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333fe470_0 .net/2u *"_ivl_10", 5 0, L_0x7b2201d570f0;  1 drivers
+v0x5bd6333fe620_0 .net *"_ivl_100", 0 0, L_0x5bd633429490;  1 drivers
+L_0x7b2201d57600 .functor BUFT 1, C4<0011>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333fe6e0_0 .net/2u *"_ivl_102", 3 0, L_0x7b2201d57600;  1 drivers
+L_0x7b2201d57648 .functor BUFT 1, C4<000100>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333fe7c0_0 .net/2u *"_ivl_104", 5 0, L_0x7b2201d57648;  1 drivers
+v0x5bd6333fe8a0_0 .net *"_ivl_106", 0 0, L_0x5bd6334295e0;  1 drivers
+L_0x7b2201d57690 .functor BUFT 1, C4<0100>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333fe960_0 .net/2u *"_ivl_108", 3 0, L_0x7b2201d57690;  1 drivers
+L_0x7b2201d576d8 .functor BUFT 1, C4<000101>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333fea40_0 .net/2u *"_ivl_110", 5 0, L_0x7b2201d576d8;  1 drivers
+v0x5bd6333feb20_0 .net *"_ivl_112", 0 0, L_0x5bd633429800;  1 drivers
+L_0x7b2201d57720 .functor BUFT 1, C4<0101>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333febe0_0 .net/2u *"_ivl_114", 3 0, L_0x7b2201d57720;  1 drivers
+L_0x7b2201d57768 .functor BUFT 1, C4<000110>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333fecc0_0 .net/2u *"_ivl_116", 5 0, L_0x7b2201d57768;  1 drivers
+v0x5bd6333feda0_0 .net *"_ivl_118", 0 0, L_0x5bd633429950;  1 drivers
+L_0x7b2201d577b0 .functor BUFT 1, C4<0110>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333fee60_0 .net/2u *"_ivl_120", 3 0, L_0x7b2201d577b0;  1 drivers
+L_0x7b2201d577f8 .functor BUFT 1, C4<000111>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333fef40_0 .net/2u *"_ivl_122", 5 0, L_0x7b2201d577f8;  1 drivers
+v0x5bd6333ff020_0 .net *"_ivl_124", 0 0, L_0x5bd633429b80;  1 drivers
+L_0x7b2201d57840 .functor BUFT 1, C4<0111>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333ff0e0_0 .net/2u *"_ivl_126", 3 0, L_0x7b2201d57840;  1 drivers
+L_0x7b2201d57888 .functor BUFT 1, C4<1000>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333ff1c0_0 .net/2u *"_ivl_128", 3 0, L_0x7b2201d57888;  1 drivers
+L_0x7b2201d578d0 .functor BUFT 1, C4<001001>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333ff2a0_0 .net/2u *"_ivl_130", 5 0, L_0x7b2201d578d0;  1 drivers
+v0x5bd6333ff590_0 .net *"_ivl_132", 0 0, L_0x5bd633429d00;  1 drivers
+v0x5bd6333ff650_0 .net *"_ivl_135", 0 0, L_0x5bd633429f10;  1 drivers
+L_0x7b2201d57918 .functor BUFT 1, C4<1001>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333ff710_0 .net/2u *"_ivl_136", 3 0, L_0x7b2201d57918;  1 drivers
+L_0x7b2201d57960 .functor BUFT 1, C4<001010>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333ff7f0_0 .net/2u *"_ivl_138", 5 0, L_0x7b2201d57960;  1 drivers
+L_0x7b2201d57138 .functor BUFT 1, C4<00000>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333ff8d0_0 .net/2u *"_ivl_14", 4 0, L_0x7b2201d57138;  1 drivers
+v0x5bd6333ff9b0_0 .net *"_ivl_140", 0 0, L_0x5bd63342a230;  1 drivers
+v0x5bd6333ffa70_0 .net *"_ivl_143", 0 0, L_0x5bd63342a350;  1 drivers
+L_0x7b2201d579a8 .functor BUFT 1, C4<1010>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333ffb30_0 .net/2u *"_ivl_144", 3 0, L_0x7b2201d579a8;  1 drivers
+L_0x7b2201d579f0 .functor BUFT 1, C4<1011>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333ffc10_0 .net/2u *"_ivl_146", 3 0, L_0x7b2201d579f0;  1 drivers
+v0x5bd6333ffcf0_0 .net *"_ivl_149", 0 0, L_0x5bd63342a4d0;  1 drivers
+v0x5bd6333ffdb0_0 .net *"_ivl_151", 0 0, L_0x5bd63342a570;  1 drivers
+L_0x7b2201d57a38 .functor BUFT 1, C4<0000>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333ffe70_0 .net/2u *"_ivl_152", 3 0, L_0x7b2201d57a38;  1 drivers
+L_0x7b2201d57a80 .functor BUFT 1, C4<0000>, C4<0>, C4<0>, C4<0>;
+v0x5bd6333fff50_0 .net/2u *"_ivl_154", 3 0, L_0x7b2201d57a80;  1 drivers
+v0x5bd633400030_0 .net *"_ivl_156", 3 0, L_0x5bd63342a710;  1 drivers
+v0x5bd633400110_0 .net *"_ivl_158", 3 0, L_0x5bd63342a980;  1 drivers
+v0x5bd6334001f0_0 .net *"_ivl_16", 0 0, L_0x5bd633427700;  1 drivers
+v0x5bd6334002b0_0 .net *"_ivl_160", 3 0, L_0x5bd63342aac0;  1 drivers
+v0x5bd633400390_0 .net *"_ivl_162", 3 0, L_0x5bd63342ad60;  1 drivers
+v0x5bd633400470_0 .net *"_ivl_164", 3 0, L_0x5bd63342aef0;  1 drivers
+v0x5bd633400550_0 .net *"_ivl_166", 3 0, L_0x5bd63342b1a0;  1 drivers
+v0x5bd633400630_0 .net *"_ivl_168", 3 0, L_0x5bd63342b330;  1 drivers
+v0x5bd633400710_0 .net *"_ivl_170", 3 0, L_0x5bd63342b500;  1 drivers
+v0x5bd6334007f0_0 .net *"_ivl_172", 3 0, L_0x5bd63342b690;  1 drivers
+v0x5bd6334008d0_0 .net *"_ivl_174", 3 0, L_0x5bd63342b960;  1 drivers
+v0x5bd6334009b0_0 .net *"_ivl_176", 3 0, L_0x5bd63342baf0;  1 drivers
+v0x5bd633400a90_0 .net *"_ivl_178", 3 0, L_0x5bd63342bdd0;  1 drivers
+L_0x7b2201d57180 .functor BUFT 1, C4<00100>, C4<0>, C4<0>, C4<0>;
+v0x5bd633400b70_0 .net/2u *"_ivl_20", 4 0, L_0x7b2201d57180;  1 drivers
+v0x5bd633400c50_0 .net *"_ivl_22", 0 0, L_0x5bd633427860;  1 drivers
+L_0x7b2201d571c8 .functor BUFT 1, C4<00001>, C4<0>, C4<0>, C4<0>;
+v0x5bd633400d10_0 .net/2u *"_ivl_26", 4 0, L_0x7b2201d571c8;  1 drivers
+v0x5bd633400df0_0 .net *"_ivl_28", 0 0, L_0x5bd633427a60;  1 drivers
+L_0x7b2201d57210 .functor BUFT 1, C4<00010>, C4<0>, C4<0>, C4<0>;
+v0x5bd633400eb0_0 .net/2u *"_ivl_32", 4 0, L_0x7b2201d57210;  1 drivers
+v0x5bd633400f90_0 .net *"_ivl_34", 0 0, L_0x5bd633427bc0;  1 drivers
+L_0x7b2201d57258 .functor BUFT 1, C4<00011>, C4<0>, C4<0>, C4<0>;
+v0x5bd633401050_0 .net/2u *"_ivl_38", 4 0, L_0x7b2201d57258;  1 drivers
+v0x5bd633401130_0 .net *"_ivl_40", 0 0, L_0x5bd633427ec0;  1 drivers
+v0x5bd6334011f0_0 .net *"_ivl_45", 4 0, L_0x5bd633428020;  1 drivers
+L_0x7b2201d572a0 .functor BUFT 1, C4<01011>, C4<0>, C4<0>, C4<0>;
+v0x5bd6334012d0_0 .net/2u *"_ivl_46", 4 0, L_0x7b2201d572a0;  1 drivers
+v0x5bd6334013b0_0 .net *"_ivl_51", 4 0, L_0x5bd633428320;  1 drivers
+L_0x7b2201d572e8 .functor BUFT 1, C4<01100>, C4<0>, C4<0>, C4<0>;
+v0x5bd633401490_0 .net/2u *"_ivl_52", 4 0, L_0x7b2201d572e8;  1 drivers
+L_0x7b2201d57330 .functor BUFT 1, C4<001110>, C4<0>, C4<0>, C4<0>;
+v0x5bd633401570_0 .net/2u *"_ivl_62", 5 0, L_0x7b2201d57330;  1 drivers
+L_0x7b2201d57378 .functor BUFT 1, C4<001010>, C4<0>, C4<0>, C4<0>;
+v0x5bd633401650_0 .net/2u *"_ivl_66", 5 0, L_0x7b2201d57378;  1 drivers
+v0x5bd633401730_0 .net *"_ivl_68", 0 0, L_0x5bd6334289f0;  1 drivers
+v0x5bd6334017f0_0 .net *"_ivl_71", 0 0, L_0x5bd633428c90;  1 drivers
+L_0x7b2201d573c0 .functor BUFT 1, C4<001000>, C4<0>, C4<0>, C4<0>;
+v0x5bd6334018b0_0 .net/2u *"_ivl_76", 5 0, L_0x7b2201d573c0;  1 drivers
+L_0x7b2201d57408 .functor BUFT 1, C4<000000>, C4<0>, C4<0>, C4<0>;
+v0x5bd633401990_0 .net/2u *"_ivl_80", 5 0, L_0x7b2201d57408;  1 drivers
+v0x5bd633401a70_0 .net *"_ivl_82", 0 0, L_0x5bd633428fd0;  1 drivers
+L_0x7b2201d57450 .functor BUFT 1, C4<0000>, C4<0>, C4<0>, C4<0>;
+v0x5bd633401b30_0 .net/2u *"_ivl_84", 3 0, L_0x7b2201d57450;  1 drivers
+L_0x7b2201d57498 .functor BUFT 1, C4<000001>, C4<0>, C4<0>, C4<0>;
+v0x5bd633401c10_0 .net/2u *"_ivl_86", 5 0, L_0x7b2201d57498;  1 drivers
+v0x5bd633401cf0_0 .net *"_ivl_88", 0 0, L_0x5bd633428bf0;  1 drivers
+L_0x7b2201d574e0 .functor BUFT 1, C4<0001>, C4<0>, C4<0>, C4<0>;
+v0x5bd633401db0_0 .net/2u *"_ivl_90", 3 0, L_0x7b2201d574e0;  1 drivers
+L_0x7b2201d57528 .functor BUFT 1, C4<000010>, C4<0>, C4<0>, C4<0>;
+v0x5bd633401e90_0 .net/2u *"_ivl_92", 5 0, L_0x7b2201d57528;  1 drivers
+v0x5bd633401f70_0 .net *"_ivl_94", 0 0, L_0x5bd633429280;  1 drivers
+L_0x7b2201d57570 .functor BUFT 1, C4<0010>, C4<0>, C4<0>, C4<0>;
+v0x5bd633402030_0 .net/2u *"_ivl_96", 3 0, L_0x7b2201d57570;  1 drivers
+L_0x7b2201d575b8 .functor BUFT 1, C4<000011>, C4<0>, C4<0>, C4<0>;
+v0x5bd633402110_0 .net/2u *"_ivl_98", 5 0, L_0x7b2201d575b8;  1 drivers
+v0x5bd6334021f0_0 .net "clk", 0 0, v0x5bd633414f90_0;  alias, 1 drivers
+v0x5bd633402290_0 .net "is_beq", 0 0, L_0x5bd633427b50;  1 drivers
+v0x5bd633402350_0 .net "is_bgt", 0 0, L_0x5bd633427f60;  1 drivers
+v0x5bd633402410_0 .net "is_blt", 0 0, L_0x5bd633427e20;  1 drivers
+v0x5bd6334024d0_0 .net "is_ctrl", 0 0, L_0x5bd633427620;  1 drivers
+v0x5bd633402590_0 .net "is_jalx", 0 0, L_0x5bd6334279a0;  1 drivers
+v0x5bd633402650_0 .net "is_jmp", 0 0, L_0x5bd6334277a0;  1 drivers
+L_0x5bd6334270c0 .part v0x5bd633405f20_0, 26, 6;
+L_0x5bd6334271f0 .part v0x5bd633405f20_0, 21, 5;
+L_0x5bd633427320 .part v0x5bd633405f20_0, 16, 5;
+L_0x5bd633427450 .part v0x5bd633405f20_0, 11, 5;
+L_0x5bd633427580 .part v0x5bd633405f20_0, 0, 11;
+L_0x5bd633427620 .cmp/eq 6, L_0x5bd6334270c0, L_0x7b2201d570f0;
+L_0x5bd633427700 .cmp/eq 5, L_0x5bd633427450, L_0x7b2201d57138;
+L_0x5bd633427860 .cmp/eq 5, L_0x5bd633427450, L_0x7b2201d57180;
+L_0x5bd633427a60 .cmp/eq 5, L_0x5bd633427450, L_0x7b2201d571c8;
+L_0x5bd633427bc0 .cmp/eq 5, L_0x5bd633427450, L_0x7b2201d57210;
+L_0x5bd633427ec0 .cmp/eq 5, L_0x5bd633427450, L_0x7b2201d57258;
+L_0x5bd633428020 .part L_0x5bd6334270c0, 0, 5;
+L_0x5bd6334281f0 .cmp/eq 5, L_0x5bd633428020, L_0x7b2201d572a0;
+L_0x5bd633428320 .part L_0x5bd6334270c0, 0, 5;
+L_0x5bd633428440 .cmp/eq 5, L_0x5bd633428320, L_0x7b2201d572e8;
+L_0x5bd6334285c0 .part L_0x5bd6334270c0, 5, 1;
+L_0x5bd6334288c0 .cmp/eq 6, L_0x5bd6334270c0, L_0x7b2201d57330;
+L_0x5bd6334289f0 .cmp/ge 6, L_0x7b2201d57378, L_0x5bd6334270c0;
+L_0x5bd633428f30 .cmp/eq 6, L_0x5bd6334270c0, L_0x7b2201d573c0;
+L_0x5bd633428fd0 .cmp/eq 6, L_0x5bd6334270c0, L_0x7b2201d57408;
+L_0x5bd633428bf0 .cmp/eq 6, L_0x5bd6334270c0, L_0x7b2201d57498;
+L_0x5bd633429280 .cmp/eq 6, L_0x5bd6334270c0, L_0x7b2201d57528;
+L_0x5bd633429490 .cmp/eq 6, L_0x5bd6334270c0, L_0x7b2201d575b8;
+L_0x5bd6334295e0 .cmp/eq 6, L_0x5bd6334270c0, L_0x7b2201d57648;
+L_0x5bd633429800 .cmp/eq 6, L_0x5bd6334270c0, L_0x7b2201d576d8;
+L_0x5bd633429950 .cmp/eq 6, L_0x5bd6334270c0, L_0x7b2201d57768;
+L_0x5bd633429b80 .cmp/eq 6, L_0x5bd6334270c0, L_0x7b2201d577f8;
+L_0x5bd633429d00 .cmp/eq 6, L_0x5bd6334270c0, L_0x7b2201d578d0;
+L_0x5bd63342a230 .cmp/eq 6, L_0x5bd6334270c0, L_0x7b2201d57960;
+L_0x5bd63342a710 .functor MUXZ 4, L_0x7b2201d57a80, L_0x7b2201d57a38, L_0x5bd63342a570, C4<>;
+L_0x5bd63342a980 .functor MUXZ 4, L_0x5bd63342a710, L_0x7b2201d579f0, L_0x5bd6334288c0, C4<>;
+L_0x5bd63342aac0 .functor MUXZ 4, L_0x5bd63342a980, L_0x7b2201d579a8, L_0x5bd63342a350, C4<>;
+L_0x5bd63342ad60 .functor MUXZ 4, L_0x5bd63342aac0, L_0x7b2201d57918, L_0x5bd633429f10, C4<>;
+L_0x5bd63342aef0 .functor MUXZ 4, L_0x5bd63342ad60, L_0x7b2201d57888, L_0x5bd633427b50, C4<>;
+L_0x5bd63342b1a0 .functor MUXZ 4, L_0x5bd63342aef0, L_0x7b2201d57840, L_0x5bd633429b80, C4<>;
+L_0x5bd63342b330 .functor MUXZ 4, L_0x5bd63342b1a0, L_0x7b2201d577b0, L_0x5bd633429950, C4<>;
+L_0x5bd63342b500 .functor MUXZ 4, L_0x5bd63342b330, L_0x7b2201d57720, L_0x5bd633429800, C4<>;
+L_0x5bd63342b690 .functor MUXZ 4, L_0x5bd63342b500, L_0x7b2201d57690, L_0x5bd6334295e0, C4<>;
+L_0x5bd63342b960 .functor MUXZ 4, L_0x5bd63342b690, L_0x7b2201d57600, L_0x5bd633429490, C4<>;
+L_0x5bd63342baf0 .functor MUXZ 4, L_0x5bd63342b960, L_0x7b2201d57570, L_0x5bd633429280, C4<>;
+L_0x5bd63342bdd0 .functor MUXZ 4, L_0x5bd63342baf0, L_0x7b2201d574e0, L_0x5bd633428bf0, C4<>;
+L_0x5bd63342bf60 .functor MUXZ 4, L_0x5bd63342bdd0, L_0x7b2201d57450, L_0x5bd633428fd0, C4<>;
+S_0x5bd6334029c0 .scope module, "u_ex_to_mem_reg" "ex_to_mem_reg" 3 384, 10 1 0, S_0x5bd6333bf650;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
  .timescale -9 -12;
     .port_info 0 /INPUT 1 "clk";
     .port_info 1 /INPUT 1 "rst";
@@ -788,6 +1528,7 @@ S_0x6522f901e2e0 .scope module, "u_ex_to_mem_reg" "ex_to_mem_reg" 3 364, 10 1 0,
     .port_info 9 /INPUT 1 "EX_str";
     .port_info 10 /INPUT 1 "EX_byt";
     .port_info 11 /INPUT 1 "MEM_stall";
+<<<<<<< HEAD
     .port_info 12 /OUTPUT 32 "MEM_alu_out";
     .port_info 13 /OUTPUT 1 "MEM_taken";
     .port_info 14 /OUTPUT 32 "MEM_b2";
@@ -833,6 +1574,65 @@ v0x6522f901fc30_0 .var "mem_taken_r", 0 0;
 v0x6522f901fcf0_0 .var "mem_we_r", 0 0;
 v0x6522f901fdb0_0 .net "rst", 0 0, v0x6522f902eeb0_0;  alias, 1 drivers
 S_0x6522f90200f0 .scope module, "u_f2d" "f_to_d_reg" 3 91, 11 1 0, S_0x6522f8fda1c0;
+=======
+    .port_info 12 /INPUT 32 "EX_link_addr";
+    .port_info 13 /INPUT 1 "EX_link_we";
+    .port_info 14 /OUTPUT 32 "MEM_alu_out";
+    .port_info 15 /OUTPUT 1 "MEM_taken";
+    .port_info 16 /OUTPUT 32 "MEM_b2";
+    .port_info 17 /OUTPUT 32 "MEM_a2";
+    .port_info 18 /OUTPUT 5 "MEM_rd";
+    .port_info 19 /OUTPUT 1 "MEM_we";
+    .port_info 20 /OUTPUT 1 "MEM_ld";
+    .port_info 21 /OUTPUT 1 "MEM_str";
+    .port_info 22 /OUTPUT 1 "MEM_byt";
+    .port_info 23 /OUTPUT 32 "MEM_link_addr";
+    .port_info 24 /OUTPUT 1 "MEM_link_we";
+P_0x5bd633402b50 .param/l "XLEN" 0 10 2, +C4<00000000000000000000000000100000>;
+L_0x5bd633432560 .functor BUFZ 1, v0x5bd633404900_0, C4<0>, C4<0>, C4<0>;
+L_0x5bd6334325d0 .functor BUFZ 32, v0x5bd633404360_0, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>;
+L_0x5bd633432640 .functor BUFZ 32, v0x5bd6334041e0_0, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>;
+L_0x5bd633432910 .functor BUFZ 1, v0x5bd633404440_0, C4<0>, C4<0>, C4<0>;
+L_0x5bd6334329b0 .functor BUFZ 32, v0x5bd6334045c0_0, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>;
+L_0x5bd633432ad0 .functor BUFZ 1, v0x5bd6334046a0_0, C4<0>, C4<0>, C4<0>;
+v0x5bd633402f50_0 .net "EX_a2", 31 0, L_0x5bd633430a90;  alias, 1 drivers
+v0x5bd633403080_0 .net "EX_alu_out", 31 0, v0x5bd6333f38e0_0;  alias, 1 drivers
+v0x5bd633403190_0 .net "EX_b2", 31 0, L_0x5bd633430b70;  alias, 1 drivers
+v0x5bd633403280_0 .net "EX_byt", 0 0, L_0x5bd633431090;  alias, 1 drivers
+v0x5bd633403320_0 .net "EX_ld", 0 0, v0x5bd6333f9370_0;  alias, 1 drivers
+v0x5bd633403460_0 .net "EX_link_addr", 31 0, L_0x5bd633431350;  alias, 1 drivers
+v0x5bd633403500_0 .net "EX_link_we", 0 0, L_0x5bd633431170;  alias, 1 drivers
+v0x5bd6334035a0_0 .net "EX_rd", 4 0, v0x5bd6333f9670_0;  alias, 1 drivers
+v0x5bd633403690_0 .net "EX_str", 0 0, L_0x5bd633430fc0;  alias, 1 drivers
+v0x5bd633403730_0 .net "EX_taken", 0 0, v0x5bd6333f3c00_0;  alias, 1 drivers
+v0x5bd6334037d0_0 .net "EX_we", 0 0, v0x5bd6333f9810_0;  alias, 1 drivers
+v0x5bd6334038c0_0 .net "MEM_a2", 31 0, L_0x5bd633432640;  alias, 1 drivers
+v0x5bd633403960_0 .net "MEM_alu_out", 31 0, v0x5bd633404280_0;  alias, 1 drivers
+v0x5bd633403a20_0 .net "MEM_b2", 31 0, L_0x5bd6334325d0;  alias, 1 drivers
+v0x5bd633403ac0_0 .net "MEM_byt", 0 0, L_0x5bd633432910;  alias, 1 drivers
+v0x5bd633403b60_0 .net "MEM_ld", 0 0, v0x5bd633404500_0;  alias, 1 drivers
+v0x5bd633403c30_0 .net "MEM_link_addr", 31 0, L_0x5bd6334329b0;  alias, 1 drivers
+v0x5bd633403cd0_0 .net "MEM_link_we", 0 0, L_0x5bd633432ad0;  alias, 1 drivers
+v0x5bd633403d70_0 .net "MEM_rd", 4 0, v0x5bd633404760_0;  alias, 1 drivers
+v0x5bd633403e60_0 .net "MEM_stall", 0 0, v0x5bd6333fb100_0;  alias, 1 drivers
+v0x5bd633403f00_0 .net "MEM_str", 0 0, v0x5bd633404840_0;  alias, 1 drivers
+v0x5bd633403fd0_0 .net "MEM_taken", 0 0, L_0x5bd633432560;  alias, 1 drivers
+v0x5bd633404070_0 .net "MEM_we", 0 0, v0x5bd6334049c0_0;  alias, 1 drivers
+v0x5bd633404140_0 .net "clk", 0 0, v0x5bd633414f90_0;  alias, 1 drivers
+v0x5bd6334041e0_0 .var "mem_a2_r", 31 0;
+v0x5bd633404280_0 .var "mem_alu_out_r", 31 0;
+v0x5bd633404360_0 .var "mem_b2_r", 31 0;
+v0x5bd633404440_0 .var "mem_byt_r", 0 0;
+v0x5bd633404500_0 .var "mem_ld_r", 0 0;
+v0x5bd6334045c0_0 .var "mem_link_addr_r", 31 0;
+v0x5bd6334046a0_0 .var "mem_link_we_r", 0 0;
+v0x5bd633404760_0 .var "mem_rd_r", 4 0;
+v0x5bd633404840_0 .var "mem_str_r", 0 0;
+v0x5bd633404900_0 .var "mem_taken_r", 0 0;
+v0x5bd6334049c0_0 .var "mem_we_r", 0 0;
+v0x5bd633404a80_0 .net "rst", 0 0, v0x5bd633415210_0;  alias, 1 drivers
+S_0x5bd633404f10 .scope module, "u_f2d" "f_to_d_reg" 3 95, 11 1 0, S_0x5bd6333bf650;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
  .timescale -9 -12;
     .port_info 0 /INPUT 1 "clk";
     .port_info 1 /INPUT 1 "rst";
@@ -843,6 +1643,7 @@ S_0x6522f90200f0 .scope module, "u_f2d" "f_to_d_reg" 3 91, 11 1 0, S_0x6522f8fda
     .port_info 6 /INPUT 1 "MEM_stall";
     .port_info 7 /INPUT 1 "EX_taken";
     .port_info 8 /INPUT 12 "F_BP_target_pc";
+<<<<<<< HEAD
     .port_info 9 /OUTPUT 12 "D_pc";
     .port_info 10 /OUTPUT 32 "D_inst";
     .port_info 11 /OUTPUT 1 "D_BP_taken";
@@ -870,6 +1671,41 @@ v0x6522f9021240_0 .var "d_pc", 11 0;
 v0x6522f9021320_0 .net "rst", 0 0, v0x6522f902eeb0_0;  alias, 1 drivers
 v0x6522f90213c0_0 .net "stall_D", 0 0, L_0x6522f9046520;  alias, 1 drivers
 S_0x6522f9021710 .scope module, "u_icache" "icache" 3 61, 12 1 0, S_0x6522f8fda1c0;
+=======
+    .port_info 9 /INPUT 32 "F_link_addr";
+    .port_info 10 /OUTPUT 12 "D_pc";
+    .port_info 11 /OUTPUT 32 "D_inst";
+    .port_info 12 /OUTPUT 1 "D_BP_taken";
+    .port_info 13 /OUTPUT 12 "D_BP_target_pc";
+    .port_info 14 /OUTPUT 32 "D_link_addr";
+P_0x5bd633402c20 .param/l "NOP" 1 11 31, C4<00100000000000000000000000000000>;
+P_0x5bd633402c60 .param/l "PC_BITS" 0 11 3, +C4<00000000000000000000000000001100>;
+P_0x5bd633402ca0 .param/l "XLEN" 0 11 2, +C4<00000000000000000000000000100000>;
+L_0x5bd6333bd4d0 .functor BUFZ 1, v0x5bd633405da0_0, C4<0>, C4<0>, C4<0>;
+L_0x5bd6332c2150 .functor BUFZ 12, v0x5bd633405e40_0, C4<000000000000>, C4<000000000000>, C4<000000000000>;
+L_0x5bd6332db570 .functor BUFZ 32, v0x5bd633406000_0, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>;
+v0x5bd6334052b0_0 .net "D_BP_taken", 0 0, L_0x5bd6333bd4d0;  alias, 1 drivers
+v0x5bd6334053a0_0 .net "D_BP_target_pc", 11 0, L_0x5bd6332c2150;  alias, 1 drivers
+v0x5bd633405470_0 .net "D_inst", 31 0, v0x5bd633405f20_0;  alias, 1 drivers
+v0x5bd633405570_0 .net "D_link_addr", 31 0, L_0x5bd6332db570;  alias, 1 drivers
+v0x5bd633405640_0 .net "D_pc", 11 0, v0x5bd6334060e0_0;  alias, 1 drivers
+v0x5bd633405730_0 .net "EX_taken", 0 0, v0x5bd6333f3c00_0;  alias, 1 drivers
+v0x5bd6334057d0_0 .net "F_BP_taken", 0 0, L_0x5bd6334316d0;  alias, 1 drivers
+v0x5bd633405870_0 .net "F_BP_target_pc", 11 0, L_0x5bd633432190;  alias, 1 drivers
+v0x5bd633405940_0 .net "F_inst", 31 0, v0x5bd6334069d0_0;  alias, 1 drivers
+v0x5bd633405a00_0 .net "F_link_addr", 31 0, L_0x5bd633426b80;  alias, 1 drivers
+v0x5bd633405ae0_0 .net "F_pc", 11 0, v0x5bd633409c60_0;  alias, 1 drivers
+v0x5bd633405bd0_0 .net "MEM_stall", 0 0, v0x5bd6333fb100_0;  alias, 1 drivers
+v0x5bd633405d00_0 .net "clk", 0 0, v0x5bd633414f90_0;  alias, 1 drivers
+v0x5bd633405da0_0 .var "d_bp_taken", 0 0;
+v0x5bd633405e40_0 .var "d_bp_target_pc", 11 0;
+v0x5bd633405f20_0 .var "d_inst", 31 0;
+v0x5bd633406000_0 .var "d_link_addr", 31 0;
+v0x5bd6334060e0_0 .var "d_pc", 11 0;
+v0x5bd6334061c0_0 .net "rst", 0 0, v0x5bd633415210_0;  alias, 1 drivers
+v0x5bd633406260_0 .net "stall_D", 0 0, L_0x5bd63342d130;  alias, 1 drivers
+S_0x5bd6334064e0 .scope module, "u_icache" "icache" 3 63, 12 1 0, S_0x5bd6333bf650;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
  .timescale -9 -12;
     .port_info 0 /INPUT 1 "clk";
     .port_info 1 /INPUT 1 "rst";
@@ -880,6 +1716,7 @@ S_0x6522f9021710 .scope module, "u_icache" "icache" 3 61, 12 1 0, S_0x6522f8fda1
     .port_info 6 /OUTPUT 10 "Ic_mem_addr";
     .port_info 7 /OUTPUT 32 "F_inst";
     .port_info 8 /OUTPUT 1 "F_stall";
+<<<<<<< HEAD
 P_0x6522f90162a0 .param/l "PC_BITS" 0 12 2, +C4<00000000000000000000000000001100>;
 v0x6522f9021c00_0 .var "F_inst", 31 0;
 v0x6522f9021d10_0 .net "F_mem_inst", 127 0, v0x6522f90295b0_0;  alias, 1 drivers
@@ -940,12 +1777,75 @@ L_0x6522f9040880 .part v0x6522f9024800_0, 2, 10;
 L_0x6522f9040920 .concat [ 10 2 0 0], L_0x6522f9040880, L_0x71f3318ce060;
 L_0x6522f9040a60 .part v0x6522f9024800_0, 0, 2;
 S_0x6522f9023330 .scope module, "u_mem_to_wb_reg" "mem_to_wb_reg" 3 479, 13 1 0, S_0x6522f8fda1c0;
+=======
+P_0x5bd6333fa240 .param/l "PC_BITS" 0 12 2, +C4<00000000000000000000000000001100>;
+v0x5bd6334069d0_0 .var "F_inst", 31 0;
+v0x5bd633406ae0_0 .net "F_mem_inst", 127 0, v0x5bd63340f400_0;  alias, 1 drivers
+v0x5bd633406ba0_0 .net "F_mem_valid", 0 0, v0x5bd63340f4d0_0;  alias, 1 drivers
+v0x5bd633406c70_0 .net "F_pc", 11 0, v0x5bd633409c60_0;  alias, 1 drivers
+v0x5bd633406d80_0 .var "F_stall", 0 0;
+v0x5bd633406e70_0 .var "Ic_mem_addr", 9 0;
+v0x5bd633406f30_0 .var "Ic_mem_req", 0 0;
+v0x5bd633406ff0_0 .net *"_ivl_1", 9 0, L_0x5bd633426db0;  1 drivers
+L_0x7b2201d570a8 .functor BUFT 1, C4<00>, C4<0>, C4<0>, C4<0>;
+v0x5bd6334070d0_0 .net *"_ivl_5", 1 0, L_0x7b2201d570a8;  1 drivers
+v0x5bd6334071b0_0 .net "clk", 0 0, v0x5bd633414f90_0;  alias, 1 drivers
+v0x5bd633407250 .array "data", 15 0, 31 0;
+v0x5bd6334075a0_0 .var "fifo_ptr", 1 0;
+v0x5bd633407680_0 .var "hit", 0 0;
+v0x5bd633407740_0 .var "hit_idx", 1 0;
+v0x5bd633407820_0 .var/i "i", 31 0;
+v0x5bd633407900_0 .var "miss_line", 9 0;
+v0x5bd6334079e0_0 .net "pc_line", 11 0, L_0x5bd633426e50;  1 drivers
+v0x5bd633407bd0_0 .net "pc_word", 1 0, L_0x5bd633426f90;  1 drivers
+v0x5bd633407cb0_0 .net "rst", 0 0, v0x5bd633415210_0;  alias, 1 drivers
+v0x5bd633407d50 .array "tag", 3 0, 2 0;
+v0x5bd633407e90 .array "valid", 3 0, 0 0;
+v0x5bd633407e90_0 .array/port v0x5bd633407e90, 0;
+v0x5bd633407e90_1 .array/port v0x5bd633407e90, 1;
+E_0x5bd633406880/0 .event anyedge, v0x5bd6334079e0_0, v0x5bd633406ba0_0, v0x5bd633407e90_0, v0x5bd633407e90_1;
+v0x5bd633407e90_2 .array/port v0x5bd633407e90, 2;
+v0x5bd633407e90_3 .array/port v0x5bd633407e90, 3;
+v0x5bd633407d50_0 .array/port v0x5bd633407d50, 0;
+v0x5bd633407d50_1 .array/port v0x5bd633407d50, 1;
+E_0x5bd633406880/1 .event anyedge, v0x5bd633407e90_2, v0x5bd633407e90_3, v0x5bd633407d50_0, v0x5bd633407d50_1;
+v0x5bd633407d50_2 .array/port v0x5bd633407d50, 2;
+v0x5bd633407d50_3 .array/port v0x5bd633407d50, 3;
+E_0x5bd633406880/2 .event anyedge, v0x5bd633407d50_2, v0x5bd633407d50_3, v0x5bd633407680_0, v0x5bd633407740_0;
+v0x5bd633407250_0 .array/port v0x5bd633407250, 0;
+v0x5bd633407250_1 .array/port v0x5bd633407250, 1;
+v0x5bd633407250_2 .array/port v0x5bd633407250, 2;
+E_0x5bd633406880/3 .event anyedge, v0x5bd633407bd0_0, v0x5bd633407250_0, v0x5bd633407250_1, v0x5bd633407250_2;
+v0x5bd633407250_3 .array/port v0x5bd633407250, 3;
+v0x5bd633407250_4 .array/port v0x5bd633407250, 4;
+v0x5bd633407250_5 .array/port v0x5bd633407250, 5;
+v0x5bd633407250_6 .array/port v0x5bd633407250, 6;
+E_0x5bd633406880/4 .event anyedge, v0x5bd633407250_3, v0x5bd633407250_4, v0x5bd633407250_5, v0x5bd633407250_6;
+v0x5bd633407250_7 .array/port v0x5bd633407250, 7;
+v0x5bd633407250_8 .array/port v0x5bd633407250, 8;
+v0x5bd633407250_9 .array/port v0x5bd633407250, 9;
+v0x5bd633407250_10 .array/port v0x5bd633407250, 10;
+E_0x5bd633406880/5 .event anyedge, v0x5bd633407250_7, v0x5bd633407250_8, v0x5bd633407250_9, v0x5bd633407250_10;
+v0x5bd633407250_11 .array/port v0x5bd633407250, 11;
+v0x5bd633407250_12 .array/port v0x5bd633407250, 12;
+v0x5bd633407250_13 .array/port v0x5bd633407250, 13;
+v0x5bd633407250_14 .array/port v0x5bd633407250, 14;
+E_0x5bd633406880/6 .event anyedge, v0x5bd633407250_11, v0x5bd633407250_12, v0x5bd633407250_13, v0x5bd633407250_14;
+v0x5bd633407250_15 .array/port v0x5bd633407250, 15;
+E_0x5bd633406880/7 .event anyedge, v0x5bd633407250_15;
+E_0x5bd633406880 .event/or E_0x5bd633406880/0, E_0x5bd633406880/1, E_0x5bd633406880/2, E_0x5bd633406880/3, E_0x5bd633406880/4, E_0x5bd633406880/5, E_0x5bd633406880/6, E_0x5bd633406880/7;
+L_0x5bd633426db0 .part v0x5bd633409c60_0, 2, 10;
+L_0x5bd633426e50 .concat [ 10 2 0 0], L_0x5bd633426db0, L_0x7b2201d570a8;
+L_0x5bd633426f90 .part v0x5bd633409c60_0, 0, 2;
+S_0x5bd633408100 .scope module, "u_mem_to_wb_reg" "mem_to_wb_reg" 3 504, 13 1 0, S_0x5bd6333bf650;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
  .timescale -9 -12;
     .port_info 0 /INPUT 1 "clk";
     .port_info 1 /INPUT 1 "rst";
     .port_info 2 /INPUT 32 "MEM_data_mem";
     .port_info 3 /INPUT 5 "MEM_rd";
     .port_info 4 /INPUT 1 "MEM_we";
+<<<<<<< HEAD
     .port_info 5 /OUTPUT 32 "WB_data_mem";
     .port_info 6 /OUTPUT 5 "WB_rd";
     .port_info 7 /OUTPUT 1 "WB_we";
@@ -962,6 +1862,34 @@ v0x6522f9023e60_0 .var "wb_data_mem_r", 31 0;
 v0x6522f9023f00_0 .var "wb_rd_r", 4 0;
 v0x6522f9023fe0_0 .var "wb_we_r", 0 0;
 S_0x6522f90241a0 .scope module, "u_pc" "pc" 3 40, 14 4 0, S_0x6522f8fda1c0;
+=======
+    .port_info 5 /INPUT 32 "MEM_link_addr";
+    .port_info 6 /INPUT 1 "MEM_link_we";
+    .port_info 7 /OUTPUT 32 "WB_data_mem";
+    .port_info 8 /OUTPUT 5 "WB_rd";
+    .port_info 9 /OUTPUT 1 "WB_we";
+    .port_info 10 /OUTPUT 32 "WB_link_addr";
+    .port_info 11 /OUTPUT 1 "WB_link_we";
+P_0x5bd633408290 .param/l "XLEN" 0 13 2, +C4<00000000000000000000000000100000>;
+v0x5bd633408490_0 .net "MEM_data_mem", 31 0, v0x5bd6333faea0_0;  alias, 1 drivers
+v0x5bd6334085a0_0 .net "MEM_link_addr", 31 0, L_0x5bd6332db570;  alias, 1 drivers
+v0x5bd633408690_0 .net "MEM_link_we", 0 0, L_0x5bd633428150;  alias, 1 drivers
+v0x5bd633408760_0 .net "MEM_rd", 4 0, v0x5bd633404760_0;  alias, 1 drivers
+v0x5bd633408850_0 .net "MEM_we", 0 0, v0x5bd6334049c0_0;  alias, 1 drivers
+v0x5bd633408990_0 .net "WB_data_mem", 31 0, v0x5bd633408fa0_0;  alias, 1 drivers
+v0x5bd633408a50_0 .net "WB_link_addr", 31 0, v0x5bd633409040_0;  alias, 1 drivers
+v0x5bd633408b30_0 .net "WB_link_we", 0 0, v0x5bd633409120_0;  alias, 1 drivers
+v0x5bd633408bf0_0 .net "WB_rd", 4 0, v0x5bd6334091e0_0;  alias, 1 drivers
+v0x5bd633408cb0_0 .net "WB_we", 0 0, v0x5bd6334092c0_0;  alias, 1 drivers
+v0x5bd633408d50_0 .net "clk", 0 0, v0x5bd633414f90_0;  alias, 1 drivers
+v0x5bd633408f00_0 .net "rst", 0 0, v0x5bd633415210_0;  alias, 1 drivers
+v0x5bd633408fa0_0 .var "wb_data_mem_r", 31 0;
+v0x5bd633409040_0 .var "wb_link_addr_r", 31 0;
+v0x5bd633409120_0 .var "wb_link_we_r", 0 0;
+v0x5bd6334091e0_0 .var "wb_rd_r", 4 0;
+v0x5bd6334092c0_0 .var "wb_we_r", 0 0;
+S_0x5bd633409610 .scope module, "u_pc" "pc" 3 42, 14 4 0, S_0x5bd6333bf650;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
  .timescale -9 -12;
     .port_info 0 /INPUT 1 "clk";
     .port_info 1 /INPUT 1 "rst";
@@ -970,6 +1898,7 @@ S_0x6522f90241a0 .scope module, "u_pc" "pc" 3 40, 14 4 0, S_0x6522f8fda1c0;
     .port_info 4 /INPUT 1 "stall_D";
     .port_info 5 /INPUT 12 "F_BP_target_pc";
     .port_info 6 /OUTPUT 12 "F_pc";
+<<<<<<< HEAD
 P_0x6522f90218f0 .param/l "PCLEN" 0 14 5, +C4<00000000000000000000000000001100>;
 P_0x6522f9021930 .param/l "RESET_PC" 0 14 6, C4<000000000000>;
 v0x6522f9024570_0 .net "EX_alt_pc", 11 0, L_0x6522f90407e0;  1 drivers
@@ -981,6 +1910,19 @@ v0x6522f9024990_0 .net "rst", 0 0, v0x6522f902eeb0_0;  alias, 1 drivers
 v0x6522f9024b40_0 .net "stall_D", 0 0, L_0x6522f9046520;  alias, 1 drivers
 E_0x6522f90244f0 .event posedge, v0x6522f900f060_0, v0x6522f900ea40_0;
 S_0x6522f9024d00 .scope module, "u_regfile" "regfile" 3 202, 15 1 0, S_0x6522f8fda1c0;
+=======
+P_0x5bd6334066c0 .param/l "PCLEN" 0 14 5, +C4<00000000000000000000000000001100>;
+P_0x5bd633406700 .param/l "RESET_PC" 0 14 6, C4<000000000000>;
+v0x5bd6334099d0_0 .net "EX_alt_pc", 11 0, L_0x5bd633426d10;  1 drivers
+v0x5bd633409ad0_0 .net "EX_taken", 0 0, v0x5bd6333f3c00_0;  alias, 1 drivers
+v0x5bd633409b90_0 .net "F_BP_target_pc", 11 0, L_0x5bd633432190;  alias, 1 drivers
+v0x5bd633409c60_0 .var "F_pc", 11 0;
+v0x5bd633409d00_0 .net "clk", 0 0, v0x5bd633414f90_0;  alias, 1 drivers
+v0x5bd633409df0_0 .net "rst", 0 0, v0x5bd633415210_0;  alias, 1 drivers
+v0x5bd633409fa0_0 .net "stall_D", 0 0, L_0x5bd63342d130;  alias, 1 drivers
+E_0x5bd633409950 .event posedge, v0x5bd6333f2db0_0, v0x5bd6333f2790_0;
+S_0x5bd63340a160 .scope module, "u_regfile" "regfile" 3 214, 15 1 0, S_0x5bd6333bf650;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
  .timescale -9 -12;
     .port_info 0 /INPUT 1 "clk";
     .port_info 1 /INPUT 5 "D_ra";
@@ -993,6 +1935,7 @@ S_0x6522f9024d00 .scope module, "u_regfile" "regfile" 3 202, 15 1 0, S_0x6522f8f
     .port_info 8 /INPUT 1 "D_addi";
     .port_info 9 /INPUT 1 "D_jmp";
     .port_info 10 /INPUT 1 "D_mul";
+<<<<<<< HEAD
     .port_info 11 /INPUT 2 "EX_D_bp";
     .port_info 12 /INPUT 2 "MEM_D_bp";
     .port_info 13 /INPUT 2 "WB_D_bp";
@@ -1143,6 +2086,159 @@ L_0x6522f9049830 .concat [ 16 5 0 0], LS_0x6522f9049830_1_0, LS_0x6522f9049830_1
 L_0x6522f9049cc0 .concat [ 11 21 0 0], L_0x6522f9041010, L_0x6522f9049830;
 L_0x6522f9049d60 .functor MUXZ 32, L_0x6522f90489d0, L_0x6522f9049cc0, L_0x6522f9049720, C4<>;
 S_0x6522f9028b80 .scope module, "u_unified_mem" "unified_mem" 3 442, 16 1 0, S_0x6522f8fda1c0;
+=======
+    .port_info 11 /INPUT 1 "D_link_we";
+    .port_info 12 /INPUT 2 "EX_D_bp";
+    .port_info 13 /INPUT 2 "MEM_D_bp";
+    .port_info 14 /INPUT 2 "WB_D_bp";
+    .port_info 15 /INPUT 32 "EX_alu_out";
+    .port_info 16 /INPUT 32 "MEM_data_mem";
+    .port_info 17 /INPUT 1 "WB_link_we";
+    .port_info 18 /INPUT 32 "WB_link_addr";
+    .port_info 19 /INPUT 1 "WB_we";
+    .port_info 20 /INPUT 5 "WB_rd";
+    .port_info 21 /INPUT 32 "WB_data_mem";
+    .port_info 22 /OUTPUT 32 "D_a";
+    .port_info 23 /OUTPUT 32 "D_b";
+    .port_info 24 /OUTPUT 32 "D_a2";
+    .port_info 25 /OUTPUT 32 "D_b2";
+P_0x5bd63340a340 .param/l "ADDR_SIZE" 0 15 4, +C4<00000000000000000000000000000101>;
+P_0x5bd63340a380 .param/l "REG_NUM" 0 15 3, +C4<00000000000000000000000000100000>;
+P_0x5bd63340a3c0 .param/l "XLEN" 0 15 2, +C4<00000000000000000000000000100000>;
+L_0x5bd63342e630 .functor OR 1, v0x5bd6334092c0_0, v0x5bd633409120_0, C4<0>, C4<0>;
+L_0x5bd63342e840 .functor BUFZ 32, L_0x5bd63342e6a0, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>;
+L_0x5bd63342eb50 .functor BUFZ 32, L_0x5bd63342e900, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>;
+L_0x5bd63342ea90 .functor BUFZ 32, L_0x5bd63342f200, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>;
+L_0x5bd63342fb20 .functor BUFZ 32, L_0x5bd63342f8c0, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>, C4<00000000000000000000000000000000>;
+L_0x5bd63342fbe0 .functor OR 1, L_0x5bd6334287c0, L_0x5bd633428150, C4<0>, C4<0>;
+L_0x5bd63342fd80 .functor AND 1, L_0x5bd633428e60, L_0x5bd63342fc90, C4<1>, C4<1>;
+L_0x5bd633430060 .functor OR 1, L_0x5bd633428440, L_0x5bd6334281f0, C4<0>, C4<0>;
+L_0x5bd633430120 .functor OR 1, L_0x5bd633430060, L_0x5bd633428f30, C4<0>, C4<0>;
+L_0x5bd6334301e0 .functor OR 1, L_0x5bd633430120, L_0x5bd633428e60, C4<0>, C4<0>;
+v0x5bd63340a890_0 .net "D_a", 31 0, L_0x5bd63342fe40;  alias, 1 drivers
+v0x5bd63340a9a0_0 .net "D_a2", 31 0, L_0x5bd63342ea90;  alias, 1 drivers
+v0x5bd63340aa70_0 .net "D_addi", 0 0, L_0x5bd633428f30;  alias, 1 drivers
+v0x5bd63340ab70_0 .net "D_b", 31 0, L_0x5bd6334307e0;  alias, 1 drivers
+v0x5bd63340ac40_0 .net "D_b2", 31 0, L_0x5bd63342fb20;  alias, 1 drivers
+v0x5bd63340ad30_0 .net "D_brn", 0 0, L_0x5bd633428e60;  alias, 1 drivers
+v0x5bd63340ae20_0 .net "D_imd", 10 0, L_0x5bd633427580;  alias, 1 drivers
+v0x5bd63340aec0_0 .net "D_jmp", 0 0, L_0x5bd6334287c0;  alias, 1 drivers
+v0x5bd63340afb0_0 .net "D_ld", 0 0, L_0x5bd6334281f0;  alias, 1 drivers
+v0x5bd63340b050_0 .net "D_link_we", 0 0, L_0x5bd633428150;  alias, 1 drivers
+v0x5bd63340b140_0 .net "D_mul", 0 0, L_0x5bd6334288c0;  alias, 1 drivers
+v0x5bd63340b230_0 .net "D_pc", 11 0, v0x5bd6334060e0_0;  alias, 1 drivers
+v0x5bd63340b2d0_0 .net "D_ra", 4 0, L_0x5bd6334271f0;  alias, 1 drivers
+v0x5bd63340b3c0_0 .net "D_rb", 4 0, L_0x5bd633427320;  alias, 1 drivers
+v0x5bd63340b4b0_0 .net "D_str", 0 0, L_0x5bd633428440;  alias, 1 drivers
+v0x5bd63340b5a0_0 .net "EX_D_bp", 1 0, L_0x5bd63342d590;  alias, 1 drivers
+v0x5bd63340b640_0 .net "EX_alu_out", 31 0, v0x5bd6333f38e0_0;  alias, 1 drivers
+v0x5bd63340b7f0_0 .net "MEM_D_bp", 1 0, L_0x5bd63342d6d0;  alias, 1 drivers
+v0x5bd63340b8b0_0 .net "MEM_data_mem", 31 0, v0x5bd6333faea0_0;  alias, 1 drivers
+v0x5bd63340b9a0_0 .net "WB_D_bp", 1 0, L_0x5bd63342d880;  alias, 1 drivers
+v0x5bd63340ba60_0 .net "WB_RegWrite_Enable", 0 0, L_0x5bd63342e630;  1 drivers
+v0x5bd63340bb00_0 .net "WB_data_mem", 31 0, v0x5bd633408fa0_0;  alias, 1 drivers
+v0x5bd63340bbc0_0 .net "WB_data_memwrite", 31 0, L_0x5bd63342e540;  1 drivers
+v0x5bd63340bc80_0 .net "WB_link_addr", 31 0, v0x5bd633409040_0;  alias, 1 drivers
+v0x5bd63340bd40_0 .net "WB_link_we", 0 0, v0x5bd633409120_0;  alias, 1 drivers
+v0x5bd63340bde0_0 .net "WB_rd", 4 0, v0x5bd6334091e0_0;  alias, 1 drivers
+v0x5bd63340bed0_0 .net "WB_we", 0 0, v0x5bd6334092c0_0;  alias, 1 drivers
+v0x5bd63340bfc0_0 .net *"_ivl_1", 0 0, L_0x5bd63342d9c0;  1 drivers
+v0x5bd63340c080_0 .net *"_ivl_10", 32 0, L_0x5bd63342e370;  1 drivers
+v0x5bd63340c160_0 .net *"_ivl_18", 31 0, L_0x5bd63342e6a0;  1 drivers
+v0x5bd63340c240_0 .net *"_ivl_2", 20 0, L_0x5bd63342daf0;  1 drivers
+v0x5bd63340c320_0 .net *"_ivl_20", 6 0, L_0x5bd63342e740;  1 drivers
+L_0x7b2201d57b58 .functor BUFT 1, C4<00>, C4<0>, C4<0>, C4<0>;
+v0x5bd63340c400_0 .net *"_ivl_23", 1 0, L_0x7b2201d57b58;  1 drivers
+v0x5bd63340c6f0_0 .net *"_ivl_26", 31 0, L_0x5bd63342e900;  1 drivers
+v0x5bd63340c7d0_0 .net *"_ivl_28", 6 0, L_0x5bd63342e9a0;  1 drivers
+L_0x7b2201d57ba0 .functor BUFT 1, C4<00>, C4<0>, C4<0>, C4<0>;
+v0x5bd63340c8b0_0 .net *"_ivl_31", 1 0, L_0x7b2201d57ba0;  1 drivers
+v0x5bd63340c990_0 .net *"_ivl_35", 0 0, L_0x5bd63342ec10;  1 drivers
+v0x5bd63340ca70_0 .net *"_ivl_37", 0 0, L_0x5bd63342ecb0;  1 drivers
+v0x5bd63340cb50_0 .net *"_ivl_39", 0 0, L_0x5bd63342edd0;  1 drivers
+v0x5bd63340cc30_0 .net *"_ivl_40", 31 0, L_0x5bd63342ef00;  1 drivers
+v0x5bd63340cd10_0 .net *"_ivl_42", 31 0, L_0x5bd63342f030;  1 drivers
+v0x5bd63340cdf0_0 .net *"_ivl_47", 0 0, L_0x5bd63342f390;  1 drivers
+v0x5bd63340ced0_0 .net *"_ivl_49", 0 0, L_0x5bd63342f430;  1 drivers
+v0x5bd63340cfb0_0 .net *"_ivl_51", 0 0, L_0x5bd63342f2a0;  1 drivers
+v0x5bd63340d090_0 .net *"_ivl_52", 31 0, L_0x5bd63342f580;  1 drivers
+v0x5bd63340d170_0 .net *"_ivl_54", 31 0, L_0x5bd63342f780;  1 drivers
+v0x5bd63340d250_0 .net *"_ivl_63", 0 0, L_0x5bd63342fbe0;  1 drivers
+v0x5bd63340d310_0 .net *"_ivl_65", 0 0, L_0x5bd63342fc90;  1 drivers
+v0x5bd63340d3d0_0 .net *"_ivl_67", 0 0, L_0x5bd63342fd80;  1 drivers
+v0x5bd63340d490_0 .net *"_ivl_7", 0 0, L_0x5bd63342ded0;  1 drivers
+v0x5bd63340d570_0 .net *"_ivl_71", 0 0, L_0x5bd633430060;  1 drivers
+v0x5bd63340d630_0 .net *"_ivl_73", 0 0, L_0x5bd633430120;  1 drivers
+v0x5bd63340d6f0_0 .net *"_ivl_75", 0 0, L_0x5bd6334301e0;  1 drivers
+v0x5bd63340d7b0_0 .net *"_ivl_77", 0 0, L_0x5bd633430300;  1 drivers
+v0x5bd63340d890_0 .net *"_ivl_78", 20 0, L_0x5bd6334303a0;  1 drivers
+v0x5bd63340d970_0 .net *"_ivl_8", 20 0, L_0x5bd63342df70;  1 drivers
+v0x5bd63340da50_0 .net *"_ivl_80", 31 0, L_0x5bd633430740;  1 drivers
+v0x5bd63340db30_0 .net "clk", 0 0, v0x5bd633414f90_0;  alias, 1 drivers
+v0x5bd63340dbd0_0 .var/i "i", 31 0;
+v0x5bd63340dcb0_0 .net "offset", 31 0, L_0x5bd63342de30;  1 drivers
+v0x5bd63340dd90_0 .net "pc_extended", 31 0, L_0x5bd63342e450;  1 drivers
+v0x5bd63340de70_0 .net "ra_fwd", 31 0, L_0x5bd63342f200;  1 drivers
+v0x5bd63340df50_0 .net "ra_raw", 31 0, L_0x5bd63342e840;  1 drivers
+v0x5bd63340e030_0 .net "rb_fwd", 31 0, L_0x5bd63342f8c0;  1 drivers
+v0x5bd63340e110_0 .net "rb_raw", 31 0, L_0x5bd63342eb50;  1 drivers
+v0x5bd63340e600 .array "regs", 31 0, 31 0;
+L_0x5bd63342d9c0 .part L_0x5bd633427580, 10, 1;
+LS_0x5bd63342daf0_0_0 .concat [ 1 1 1 1], L_0x5bd63342d9c0, L_0x5bd63342d9c0, L_0x5bd63342d9c0, L_0x5bd63342d9c0;
+LS_0x5bd63342daf0_0_4 .concat [ 1 1 1 1], L_0x5bd63342d9c0, L_0x5bd63342d9c0, L_0x5bd63342d9c0, L_0x5bd63342d9c0;
+LS_0x5bd63342daf0_0_8 .concat [ 1 1 1 1], L_0x5bd63342d9c0, L_0x5bd63342d9c0, L_0x5bd63342d9c0, L_0x5bd63342d9c0;
+LS_0x5bd63342daf0_0_12 .concat [ 1 1 1 1], L_0x5bd63342d9c0, L_0x5bd63342d9c0, L_0x5bd63342d9c0, L_0x5bd63342d9c0;
+LS_0x5bd63342daf0_0_16 .concat [ 1 1 1 1], L_0x5bd63342d9c0, L_0x5bd63342d9c0, L_0x5bd63342d9c0, L_0x5bd63342d9c0;
+LS_0x5bd63342daf0_0_20 .concat [ 1 0 0 0], L_0x5bd63342d9c0;
+LS_0x5bd63342daf0_1_0 .concat [ 4 4 4 4], LS_0x5bd63342daf0_0_0, LS_0x5bd63342daf0_0_4, LS_0x5bd63342daf0_0_8, LS_0x5bd63342daf0_0_12;
+LS_0x5bd63342daf0_1_4 .concat [ 4 1 0 0], LS_0x5bd63342daf0_0_16, LS_0x5bd63342daf0_0_20;
+L_0x5bd63342daf0 .concat [ 16 5 0 0], LS_0x5bd63342daf0_1_0, LS_0x5bd63342daf0_1_4;
+L_0x5bd63342de30 .concat [ 11 21 0 0], L_0x5bd633427580, L_0x5bd63342daf0;
+L_0x5bd63342ded0 .part v0x5bd6334060e0_0, 10, 1;
+LS_0x5bd63342df70_0_0 .concat [ 1 1 1 1], L_0x5bd63342ded0, L_0x5bd63342ded0, L_0x5bd63342ded0, L_0x5bd63342ded0;
+LS_0x5bd63342df70_0_4 .concat [ 1 1 1 1], L_0x5bd63342ded0, L_0x5bd63342ded0, L_0x5bd63342ded0, L_0x5bd63342ded0;
+LS_0x5bd63342df70_0_8 .concat [ 1 1 1 1], L_0x5bd63342ded0, L_0x5bd63342ded0, L_0x5bd63342ded0, L_0x5bd63342ded0;
+LS_0x5bd63342df70_0_12 .concat [ 1 1 1 1], L_0x5bd63342ded0, L_0x5bd63342ded0, L_0x5bd63342ded0, L_0x5bd63342ded0;
+LS_0x5bd63342df70_0_16 .concat [ 1 1 1 1], L_0x5bd63342ded0, L_0x5bd63342ded0, L_0x5bd63342ded0, L_0x5bd63342ded0;
+LS_0x5bd63342df70_0_20 .concat [ 1 0 0 0], L_0x5bd63342ded0;
+LS_0x5bd63342df70_1_0 .concat [ 4 4 4 4], LS_0x5bd63342df70_0_0, LS_0x5bd63342df70_0_4, LS_0x5bd63342df70_0_8, LS_0x5bd63342df70_0_12;
+LS_0x5bd63342df70_1_4 .concat [ 4 1 0 0], LS_0x5bd63342df70_0_16, LS_0x5bd63342df70_0_20;
+L_0x5bd63342df70 .concat [ 16 5 0 0], LS_0x5bd63342df70_1_0, LS_0x5bd63342df70_1_4;
+L_0x5bd63342e370 .concat [ 12 21 0 0], v0x5bd6334060e0_0, L_0x5bd63342df70;
+L_0x5bd63342e450 .part L_0x5bd63342e370, 0, 32;
+L_0x5bd63342e540 .functor MUXZ 32, v0x5bd633408fa0_0, v0x5bd633409040_0, v0x5bd633409120_0, C4<>;
+L_0x5bd63342e6a0 .array/port v0x5bd63340e600, L_0x5bd63342e740;
+L_0x5bd63342e740 .concat [ 5 2 0 0], L_0x5bd6334271f0, L_0x7b2201d57b58;
+L_0x5bd63342e900 .array/port v0x5bd63340e600, L_0x5bd63342e9a0;
+L_0x5bd63342e9a0 .concat [ 5 2 0 0], L_0x5bd633427320, L_0x7b2201d57ba0;
+L_0x5bd63342ec10 .part L_0x5bd63342d590, 1, 1;
+L_0x5bd63342ecb0 .part L_0x5bd63342d6d0, 1, 1;
+L_0x5bd63342edd0 .part L_0x5bd63342d880, 1, 1;
+L_0x5bd63342ef00 .functor MUXZ 32, L_0x5bd63342e840, L_0x5bd63342e540, L_0x5bd63342edd0, C4<>;
+L_0x5bd63342f030 .functor MUXZ 32, L_0x5bd63342ef00, v0x5bd6333faea0_0, L_0x5bd63342ecb0, C4<>;
+L_0x5bd63342f200 .functor MUXZ 32, L_0x5bd63342f030, v0x5bd6333f38e0_0, L_0x5bd63342ec10, C4<>;
+L_0x5bd63342f390 .part L_0x5bd63342d590, 0, 1;
+L_0x5bd63342f430 .part L_0x5bd63342d6d0, 0, 1;
+L_0x5bd63342f2a0 .part L_0x5bd63342d880, 0, 1;
+L_0x5bd63342f580 .functor MUXZ 32, L_0x5bd63342eb50, L_0x5bd63342e540, L_0x5bd63342f2a0, C4<>;
+L_0x5bd63342f780 .functor MUXZ 32, L_0x5bd63342f580, v0x5bd6333faea0_0, L_0x5bd63342f430, C4<>;
+L_0x5bd63342f8c0 .functor MUXZ 32, L_0x5bd63342f780, v0x5bd6333f38e0_0, L_0x5bd63342f390, C4<>;
+L_0x5bd63342fc90 .reduce/nor L_0x5bd63342fbe0;
+L_0x5bd63342fe40 .functor MUXZ 32, L_0x5bd63342f200, L_0x5bd63342e450, L_0x5bd63342fd80, C4<>;
+L_0x5bd633430300 .part L_0x5bd633427580, 10, 1;
+LS_0x5bd6334303a0_0_0 .concat [ 1 1 1 1], L_0x5bd633430300, L_0x5bd633430300, L_0x5bd633430300, L_0x5bd633430300;
+LS_0x5bd6334303a0_0_4 .concat [ 1 1 1 1], L_0x5bd633430300, L_0x5bd633430300, L_0x5bd633430300, L_0x5bd633430300;
+LS_0x5bd6334303a0_0_8 .concat [ 1 1 1 1], L_0x5bd633430300, L_0x5bd633430300, L_0x5bd633430300, L_0x5bd633430300;
+LS_0x5bd6334303a0_0_12 .concat [ 1 1 1 1], L_0x5bd633430300, L_0x5bd633430300, L_0x5bd633430300, L_0x5bd633430300;
+LS_0x5bd6334303a0_0_16 .concat [ 1 1 1 1], L_0x5bd633430300, L_0x5bd633430300, L_0x5bd633430300, L_0x5bd633430300;
+LS_0x5bd6334303a0_0_20 .concat [ 1 0 0 0], L_0x5bd633430300;
+LS_0x5bd6334303a0_1_0 .concat [ 4 4 4 4], LS_0x5bd6334303a0_0_0, LS_0x5bd6334303a0_0_4, LS_0x5bd6334303a0_0_8, LS_0x5bd6334303a0_0_12;
+LS_0x5bd6334303a0_1_4 .concat [ 4 1 0 0], LS_0x5bd6334303a0_0_16, LS_0x5bd6334303a0_0_20;
+L_0x5bd6334303a0 .concat [ 16 5 0 0], LS_0x5bd6334303a0_1_0, LS_0x5bd6334303a0_1_4;
+L_0x5bd633430740 .concat [ 11 21 0 0], L_0x5bd633427580, L_0x5bd6334303a0;
+L_0x5bd6334307e0 .functor MUXZ 32, L_0x5bd63342f8c0, L_0x5bd633430740, L_0x5bd6334301e0, C4<>;
+S_0x5bd63340eae0 .scope module, "u_unified_mem" "unified_mem" 3 466, 16 1 0, S_0x5bd6333bf650;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
  .timescale -9 -12;
     .port_info 0 /INPUT 1 "clk";
     .port_info 1 /INPUT 1 "rst";
@@ -1157,6 +2253,7 @@ S_0x6522f9028b80 .scope module, "u_unified_mem" "unified_mem" 3 442, 16 1 0, S_0
     .port_info 10 /INPUT 1 "Dc_wb_we";
     .port_info 11 /INPUT 10 "Dc_wb_addr";
     .port_info 12 /INPUT 128 "Dc_wb_wline";
+<<<<<<< HEAD
 P_0x6522f9012e90 .param/l "LATENCY" 0 16 3, +C4<00000000000000000000000000000011>;
 P_0x6522f9012ed0 .param/l "XLEN" 0 16 2, +C4<00000000000000000000000000100000>;
 v0x6522f9028fd0_0 .var "D_counter", 1 0;
@@ -1182,6 +2279,33 @@ v0x6522f9029eb0_0 .net "rst", 0 0, v0x6522f902eeb0_0;  alias, 1 drivers
 S_0x6522f902eaa0 .scope begin, "run_loop" "run_loop" 2 45, 2 45 0, S_0x6522f8fbe700;
  .timescale -9 -12;
 S_0x6522f8fa2da0 .scope module, "data_mem" "data_mem" 17 1;
+=======
+P_0x5bd6333f69f0 .param/l "LATENCY" 0 16 3, +C4<00000000000000000000000000000011>;
+P_0x5bd6333f6a30 .param/l "XLEN" 0 16 2, +C4<00000000000000000000000000100000>;
+v0x5bd63340edf0_0 .var "D_counter", 1 0;
+v0x5bd63340eef0_0 .var "D_saved_line", 9 0;
+v0x5bd63340efd0_0 .net "Dc_mem_addr", 9 0, v0x5bd6333fa640_0;  alias, 1 drivers
+v0x5bd63340f0a0_0 .net "Dc_mem_req", 0 0, v0x5bd6333fa740_0;  alias, 1 drivers
+v0x5bd63340f170_0 .net "Dc_wb_addr", 9 0, v0x5bd6333fa800_0;  alias, 1 drivers
+v0x5bd63340f260_0 .net "Dc_wb_we", 0 0, v0x5bd6333fa8c0_0;  alias, 1 drivers
+v0x5bd63340f330_0 .net "Dc_wb_wline", 127 0, v0x5bd6333fa980_0;  alias, 1 drivers
+v0x5bd63340f400_0 .var "F_mem_inst", 127 0;
+v0x5bd63340f4d0_0 .var "F_mem_valid", 0 0;
+v0x5bd63340f5a0_0 .var "I_counter", 1 0;
+v0x5bd63340f640_0 .var "I_saved_line", 9 0;
+v0x5bd63340f6e0_0 .net "Ic_mem_addr", 9 0, v0x5bd633406e70_0;  alias, 1 drivers
+v0x5bd63340f7d0_0 .net "Ic_mem_req", 0 0, v0x5bd633406f30_0;  alias, 1 drivers
+v0x5bd63340f8a0_0 .var "MEM_data_line", 127 0;
+v0x5bd63340f970_0 .var "MEM_mem_valid", 0 0;
+v0x5bd63340fa40_0 .net "clk", 0 0, v0x5bd633414f90_0;  alias, 1 drivers
+v0x5bd63340fae0_0 .var/i "i", 31 0;
+v0x5bd63340fb80_0 .var/i "j", 31 0;
+v0x5bd63340fc40 .array "line", 4095 0, 31 0;
+v0x5bd63340fd00_0 .net "rst", 0 0, v0x5bd633415210_0;  alias, 1 drivers
+S_0x5bd633414e00 .scope begin, "run_loop" "run_loop" 2 45, 2 45 0, S_0x5bd6333a34f0;
+ .timescale -9 -12;
+S_0x5bd6333bee90 .scope module, "data_mem" "data_mem" 17 1;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
  .timescale -9 -12;
     .port_info 0 /INPUT 1 "clk";
     .port_info 1 /INPUT 1 "rst";
@@ -1192,6 +2316,7 @@ S_0x6522f8fa2da0 .scope module, "data_mem" "data_mem" 17 1;
     .port_info 6 /INPUT 1 "Dc_wb_we";
     .port_info 7 /INPUT 10 "Dc_wb_addr";
     .port_info 8 /INPUT 128 "Dc_wb_wline";
+<<<<<<< HEAD
 P_0x6522f8ebf420 .param/l "LATENCY" 0 17 3, +C4<00000000000000000000000000000011>;
 P_0x6522f8ebf460 .param/l "XLEN" 0 17 2, +C4<00000000000000000000000000100000>;
 o0x71f331c8f858 .functor BUFZ 10, C4<zzzzzzzzzz>; HiZ drive
@@ -1217,6 +2342,33 @@ v0x6522f902f960_0 .net "rst", 0 0, o0x71f331c8fa68;  0 drivers
 v0x6522f902fa20_0 .var "saved_line", 9 0;
 E_0x6522f9024490 .event posedge, v0x6522f902f4b0_0;
 S_0x6522f8fa3910 .scope module, "instruct_mem" "instruct_mem" 18 1;
+=======
+P_0x5bd6332917d0 .param/l "LATENCY" 0 17 3, +C4<00000000000000000000000000000011>;
+P_0x5bd633291810 .param/l "XLEN" 0 17 2, +C4<00000000000000000000000000100000>;
+o0x7b2201da7098 .functor BUFZ 10, C4<zzzzzzzzzz>; HiZ drive
+v0x5bd633415300_0 .net "Dc_mem_addr", 9 0, o0x7b2201da7098;  0 drivers
+o0x7b2201da70c8 .functor BUFZ 1, C4<z>; HiZ drive
+v0x5bd6334153a0_0 .net "Dc_mem_req", 0 0, o0x7b2201da70c8;  0 drivers
+o0x7b2201da70f8 .functor BUFZ 10, C4<zzzzzzzzzz>; HiZ drive
+v0x5bd633415440_0 .net "Dc_wb_addr", 9 0, o0x7b2201da70f8;  0 drivers
+o0x7b2201da7128 .functor BUFZ 1, C4<z>; HiZ drive
+v0x5bd6334154e0_0 .net "Dc_wb_we", 0 0, o0x7b2201da7128;  0 drivers
+o0x7b2201da7158 .functor BUFZ 128, C4<zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz>; HiZ drive
+v0x5bd633415580_0 .net "Dc_wb_wline", 127 0, o0x7b2201da7158;  0 drivers
+v0x5bd6334156b0_0 .var "MEM_data_line", 127 0;
+v0x5bd633415790_0 .var "MEM_mem_valid", 0 0;
+o0x7b2201da71e8 .functor BUFZ 1, C4<z>; HiZ drive
+v0x5bd633415850_0 .net "clk", 0 0, o0x7b2201da71e8;  0 drivers
+v0x5bd633415910_0 .var "counter", 1 0;
+v0x5bd633415a80_0 .var/i "i", 31 0;
+v0x5bd633415b60_0 .var/i "j", 31 0;
+v0x5bd633415c40 .array "line", 4099 0, 31 0;
+o0x7b2201da72a8 .functor BUFZ 1, C4<z>; HiZ drive
+v0x5bd633415d00_0 .net "rst", 0 0, o0x7b2201da72a8;  0 drivers
+v0x5bd633415dc0_0 .var "saved_line", 9 0;
+E_0x5bd633409840 .event posedge, v0x5bd633415850_0;
+S_0x5bd6333bf270 .scope module, "instruct_mem" "instruct_mem" 18 1;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
  .timescale -9 -12;
     .port_info 0 /INPUT 1 "clk";
     .port_info 1 /INPUT 1 "rst";
@@ -1224,6 +2376,7 @@ S_0x6522f8fa3910 .scope module, "instruct_mem" "instruct_mem" 18 1;
     .port_info 3 /INPUT 10 "Ic_mem_addr";
     .port_info 4 /OUTPUT 128 "F_mem_inst";
     .port_info 5 /OUTPUT 1 "F_mem_valid";
+<<<<<<< HEAD
 P_0x6522f8f4b210 .param/l "LATENCY" 0 18 3, +C4<00000000000000000000000000000011>;
 P_0x6522f8f4b250 .param/l "XLEN" 0 18 2, +C4<00000000000000000000000000100000>;
 v0x6522f902fca0_0 .var "F_mem_inst", 127 0;
@@ -1268,11 +2421,58 @@ T_1.2 ;
 T_1.4 ;
     %load/vec4 v0x6522f9024730_0;
     %assign/vec4 v0x6522f9024800_0, 0;
+=======
+P_0x5bd633328040 .param/l "LATENCY" 0 18 3, +C4<00000000000000000000000000000011>;
+P_0x5bd633328080 .param/l "XLEN" 0 18 2, +C4<00000000000000000000000000100000>;
+v0x5bd633416040_0 .var "F_mem_inst", 127 0;
+v0x5bd633416140_0 .var "F_mem_valid", 0 0;
+o0x7b2201da7518 .functor BUFZ 10, C4<zzzzzzzzzz>; HiZ drive
+v0x5bd633416200_0 .net "Ic_mem_addr", 9 0, o0x7b2201da7518;  0 drivers
+o0x7b2201da7548 .functor BUFZ 1, C4<z>; HiZ drive
+v0x5bd6334162c0_0 .net "Ic_mem_req", 0 0, o0x7b2201da7548;  0 drivers
+o0x7b2201da7578 .functor BUFZ 1, C4<z>; HiZ drive
+v0x5bd633416380_0 .net "clk", 0 0, o0x7b2201da7578;  0 drivers
+v0x5bd633416440_0 .var "counter", 1 0;
+v0x5bd633416520_0 .var/i "i", 31 0;
+v0x5bd633416600_0 .var/i "j", 31 0;
+v0x5bd6334166e0 .array "line", 4099 0, 31 0;
+o0x7b2201da7638 .functor BUFZ 1, C4<z>; HiZ drive
+v0x5bd633416830_0 .net "rst", 0 0, o0x7b2201da7638;  0 drivers
+v0x5bd6334168f0_0 .var "saved_line", 9 0;
+E_0x5bd633415fc0 .event posedge, v0x5bd633416380_0;
+    .scope S_0x5bd633409610;
+T_1 ;
+    %wait E_0x5bd633409950;
+    %load/vec4 v0x5bd633409df0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.0, 8;
+    %pushi/vec4 0, 0, 12;
+    %assign/vec4 v0x5bd633409c60_0, 0;
+    %jmp T_1.1;
+T_1.0 ;
+    %load/vec4 v0x5bd633409ad0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.2, 8;
+    %load/vec4 v0x5bd6334099d0_0;
+    %assign/vec4 v0x5bd633409c60_0, 0;
+    %jmp T_1.3;
+T_1.2 ;
+    %load/vec4 v0x5bd633409fa0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_1.4, 8;
+    %load/vec4 v0x5bd633409c60_0;
+    %assign/vec4 v0x5bd633409c60_0, 0;
+    %jmp T_1.5;
+T_1.4 ;
+    %load/vec4 v0x5bd633409b90_0;
+    %assign/vec4 v0x5bd633409c60_0, 0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 T_1.5 ;
 T_1.3 ;
 T_1.1 ;
     %jmp T_1;
     .thread T_1;
+<<<<<<< HEAD
     .scope S_0x6522f9021710;
 T_2 ;
     %wait E_0x6522f8e7a2f0;
@@ -1305,11 +2505,46 @@ T_2.0 ;
     %flag_get/vec4 9;
     %jmp/0 T_2.6, 9;
     %load/vec4 v0x6522f90228b0_0;
+=======
+    .scope S_0x5bd6334064e0;
+T_2 ;
+    %wait E_0x5bd63324b310;
+    %load/vec4 v0x5bd633407cb0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_2.0, 8;
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v0x5bd633407820_0, 0, 32;
+T_2.2 ;
+    %load/vec4 v0x5bd633407820_0;
+    %cmpi/s 4, 0, 32;
+    %jmp/0xz T_2.3, 5;
+    %pushi/vec4 0, 0, 1;
+    %ix/getv/s 3, v0x5bd633407820_0;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd633407e90, 0, 4;
+    %load/vec4 v0x5bd633407820_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd633407820_0, 0, 32;
+    %jmp T_2.2;
+T_2.3 ;
+    %pushi/vec4 0, 0, 2;
+    %assign/vec4 v0x5bd6334075a0_0, 0;
+    %pushi/vec4 0, 0, 10;
+    %assign/vec4 v0x5bd633407900_0, 0;
+    %jmp T_2.1;
+T_2.0 ;
+    %load/vec4 v0x5bd633406f30_0;
+    %flag_set/vec4 9;
+    %flag_get/vec4 9;
+    %jmp/0 T_2.6, 9;
+    %load/vec4 v0x5bd633407680_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %nor/r;
     %and;
 T_2.6;
     %flag_set/vec4 8;
     %jmp/0xz  T_2.4, 8;
+<<<<<<< HEAD
     %load/vec4 v0x6522f9022c10_0;
     %pad/u 10;
     %assign/vec4 v0x6522f9022b30_0, 0;
@@ -1336,15 +2571,50 @@ T_2.4 ;
     %load/vec4 v0x6522f9021d10_0;
     %parti/s 32, 0, 2;
     %load/vec4 v0x6522f90227d0_0;
+=======
+    %load/vec4 v0x5bd6334079e0_0;
+    %pad/u 10;
+    %assign/vec4 v0x5bd633407900_0, 0;
+T_2.4 ;
+    %load/vec4 v0x5bd633406ba0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_2.7, 8;
+    %load/vec4 v0x5bd6334075a0_0;
+    %addi 1, 0, 2;
+    %assign/vec4 v0x5bd6334075a0_0, 0;
+    %pushi/vec4 1, 0, 1;
+    %load/vec4 v0x5bd6334075a0_0;
+    %pad/u 4;
+    %ix/vec4 3;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd633407e90, 0, 4;
+    %load/vec4 v0x5bd633407900_0;
+    %pad/u 3;
+    %load/vec4 v0x5bd6334075a0_0;
+    %pad/u 4;
+    %ix/vec4 3;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd633407d50, 0, 4;
+    %load/vec4 v0x5bd633406ae0_0;
+    %parti/s 32, 0, 2;
+    %load/vec4 v0x5bd6334075a0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 7;
     %pad/u 9;
     %muli 4, 0, 9;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
+<<<<<<< HEAD
     %assign/vec4/a/d v0x6522f9022480, 0, 4;
     %load/vec4 v0x6522f9021d10_0;
     %parti/s 32, 32, 7;
     %load/vec4 v0x6522f90227d0_0;
+=======
+    %assign/vec4/a/d v0x5bd633407250, 0, 4;
+    %load/vec4 v0x5bd633406ae0_0;
+    %parti/s 32, 32, 7;
+    %load/vec4 v0x5bd6334075a0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 7;
     %pad/u 9;
     %muli 4, 0, 9;
@@ -1354,10 +2624,17 @@ T_2.4 ;
     %add;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
+<<<<<<< HEAD
     %assign/vec4/a/d v0x6522f9022480, 0, 4;
     %load/vec4 v0x6522f9021d10_0;
     %parti/s 32, 64, 8;
     %load/vec4 v0x6522f90227d0_0;
+=======
+    %assign/vec4/a/d v0x5bd633407250, 0, 4;
+    %load/vec4 v0x5bd633406ae0_0;
+    %parti/s 32, 64, 8;
+    %load/vec4 v0x5bd6334075a0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 7;
     %pad/u 9;
     %muli 4, 0, 9;
@@ -1367,10 +2644,17 @@ T_2.4 ;
     %add;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
+<<<<<<< HEAD
     %assign/vec4/a/d v0x6522f9022480, 0, 4;
     %load/vec4 v0x6522f9021d10_0;
     %parti/s 32, 96, 8;
     %load/vec4 v0x6522f90227d0_0;
+=======
+    %assign/vec4/a/d v0x5bd633407250, 0, 4;
+    %load/vec4 v0x5bd633406ae0_0;
+    %parti/s 32, 96, 8;
+    %load/vec4 v0x5bd6334075a0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 7;
     %pad/u 9;
     %muli 4, 0, 9;
@@ -1380,11 +2664,16 @@ T_2.4 ;
     %add;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
+<<<<<<< HEAD
     %assign/vec4/a/d v0x6522f9022480, 0, 4;
+=======
+    %assign/vec4/a/d v0x5bd633407250, 0, 4;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 T_2.7 ;
 T_2.1 ;
     %jmp T_2;
     .thread T_2;
+<<<<<<< HEAD
     .scope S_0x6522f9021710;
 T_3 ;
     %wait E_0x6522f9021ab0;
@@ -1402,10 +2691,30 @@ T_3 ;
     %pushi/vec4 0, 0, 1;
     %store/vec4 v0x6522f9022160_0, 0, 1;
     %load/vec4 v0x6522f9021dd0_0;
+=======
+    .scope S_0x5bd6334064e0;
+T_3 ;
+    %wait E_0x5bd633406880;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x5bd633407680_0, 0, 1;
+    %pushi/vec4 0, 0, 2;
+    %store/vec4 v0x5bd633407740_0, 0, 2;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x5bd633406d80_0, 0, 1;
+    %pushi/vec4 536870912, 0, 32;
+    %store/vec4 v0x5bd6334069d0_0, 0, 32;
+    %load/vec4 v0x5bd6334079e0_0;
+    %pad/u 10;
+    %store/vec4 v0x5bd633406e70_0, 0, 10;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x5bd633406f30_0, 0, 1;
+    %load/vec4 v0x5bd633406ba0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %nor/r;
     %flag_set/vec4 8;
     %jmp/0xz  T_3.0, 8;
     %pushi/vec4 0, 0, 32;
+<<<<<<< HEAD
     %store/vec4 v0x6522f9022a50_0, 0, 32;
 T_3.2 ;
     %load/vec4 v0x6522f9022a50_0;
@@ -1420,6 +2729,22 @@ T_3.2 ;
     %load/vec4a v0x6522f9022f80, 4;
     %pad/u 12;
     %load/vec4 v0x6522f9022c10_0;
+=======
+    %store/vec4 v0x5bd633407820_0, 0, 32;
+T_3.2 ;
+    %load/vec4 v0x5bd633407820_0;
+    %cmpi/s 4, 0, 32;
+    %jmp/0xz T_3.3, 5;
+    %ix/getv/s 4, v0x5bd633407820_0;
+    %load/vec4a v0x5bd633407e90, 4;
+    %flag_set/vec4 9;
+    %flag_get/vec4 9;
+    %jmp/0 T_3.6, 9;
+    %ix/getv/s 4, v0x5bd633407820_0;
+    %load/vec4a v0x5bd633407d50, 4;
+    %pad/u 12;
+    %load/vec4 v0x5bd6334079e0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %cmp/e;
     %flag_get/vec4 4;
     %and;
@@ -1427,6 +2752,7 @@ T_3.6;
     %flag_set/vec4 8;
     %jmp/0xz  T_3.4, 8;
     %pushi/vec4 1, 0, 1;
+<<<<<<< HEAD
     %store/vec4 v0x6522f90228b0_0, 0, 1;
     %load/vec4 v0x6522f9022a50_0;
     %parti/s 2, 0, 2;
@@ -1442,15 +2768,37 @@ T_3.0 ;
     %flag_set/vec4 8;
     %jmp/0xz  T_3.7, 8;
     %load/vec4 v0x6522f9022970_0;
+=======
+    %store/vec4 v0x5bd633407680_0, 0, 1;
+    %load/vec4 v0x5bd633407820_0;
+    %parti/s 2, 0, 2;
+    %store/vec4 v0x5bd633407740_0, 0, 2;
+T_3.4 ;
+    %load/vec4 v0x5bd633407820_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd633407820_0, 0, 32;
+    %jmp T_3.2;
+T_3.3 ;
+T_3.0 ;
+    %load/vec4 v0x5bd633407680_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_3.7, 8;
+    %load/vec4 v0x5bd633407740_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 7;
     %pad/u 9;
     %muli 4, 0, 9;
     %pad/u 10;
+<<<<<<< HEAD
     %load/vec4 v0x6522f9022e00_0;
+=======
+    %load/vec4 v0x5bd633407bd0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 4;
     %pad/u 10;
     %add;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9022480, 4;
     %store/vec4 v0x6522f9021c00_0, 0, 32;
     %jmp T_3.8;
@@ -1458,6 +2806,15 @@ T_3.7 ;
     %pushi/vec4 1, 0, 1;
     %store/vec4 v0x6522f9021fb0_0, 0, 1;
     %load/vec4 v0x6522f9021dd0_0;
+=======
+    %load/vec4a v0x5bd633407250, 4;
+    %store/vec4 v0x5bd6334069d0_0, 0, 32;
+    %jmp T_3.8;
+T_3.7 ;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0x5bd633406d80_0, 0, 1;
+    %load/vec4 v0x5bd633406ba0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %flag_set/vec4 8;
     %jmp/0 T_3.9, 8;
     %pushi/vec4 0, 0, 1;
@@ -1468,6 +2825,7 @@ T_3.9 ; End of true expr.
  ; End of false expr.
     %blend;
 T_3.10;
+<<<<<<< HEAD
     %store/vec4 v0x6522f9022160_0, 0, 1;
     %load/vec4 v0x6522f9022c10_0;
     %pad/u 10;
@@ -1494,10 +2852,41 @@ T_4.0 ;
     %load/vec4 v0x6522f90213c0_0;
     %nor/r;
     %load/vec4 v0x6522f9020e10_0;
+=======
+    %store/vec4 v0x5bd633406f30_0, 0, 1;
+    %load/vec4 v0x5bd6334079e0_0;
+    %pad/u 10;
+    %store/vec4 v0x5bd633406e70_0, 0, 10;
+T_3.8 ;
+    %jmp T_3;
+    .thread T_3, $push;
+    .scope S_0x5bd633404f10;
+T_4 ;
+    %wait E_0x5bd63324b310;
+    %load/vec4 v0x5bd6334061c0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_4.0, 8;
+    %pushi/vec4 0, 0, 12;
+    %assign/vec4 v0x5bd6334060e0_0, 0;
+    %pushi/vec4 536870912, 0, 32;
+    %assign/vec4 v0x5bd633405f20_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd633405da0_0, 0;
+    %pushi/vec4 0, 0, 12;
+    %assign/vec4 v0x5bd633405e40_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v0x5bd633406000_0, 0;
+    %jmp T_4.1;
+T_4.0 ;
+    %load/vec4 v0x5bd633406260_0;
+    %nor/r;
+    %load/vec4 v0x5bd633405bd0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %nor/r;
     %and;
     %flag_set/vec4 8;
     %jmp/0xz  T_4.2, 8;
+<<<<<<< HEAD
     %load/vec4 v0x6522f9020d20_0;
     %assign/vec4 v0x6522f9021240_0, 0;
     %load/vec4 v0x6522f9020c60_0;
@@ -1506,10 +2895,24 @@ T_4.0 ;
     %assign/vec4 v0x6522f9020fe0_0, 0;
     %load/vec4 v0x6522f9020b90_0;
     %assign/vec4 v0x6522f9021080_0, 0;
+=======
+    %load/vec4 v0x5bd633405ae0_0;
+    %assign/vec4 v0x5bd6334060e0_0, 0;
+    %load/vec4 v0x5bd633405940_0;
+    %assign/vec4 v0x5bd633405f20_0, 0;
+    %load/vec4 v0x5bd6334057d0_0;
+    %assign/vec4 v0x5bd633405da0_0, 0;
+    %load/vec4 v0x5bd633405870_0;
+    %assign/vec4 v0x5bd633405e40_0, 0;
+    %load/vec4 v0x5bd633405ae0_0;
+    %pad/u 32;
+    %assign/vec4 v0x5bd633406000_0, 0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 T_4.2 ;
 T_4.1 ;
     %jmp T_4;
     .thread T_4;
+<<<<<<< HEAD
     .scope S_0x6522f8fda5a0;
 T_5 ;
     %wait E_0x6522f8e7a2f0;
@@ -1533,11 +2936,37 @@ T_5.2 ;
     %load/vec4 v0x6522f900ee00_0;
     %subi 1, 0, 3;
     %assign/vec4 v0x6522f900ee00_0, 0;
+=======
+    .scope S_0x5bd6333bfa30;
+T_5 ;
+    %wait E_0x5bd63324b310;
+    %load/vec4 v0x5bd6333f2db0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_5.0, 8;
+    %pushi/vec4 0, 0, 3;
+    %assign/vec4 v0x5bd6333f2b50_0, 0;
+    %jmp T_5.1;
+T_5.0 ;
+    %load/vec4 v0x5bd6333f2cf0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_5.2, 8;
+    %pushi/vec4 4, 0, 3;
+    %assign/vec4 v0x5bd6333f2b50_0, 0;
+    %jmp T_5.3;
+T_5.2 ;
+    %load/vec4 v0x5bd6333f2b50_0;
+    %cmpi/ne 0, 0, 3;
+    %jmp/0xz  T_5.4, 4;
+    %load/vec4 v0x5bd6333f2b50_0;
+    %subi 1, 0, 3;
+    %assign/vec4 v0x5bd6333f2b50_0, 0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 T_5.4 ;
 T_5.3 ;
 T_5.1 ;
     %jmp T_5;
     .thread T_5;
+<<<<<<< HEAD
     .scope S_0x6522f9024d00;
 T_6 ;
     %pushi/vec4 0, 0, 32;
@@ -1552,10 +2981,27 @@ T_6.0 ;
     %load/vec4 v0x6522f90281c0_0;
     %addi 1, 0, 32;
     %store/vec4 v0x6522f90281c0_0, 0, 32;
+=======
+    .scope S_0x5bd63340a160;
+T_6 ;
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v0x5bd63340dbd0_0, 0, 32;
+T_6.0 ;
+    %load/vec4 v0x5bd63340dbd0_0;
+    %cmpi/s 32, 0, 32;
+    %jmp/0xz T_6.1, 5;
+    %pushi/vec4 0, 0, 32;
+    %ix/getv/s 4, v0x5bd63340dbd0_0;
+    %store/vec4a v0x5bd63340e600, 4, 0;
+    %load/vec4 v0x5bd63340dbd0_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd63340dbd0_0, 0, 32;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %jmp T_6.0;
 T_6.1 ;
     %end;
     .thread T_6;
+<<<<<<< HEAD
     .scope S_0x6522f9024d00;
 T_7 ;
     %wait E_0x6522f8e7a2f0;
@@ -1564,6 +3010,16 @@ T_7 ;
     %flag_get/vec4 9;
     %jmp/0 T_7.2, 9;
     %load/vec4 v0x6522f9026480_0;
+=======
+    .scope S_0x5bd63340a160;
+T_7 ;
+    %wait E_0x5bd63324b310;
+    %load/vec4 v0x5bd63340ba60_0;
+    %flag_set/vec4 9;
+    %flag_get/vec4 9;
+    %jmp/0 T_7.2, 9;
+    %load/vec4 v0x5bd63340bde0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pushi/vec4 0, 0, 5;
     %cmp/ne;
     %flag_get/vec4 4;
@@ -1571,17 +3027,27 @@ T_7 ;
 T_7.2;
     %flag_set/vec4 8;
     %jmp/0xz  T_7.0, 8;
+<<<<<<< HEAD
     %load/vec4 v0x6522f90263e0_0;
     %load/vec4 v0x6522f9026480_0;
     %pad/u 7;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
     %assign/vec4/a/d v0x6522f90287e0, 0, 4;
+=======
+    %load/vec4 v0x5bd63340bbc0_0;
+    %load/vec4 v0x5bd63340bde0_0;
+    %pad/u 7;
+    %ix/vec4 3;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd63340e600, 0, 4;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 T_7.0 ;
     %pushi/vec4 0, 0, 32;
     %ix/load 3, 0, 0;
     %flag_set/imm 4, 0;
     %ix/load 4, 0, 0; Constant delay
+<<<<<<< HEAD
     %assign/vec4/a/d v0x6522f90287e0, 0, 4;
     %jmp T_7;
     .thread T_7;
@@ -1592,16 +3058,33 @@ T_8 ;
     %flag_set/vec4 8;
     %jmp/1 T_8.3, 8;
     %load/vec4 v0x6522f9015c00_0;
+=======
+    %assign/vec4/a/d v0x5bd63340e600, 0, 4;
+    %jmp T_7;
+    .thread T_7;
+    .scope S_0x5bd6333f67c0;
+T_8 ;
+    %wait E_0x5bd63324b310;
+    %load/vec4 v0x5bd6333f98d0_0;
+    %flag_set/vec4 8;
+    %jmp/1 T_8.3, 8;
+    %load/vec4 v0x5bd6333f99c0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %flag_set/vec4 9;
     %flag_or 8, 9;
 T_8.3;
     %jmp/1 T_8.2, 8;
+<<<<<<< HEAD
     %load/vec4 v0x6522f9014a00_0;
+=======
+    %load/vec4 v0x5bd6333f8750_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %flag_set/vec4 9;
     %flag_or 8, 9;
 T_8.2;
     %jmp/0xz  T_8.0, 8;
     %pushi/vec4 0, 0, 32;
+<<<<<<< HEAD
     %assign/vec4 v0x6522f9015010_0, 0;
     %pushi/vec4 0, 0, 32;
     %assign/vec4 v0x6522f9014f70_0, 0;
@@ -1667,10 +3150,87 @@ T_8.0 ;
     %assign/vec4 v0x6522f9015670_0, 0;
     %load/vec4 v0x6522f90133f0_0;
     %assign/vec4 v0x6522f9015410_0, 0;
+=======
+    %assign/vec4 v0x5bd6333f8c10_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v0x5bd6333f8b50_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v0x5bd6333f8eb0_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v0x5bd6333f8dd0_0, 0;
+    %pushi/vec4 0, 0, 4;
+    %assign/vec4 v0x5bd6333f8cf0_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd6333f9130_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd6333f8f90_0, 0;
+    %pushi/vec4 0, 0, 5;
+    %assign/vec4 v0x5bd6333f9670_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd6333f9370_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd6333f9750_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd6333f91f0_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd6333f9810_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd6333f95b0_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd6333f92b0_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd6333f94f0_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd6333f9430_0, 0;
+    %pushi/vec4 0, 0, 12;
+    %assign/vec4 v0x5bd6333f9050_0, 0;
+    %jmp T_8.1;
+T_8.0 ;
+    %load/vec4 v0x5bd6333f88f0_0;
+    %nor/r;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_8.4, 8;
+    %load/vec4 v0x5bd6333f6cf0_0;
+    %assign/vec4 v0x5bd6333f8c10_0, 0;
+    %load/vec4 v0x5bd6333f6de0_0;
+    %assign/vec4 v0x5bd6333f8b50_0, 0;
+    %load/vec4 v0x5bd6333f6ff0_0;
+    %assign/vec4 v0x5bd6333f8eb0_0, 0;
+    %load/vec4 v0x5bd6333f70d0_0;
+    %assign/vec4 v0x5bd6333f8dd0_0, 0;
+    %load/vec4 v0x5bd6333f6ec0_0;
+    %assign/vec4 v0x5bd6333f8cf0_0, 0;
+    %load/vec4 v0x5bd6333f71b0_0;
+    %assign/vec4 v0x5bd6333f9130_0, 0;
+    %load/vec4 v0x5bd6333f6b30_0;
+    %assign/vec4 v0x5bd6333f8f90_0, 0;
+    %load/vec4 v0x5bd6333f7710_0;
+    %assign/vec4 v0x5bd6333f9670_0, 0;
+    %load/vec4 v0x5bd6333f73f0_0;
+    %assign/vec4 v0x5bd6333f9370_0, 0;
+    %load/vec4 v0x5bd6333f77d0_0;
+    %assign/vec4 v0x5bd6333f9750_0, 0;
+    %load/vec4 v0x5bd6333f7270_0;
+    %assign/vec4 v0x5bd6333f91f0_0, 0;
+    %load/vec4 v0x5bd6333f7870_0;
+    %assign/vec4 v0x5bd6333f9810_0, 0;
+    %load/vec4 v0x5bd6333f7650_0;
+    %assign/vec4 v0x5bd6333f95b0_0, 0;
+    %load/vec4 v0x5bd6333f7330_0;
+    %assign/vec4 v0x5bd6333f92b0_0, 0;
+    %load/vec4 v0x5bd6333f7590_0;
+    %assign/vec4 v0x5bd6333f94f0_0, 0;
+    %load/vec4 v0x5bd6333f74b0_0;
+    %pad/u 1;
+    %assign/vec4 v0x5bd6333f9430_0, 0;
+    %load/vec4 v0x5bd6333f6c10_0;
+    %assign/vec4 v0x5bd6333f9050_0, 0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 T_8.4 ;
 T_8.1 ;
     %jmp T_8;
     .thread T_8;
+<<<<<<< HEAD
     .scope S_0x6522f8fda980;
 T_9 ;
     %wait E_0x6522f8e7a2b0;
@@ -1926,13 +3486,256 @@ T_10.0 ;
     %cmpi/s 8, 0, 32;
     %jmp/0xz T_10.1, 5;
     %load/vec4 v0x6522f9012180_0;
+=======
+    .scope S_0x5bd6333bfe10;
+T_9 ;
+    %wait E_0x5bd63324b2d0;
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v0x5bd6333f38e0_0, 0, 32;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x5bd6333f3c00_0, 0, 1;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x5bd6333f3cc0_0, 0, 1;
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v0x5bd6333f3d80_0, 0, 32;
+    %load/vec4 v0x5bd6333f3b40_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_9.0, 8;
+    %load/vec4 v0x5bd6333f37b0_0;
+    %dup/vec4;
+    %pushi/vec4 8, 0, 4;
+    %cmp/u;
+    %jmp/1 T_9.2, 6;
+    %dup/vec4;
+    %pushi/vec4 9, 0, 4;
+    %cmp/u;
+    %jmp/1 T_9.3, 6;
+    %dup/vec4;
+    %pushi/vec4 10, 0, 4;
+    %cmp/u;
+    %jmp/1 T_9.4, 6;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0x5bd6333f3cc0_0, 0, 1;
+    %jmp T_9.6;
+T_9.2 ;
+    %load/vec4 v0x5bd6333f36d0_0;
+    %load/vec4 v0x5bd6333f3a60_0;
+    %cmp/e;
+    %flag_get/vec4 4;
+    %store/vec4 v0x5bd6333f3cc0_0, 0, 1;
+    %jmp T_9.6;
+T_9.3 ;
+    %load/vec4 v0x5bd6333f36d0_0;
+    %load/vec4 v0x5bd6333f3a60_0;
+    %cmp/u;
+    %flag_get/vec4 5;
+    %store/vec4 v0x5bd6333f3cc0_0, 0, 1;
+    %jmp T_9.6;
+T_9.4 ;
+    %load/vec4 v0x5bd6333f3a60_0;
+    %load/vec4 v0x5bd6333f36d0_0;
+    %cmp/u;
+    %flag_get/vec4 5;
+    %store/vec4 v0x5bd6333f3cc0_0, 0, 1;
+    %jmp T_9.6;
+T_9.6 ;
+    %pop/vec4 1;
+    %load/vec4 v0x5bd6333f3cc0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_9.7, 8;
+    %load/vec4 v0x5bd6333f3610_0;
+    %load/vec4 v0x5bd6333f39a0_0;
+    %add;
+    %store/vec4 v0x5bd6333f3d80_0, 0, 32;
+    %jmp T_9.8;
+T_9.7 ;
+    %load/vec4 v0x5bd6333f3610_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd6333f3d80_0, 0, 32;
+T_9.8 ;
+    %load/vec4 v0x5bd6333f3d80_0;
+    %store/vec4 v0x5bd6333f38e0_0, 0, 32;
+    %load/vec4 v0x5bd63337d400_0;
+    %load/vec4 v0x5bd6333f3cc0_0;
+    %xor;
+    %store/vec4 v0x5bd6333f3c00_0, 0, 1;
+    %jmp T_9.1;
+T_9.0 ;
+    %load/vec4 v0x5bd6333f37b0_0;
+    %dup/vec4;
+    %pushi/vec4 0, 0, 4;
+    %cmp/u;
+    %jmp/1 T_9.9, 6;
+    %dup/vec4;
+    %pushi/vec4 1, 0, 4;
+    %cmp/u;
+    %jmp/1 T_9.10, 6;
+    %dup/vec4;
+    %pushi/vec4 2, 0, 4;
+    %cmp/u;
+    %jmp/1 T_9.11, 6;
+    %dup/vec4;
+    %pushi/vec4 3, 0, 4;
+    %cmp/u;
+    %jmp/1 T_9.12, 6;
+    %dup/vec4;
+    %pushi/vec4 4, 0, 4;
+    %cmp/u;
+    %jmp/1 T_9.13, 6;
+    %dup/vec4;
+    %pushi/vec4 5, 0, 4;
+    %cmp/u;
+    %jmp/1 T_9.14, 6;
+    %dup/vec4;
+    %pushi/vec4 6, 0, 4;
+    %cmp/u;
+    %jmp/1 T_9.15, 6;
+    %dup/vec4;
+    %pushi/vec4 7, 0, 4;
+    %cmp/u;
+    %jmp/1 T_9.16, 6;
+    %dup/vec4;
+    %pushi/vec4 8, 0, 4;
+    %cmp/u;
+    %jmp/1 T_9.17, 6;
+    %dup/vec4;
+    %pushi/vec4 9, 0, 4;
+    %cmp/u;
+    %jmp/1 T_9.18, 6;
+    %dup/vec4;
+    %pushi/vec4 10, 0, 4;
+    %cmp/u;
+    %jmp/1 T_9.19, 6;
+    %dup/vec4;
+    %pushi/vec4 11, 0, 4;
+    %cmp/u;
+    %jmp/1 T_9.20, 6;
+    %load/vec4 v0x5bd6333f3610_0;
+    %load/vec4 v0x5bd6333f39a0_0;
+    %add;
+    %store/vec4 v0x5bd6333f38e0_0, 0, 32;
+    %jmp T_9.22;
+T_9.9 ;
+    %load/vec4 v0x5bd6333f3610_0;
+    %load/vec4 v0x5bd6333f39a0_0;
+    %add;
+    %store/vec4 v0x5bd6333f38e0_0, 0, 32;
+    %jmp T_9.22;
+T_9.10 ;
+    %load/vec4 v0x5bd6333f3610_0;
+    %load/vec4 v0x5bd6333f39a0_0;
+    %sub;
+    %store/vec4 v0x5bd6333f38e0_0, 0, 32;
+    %jmp T_9.22;
+T_9.11 ;
+    %load/vec4 v0x5bd6333f3610_0;
+    %load/vec4 v0x5bd6333f39a0_0;
+    %and;
+    %store/vec4 v0x5bd6333f38e0_0, 0, 32;
+    %jmp T_9.22;
+T_9.12 ;
+    %load/vec4 v0x5bd6333f3610_0;
+    %load/vec4 v0x5bd6333f39a0_0;
+    %or;
+    %store/vec4 v0x5bd6333f38e0_0, 0, 32;
+    %jmp T_9.22;
+T_9.13 ;
+    %load/vec4 v0x5bd6333f3610_0;
+    %load/vec4 v0x5bd6333f39a0_0;
+    %xor;
+    %store/vec4 v0x5bd6333f38e0_0, 0, 32;
+    %jmp T_9.22;
+T_9.14 ;
+    %load/vec4 v0x5bd6333f3610_0;
+    %inv;
+    %store/vec4 v0x5bd6333f38e0_0, 0, 32;
+    %jmp T_9.22;
+T_9.15 ;
+    %load/vec4 v0x5bd6333f3610_0;
+    %load/vec4 v0x5bd6333f39a0_0;
+    %parti/s 5, 0, 2;
+    %ix/vec4 4;
+    %shiftl 4;
+    %store/vec4 v0x5bd6333f38e0_0, 0, 32;
+    %jmp T_9.22;
+T_9.16 ;
+    %load/vec4 v0x5bd6333f3610_0;
+    %load/vec4 v0x5bd6333f39a0_0;
+    %parti/s 5, 0, 2;
+    %ix/vec4 4;
+    %shiftr 4;
+    %store/vec4 v0x5bd6333f38e0_0, 0, 32;
+    %jmp T_9.22;
+T_9.17 ;
+    %pushi/vec4 0, 0, 31;
+    %load/vec4 v0x5bd6333f3610_0;
+    %load/vec4 v0x5bd6333f39a0_0;
+    %cmp/e;
+    %flag_get/vec4 4;
+    %concat/vec4; draw_concat_vec4
+    %store/vec4 v0x5bd6333f38e0_0, 0, 32;
+    %jmp T_9.22;
+T_9.18 ;
+    %pushi/vec4 0, 0, 31;
+    %load/vec4 v0x5bd6333f3610_0;
+    %load/vec4 v0x5bd6333f39a0_0;
+    %cmp/u;
+    %flag_get/vec4 5;
+    %concat/vec4; draw_concat_vec4
+    %store/vec4 v0x5bd6333f38e0_0, 0, 32;
+    %jmp T_9.22;
+T_9.19 ;
+    %pushi/vec4 0, 0, 31;
+    %load/vec4 v0x5bd6333f39a0_0;
+    %load/vec4 v0x5bd6333f3610_0;
+    %cmp/u;
+    %flag_get/vec4 5;
+    %concat/vec4; draw_concat_vec4
+    %store/vec4 v0x5bd6333f38e0_0, 0, 32;
+    %jmp T_9.22;
+T_9.20 ;
+    %load/vec4 v0x5bd6333f3610_0;
+    %load/vec4 v0x5bd6333f39a0_0;
+    %mul;
+    %store/vec4 v0x5bd6333f38e0_0, 0, 32;
+    %jmp T_9.22;
+T_9.22 ;
+    %pop/vec4 1;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x5bd6333f3c00_0, 0, 1;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x5bd6333f3cc0_0, 0, 1;
+T_9.1 ;
+    %jmp T_9;
+    .thread T_9, $push;
+    .scope S_0x5bd6333c01f0;
+T_10 ;
+    %wait E_0x5bd6333ef050;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x5bd6333f5ce0_0, 0, 1;
+    %pushi/vec4 0, 0, 3;
+    %store/vec4 v0x5bd6333f5da0_0, 0, 3;
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v0x5bd6333f5e80_0, 0, 32;
+T_10.0 ;
+    %load/vec4 v0x5bd6333f5e80_0;
+    %cmpi/s 8, 0, 32;
+    %jmp/0xz T_10.1, 5;
+    %load/vec4 v0x5bd6333f5ce0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %nor/r;
     %flag_set/vec4 9;
     %flag_get/vec4 9;
     %jmp/0 T_10.4, 9;
+<<<<<<< HEAD
     %ix/getv/s 4, v0x6522f9012320_0;
     %load/vec4a v0x6522f9012400, 4;
     %load/vec4 v0x6522f9010f60_0;
+=======
+    %ix/getv/s 4, v0x5bd6333f5e80_0;
+    %load/vec4a v0x5bd6333f5f60, 4;
+    %load/vec4 v0x5bd6333f49b0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %cmp/e;
     %flag_get/vec4 4;
     %and;
@@ -1940,6 +3743,7 @@ T_10.4;
     %flag_set/vec4 8;
     %jmp/0xz  T_10.2, 8;
     %pushi/vec4 1, 0, 1;
+<<<<<<< HEAD
     %store/vec4 v0x6522f9012180_0, 0, 1;
     %load/vec4 v0x6522f9012320_0;
     %parti/s 3, 0, 2;
@@ -1948,10 +3752,21 @@ T_10.2 ;
     %load/vec4 v0x6522f9012320_0;
     %addi 1, 0, 32;
     %store/vec4 v0x6522f9012320_0, 0, 32;
+=======
+    %store/vec4 v0x5bd6333f5ce0_0, 0, 1;
+    %load/vec4 v0x5bd6333f5e80_0;
+    %parti/s 3, 0, 2;
+    %store/vec4 v0x5bd6333f5da0_0, 0, 3;
+T_10.2 ;
+    %load/vec4 v0x5bd6333f5e80_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd6333f5e80_0, 0, 32;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %jmp T_10.0;
 T_10.1 ;
     %jmp T_10;
     .thread T_10, $push;
+<<<<<<< HEAD
     .scope S_0x6522f8fd9740;
 T_11 ;
     %wait E_0x6522f90090a0;
@@ -1966,13 +3781,35 @@ T_11.0 ;
     %cmpi/s 8, 0, 32;
     %jmp/0xz T_11.1, 5;
     %load/vec4 v0x6522f9012000_0;
+=======
+    .scope S_0x5bd6333c01f0;
+T_11 ;
+    %wait E_0x5bd6333ef730;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x5bd6333f5b60_0, 0, 1;
+    %pushi/vec4 0, 0, 3;
+    %store/vec4 v0x5bd6333f5c00_0, 0, 3;
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v0x5bd6333f5e80_0, 0, 32;
+T_11.0 ;
+    %load/vec4 v0x5bd6333f5e80_0;
+    %cmpi/s 8, 0, 32;
+    %jmp/0xz T_11.1, 5;
+    %load/vec4 v0x5bd6333f5b60_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %nor/r;
     %flag_set/vec4 9;
     %flag_get/vec4 9;
     %jmp/0 T_11.4, 9;
+<<<<<<< HEAD
     %ix/getv/s 4, v0x6522f9012320_0;
     %load/vec4a v0x6522f9012400, 4;
     %load/vec4 v0x6522f9010c10_0;
+=======
+    %ix/getv/s 4, v0x5bd6333f5e80_0;
+    %load/vec4a v0x5bd6333f5f60, 4;
+    %load/vec4 v0x5bd6333f4660_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %cmp/e;
     %flag_get/vec4 4;
     %and;
@@ -1980,6 +3817,7 @@ T_11.4;
     %flag_set/vec4 8;
     %jmp/0xz  T_11.2, 8;
     %pushi/vec4 1, 0, 1;
+<<<<<<< HEAD
     %store/vec4 v0x6522f9012000_0, 0, 1;
     %load/vec4 v0x6522f9012320_0;
     %parti/s 3, 0, 2;
@@ -1988,10 +3826,21 @@ T_11.2 ;
     %load/vec4 v0x6522f9012320_0;
     %addi 1, 0, 32;
     %store/vec4 v0x6522f9012320_0, 0, 32;
+=======
+    %store/vec4 v0x5bd6333f5b60_0, 0, 1;
+    %load/vec4 v0x5bd6333f5e80_0;
+    %parti/s 3, 0, 2;
+    %store/vec4 v0x5bd6333f5c00_0, 0, 3;
+T_11.2 ;
+    %load/vec4 v0x5bd6333f5e80_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd6333f5e80_0, 0, 32;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %jmp T_11.0;
 T_11.1 ;
     %jmp T_11;
     .thread T_11, $push;
+<<<<<<< HEAD
     .scope S_0x6522f8fd9740;
 T_12 ;
     %wait E_0x6522f8e7a2f0;
@@ -2019,10 +3868,40 @@ T_12.2 ;
     %load/vec4 v0x6522f9012320_0;
     %addi 1, 0, 32;
     %store/vec4 v0x6522f9012320_0, 0, 32;
+=======
+    .scope S_0x5bd6333c01f0;
+T_12 ;
+    %wait E_0x5bd63324b310;
+    %load/vec4 v0x5bd6333f6120_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_12.0, 8;
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v0x5bd6333f5e80_0, 0, 32;
+T_12.2 ;
+    %load/vec4 v0x5bd6333f5e80_0;
+    %cmpi/s 8, 0, 32;
+    %jmp/0xz T_12.3, 5;
+    %pushi/vec4 0, 0, 12;
+    %ix/getv/s 3, v0x5bd6333f5e80_0;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd6333f5f60, 0, 4;
+    %pushi/vec4 0, 0, 12;
+    %ix/getv/s 3, v0x5bd6333f5e80_0;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd6333f6540, 0, 4;
+    %pushi/vec4 0, 0, 1;
+    %ix/getv/s 3, v0x5bd6333f5e80_0;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd6333f6400, 0, 4;
+    %load/vec4 v0x5bd6333f5e80_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd6333f5e80_0, 0, 32;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %jmp T_12.2;
 T_12.3 ;
     %jmp T_12.1;
 T_12.0 ;
+<<<<<<< HEAD
     %load/vec4 v0x6522f9010b20_0;
     %flag_set/vec4 8;
     %jmp/0xz  T_12.4, 8;
@@ -2047,11 +3926,38 @@ T_12.6 ;
     %fork TD_cpu_run_tb.dut.u_branch_buffer.fifo_insert_new, S_0x6522f8fbe380;
     %join;
     %free S_0x6522f8fbe380;
+=======
+    %load/vec4 v0x5bd6333f4570_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_12.4, 8;
+    %load/vec4 v0x5bd6333f5b60_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_12.6, 8;
+    %load/vec4 v0x5bd6333f4730_0;
+    %load/vec4 v0x5bd6333f5c00_0;
+    %pad/u 5;
+    %ix/vec4 3;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd6333f6400, 0, 4;
+    %load/vec4 v0x5bd6333f4470_0;
+    %load/vec4 v0x5bd6333f5c00_0;
+    %pad/u 5;
+    %ix/vec4 3;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd6333f6540, 0, 4;
+    %jmp T_12.7;
+T_12.6 ;
+    %alloc S_0x5bd6333beb40;
+    %fork TD_cpu_run_tb.dut.u_branch_buffer.fifo_insert_new, S_0x5bd6333beb40;
+    %join;
+    %free S_0x5bd6333beb40;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 T_12.7 ;
 T_12.4 ;
 T_12.1 ;
     %jmp T_12;
     .thread T_12;
+<<<<<<< HEAD
     .scope S_0x6522f901e2e0;
 T_13 ;
     %wait E_0x6522f8e7a2f0;
@@ -2100,10 +4006,65 @@ T_13.0 ;
     %assign/vec4 v0x6522f901fb70_0, 0;
     %load/vec4 v0x6522f901ea70_0;
     %assign/vec4 v0x6522f901f910_0, 0;
+=======
+    .scope S_0x5bd6334029c0;
+T_13 ;
+    %wait E_0x5bd63324b310;
+    %load/vec4 v0x5bd633404a80_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_13.0, 8;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v0x5bd633404280_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd633404900_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v0x5bd633404360_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v0x5bd6334041e0_0, 0;
+    %pushi/vec4 0, 0, 5;
+    %assign/vec4 v0x5bd633404760_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd6334049c0_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd633404500_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd633404840_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd633404440_0, 0;
+    %jmp T_13.1;
+T_13.0 ;
+    %load/vec4 v0x5bd633403e60_0;
+    %nor/r;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_13.2, 8;
+    %load/vec4 v0x5bd633403080_0;
+    %assign/vec4 v0x5bd633404280_0, 0;
+    %load/vec4 v0x5bd633403730_0;
+    %assign/vec4 v0x5bd633404900_0, 0;
+    %load/vec4 v0x5bd633403190_0;
+    %assign/vec4 v0x5bd633404360_0, 0;
+    %load/vec4 v0x5bd633402f50_0;
+    %assign/vec4 v0x5bd6334041e0_0, 0;
+    %load/vec4 v0x5bd6334035a0_0;
+    %assign/vec4 v0x5bd633404760_0, 0;
+    %load/vec4 v0x5bd6334037d0_0;
+    %assign/vec4 v0x5bd6334049c0_0, 0;
+    %load/vec4 v0x5bd633403320_0;
+    %assign/vec4 v0x5bd633404500_0, 0;
+    %load/vec4 v0x5bd633403690_0;
+    %assign/vec4 v0x5bd633404840_0, 0;
+    %load/vec4 v0x5bd633403280_0;
+    %assign/vec4 v0x5bd633404440_0, 0;
+    %load/vec4 v0x5bd633403460_0;
+    %assign/vec4 v0x5bd6334045c0_0, 0;
+    %load/vec4 v0x5bd633403500_0;
+    %assign/vec4 v0x5bd6334046a0_0, 0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 T_13.2 ;
 T_13.1 ;
     %jmp T_13;
     .thread T_13;
+<<<<<<< HEAD
     .scope S_0x6522f90160c0;
 T_14 ;
     %wait E_0x6522f8e7a2f0;
@@ -2152,17 +4113,72 @@ T_14.0 ;
     %flag_get/vec4 10;
     %jmp/0 T_14.7, 10;
     %load/vec4 v0x6522f9017c00_0;
+=======
+    .scope S_0x5bd6333fa060;
+T_14 ;
+    %wait E_0x5bd63324b310;
+    %load/vec4 v0x5bd6333fbfc0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_14.0, 8;
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v0x5bd6333fbd40_0, 0, 32;
+T_14.2 ;
+    %load/vec4 v0x5bd6333fbd40_0;
+    %cmpi/s 4, 0, 32;
+    %jmp/0xz T_14.3, 5;
+    %pushi/vec4 0, 0, 1;
+    %ix/getv/s 3, v0x5bd6333fbd40_0;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd6333fc1a0, 0, 4;
+    %pushi/vec4 0, 0, 1;
+    %ix/getv/s 3, v0x5bd6333fbd40_0;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd6333fba20, 0, 4;
+    %pushi/vec4 0, 0, 4;
+    %ix/getv/s 3, v0x5bd6333fbd40_0;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd6333fc060, 0, 4;
+    %load/vec4 v0x5bd6333fbd40_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd6333fbd40_0, 0, 32;
+    %jmp T_14.2;
+T_14.3 ;
+    %pushi/vec4 0, 0, 2;
+    %assign/vec4 v0x5bd6333fbac0_0, 0;
+    %pushi/vec4 0, 0, 10;
+    %assign/vec4 v0x5bd6333fbe20_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd6333fa8c0_0, 0;
+    %pushi/vec4 0, 0, 10;
+    %assign/vec4 v0x5bd6333fa800_0, 0;
+    %pushi/vec4 0, 0, 128;
+    %assign/vec4 v0x5bd6333fa980_0, 0;
+    %jmp T_14.1;
+T_14.0 ;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd6333fa8c0_0, 0;
+    %load/vec4 v0x5bd6333fa740_0;
+    %flag_set/vec4 10;
+    %flag_get/vec4 10;
+    %jmp/0 T_14.7, 10;
+    %load/vec4 v0x5bd6333fbba0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %nor/r;
     %and;
 T_14.7;
     %flag_set/vec4 9;
     %flag_get/vec4 9;
     %jmp/0 T_14.6, 9;
+<<<<<<< HEAD
     %load/vec4 v0x6522f9017f60_0;
+=======
+    %load/vec4 v0x5bd6333fbf00_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %and;
 T_14.6;
     %flag_set/vec4 8;
     %jmp/0xz  T_14.4, 8;
+<<<<<<< HEAD
     %load/vec4 v0x6522f9017480_0;
     %assign/vec4 v0x6522f9017e80_0, 0;
 T_14.4 ;
@@ -2180,11 +4196,31 @@ T_14.4 ;
     %pad/u 4;
     %ix/vec4 4;
     %load/vec4a v0x6522f9017a80, 4;
+=======
+    %load/vec4 v0x5bd6333fb420_0;
+    %assign/vec4 v0x5bd6333fbe20_0, 0;
+T_14.4 ;
+    %load/vec4 v0x5bd6333fb040_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_14.8, 8;
+    %load/vec4 v0x5bd6333fbac0_0;
+    %pad/u 4;
+    %ix/vec4 4;
+    %load/vec4a v0x5bd6333fc1a0, 4;
+    %flag_set/vec4 9;
+    %flag_get/vec4 9;
+    %jmp/0 T_14.12, 9;
+    %load/vec4 v0x5bd6333fbac0_0;
+    %pad/u 4;
+    %ix/vec4 4;
+    %load/vec4a v0x5bd6333fba20, 4;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %and;
 T_14.12;
     %flag_set/vec4 8;
     %jmp/0xz  T_14.10, 8;
     %pushi/vec4 1, 0, 1;
+<<<<<<< HEAD
     %assign/vec4 v0x6522f9016920_0, 0;
     %load/vec4 v0x6522f9017b20_0;
     %pad/u 4;
@@ -2193,16 +4229,35 @@ T_14.12;
     %pad/u 10;
     %assign/vec4 v0x6522f9016860_0, 0;
     %load/vec4 v0x6522f9017b20_0;
+=======
+    %assign/vec4 v0x5bd6333fa8c0_0, 0;
+    %load/vec4 v0x5bd6333fbac0_0;
+    %pad/u 4;
+    %ix/vec4 4;
+    %load/vec4a v0x5bd6333fc060, 4;
+    %pad/u 10;
+    %assign/vec4 v0x5bd6333fa800_0, 0;
+    %load/vec4 v0x5bd6333fbac0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 7;
     %pad/u 9;
     %muli 4, 0, 9;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f90177c0, 4;
     %ix/load 4, 0, 0;
     %ix/load 5, 0, 0;
     %flag_set/imm 4, 0;
     %assign/vec4/off/d v0x6522f90169e0_0, 4, 5;
     %load/vec4 v0x6522f9017b20_0;
+=======
+    %load/vec4a v0x5bd6333fb760, 4;
+    %ix/load 4, 0, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd6333fa980_0, 4, 5;
+    %load/vec4 v0x5bd6333fbac0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 7;
     %pad/u 9;
     %muli 4, 0, 9;
@@ -2211,12 +4266,21 @@ T_14.12;
     %pad/s 10;
     %add;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f90177c0, 4;
     %ix/load 4, 32, 0;
     %ix/load 5, 0, 0;
     %flag_set/imm 4, 0;
     %assign/vec4/off/d v0x6522f90169e0_0, 4, 5;
     %load/vec4 v0x6522f9017b20_0;
+=======
+    %load/vec4a v0x5bd6333fb760, 4;
+    %ix/load 4, 32, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd6333fa980_0, 4, 5;
+    %load/vec4 v0x5bd6333fbac0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 7;
     %pad/u 9;
     %muli 4, 0, 9;
@@ -2225,12 +4289,21 @@ T_14.12;
     %pad/s 10;
     %add;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f90177c0, 4;
     %ix/load 4, 64, 0;
     %ix/load 5, 0, 0;
     %flag_set/imm 4, 0;
     %assign/vec4/off/d v0x6522f90169e0_0, 4, 5;
     %load/vec4 v0x6522f9017b20_0;
+=======
+    %load/vec4a v0x5bd6333fb760, 4;
+    %ix/load 4, 64, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd6333fa980_0, 4, 5;
+    %load/vec4 v0x5bd6333fbac0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 7;
     %pad/u 9;
     %muli 4, 0, 9;
@@ -2239,6 +4312,7 @@ T_14.12;
     %pad/s 10;
     %add;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f90177c0, 4;
     %ix/load 4, 96, 0;
     %ix/load 5, 0, 0;
@@ -2267,15 +4341,52 @@ T_14.10 ;
     %load/vec4 v0x6522f9016d90_0;
     %parti/s 32, 0, 2;
     %load/vec4 v0x6522f9017b20_0;
+=======
+    %load/vec4a v0x5bd6333fb760, 4;
+    %ix/load 4, 96, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd6333fa980_0, 4, 5;
+T_14.10 ;
+    %pushi/vec4 1, 0, 1;
+    %load/vec4 v0x5bd6333fbac0_0;
+    %pad/u 4;
+    %ix/vec4 3;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd6333fc1a0, 0, 4;
+    %pushi/vec4 0, 0, 1;
+    %load/vec4 v0x5bd6333fbac0_0;
+    %pad/u 4;
+    %ix/vec4 3;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd6333fba20, 0, 4;
+    %load/vec4 v0x5bd6333fbe20_0;
+    %pad/u 4;
+    %load/vec4 v0x5bd6333fbac0_0;
+    %pad/u 4;
+    %ix/vec4 3;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd6333fc060, 0, 4;
+    %load/vec4 v0x5bd6333fad30_0;
+    %parti/s 32, 0, 2;
+    %load/vec4 v0x5bd6333fbac0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 7;
     %pad/u 9;
     %muli 4, 0, 9;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
+<<<<<<< HEAD
     %assign/vec4/a/d v0x6522f90177c0, 0, 4;
     %load/vec4 v0x6522f9016d90_0;
     %parti/s 32, 32, 7;
     %load/vec4 v0x6522f9017b20_0;
+=======
+    %assign/vec4/a/d v0x5bd6333fb760, 0, 4;
+    %load/vec4 v0x5bd6333fad30_0;
+    %parti/s 32, 32, 7;
+    %load/vec4 v0x5bd6333fbac0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 7;
     %pad/u 9;
     %muli 4, 0, 9;
@@ -2285,10 +4396,17 @@ T_14.10 ;
     %add;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
+<<<<<<< HEAD
     %assign/vec4/a/d v0x6522f90177c0, 0, 4;
     %load/vec4 v0x6522f9016d90_0;
     %parti/s 32, 64, 8;
     %load/vec4 v0x6522f9017b20_0;
+=======
+    %assign/vec4/a/d v0x5bd6333fb760, 0, 4;
+    %load/vec4 v0x5bd6333fad30_0;
+    %parti/s 32, 64, 8;
+    %load/vec4 v0x5bd6333fbac0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 7;
     %pad/u 9;
     %muli 4, 0, 9;
@@ -2298,10 +4416,17 @@ T_14.10 ;
     %add;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
+<<<<<<< HEAD
     %assign/vec4/a/d v0x6522f90177c0, 0, 4;
     %load/vec4 v0x6522f9016d90_0;
     %parti/s 32, 96, 8;
     %load/vec4 v0x6522f9017b20_0;
+=======
+    %assign/vec4/a/d v0x5bd6333fb760, 0, 4;
+    %load/vec4 v0x5bd6333fad30_0;
+    %parti/s 32, 96, 8;
+    %load/vec4 v0x5bd6333fbac0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 7;
     %pad/u 9;
     %muli 4, 0, 9;
@@ -2311,6 +4436,7 @@ T_14.10 ;
     %add;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
+<<<<<<< HEAD
     %assign/vec4/a/d v0x6522f90177c0, 0, 4;
     %load/vec4 v0x6522f9017b20_0;
     %addi 1, 0, 2;
@@ -2321,10 +4447,23 @@ T_14.8 ;
     %flag_get/vec4 9;
     %jmp/0 T_14.15, 9;
     %load/vec4 v0x6522f9017c00_0;
+=======
+    %assign/vec4/a/d v0x5bd6333fb760, 0, 4;
+    %load/vec4 v0x5bd6333fbac0_0;
+    %addi 1, 0, 2;
+    %assign/vec4 v0x5bd6333fbac0_0, 0;
+T_14.8 ;
+    %load/vec4 v0x5bd6333fb1a0_0;
+    %flag_set/vec4 9;
+    %flag_get/vec4 9;
+    %jmp/0 T_14.15, 9;
+    %load/vec4 v0x5bd6333fbba0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %and;
 T_14.15;
     %flag_set/vec4 8;
     %jmp/0xz  T_14.13, 8;
+<<<<<<< HEAD
     %load/vec4 v0x6522f9016cd0_0;
     %flag_set/vec4 8;
     %jmp/0xz  T_14.16, 8;
@@ -2333,31 +4472,58 @@ T_14.15;
     %parti/s 8, 0, 2;
     %concat/vec4; draw_concat_vec4
     %load/vec4 v0x6522f9017cc0_0;
+=======
+    %load/vec4 v0x5bd6333fac70_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_14.16, 8;
+    %pushi/vec4 0, 0, 24;
+    %load/vec4 v0x5bd6333fab90_0;
+    %parti/s 8, 0, 2;
+    %concat/vec4; draw_concat_vec4
+    %load/vec4 v0x5bd6333fbc60_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 7;
     %pad/u 9;
     %muli 4, 0, 9;
     %pad/u 10;
+<<<<<<< HEAD
     %load/vec4 v0x6522f9017560_0;
+=======
+    %load/vec4 v0x5bd6333fb500_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 4;
     %pad/u 10;
     %add;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
+<<<<<<< HEAD
     %assign/vec4/a/d v0x6522f90177c0, 0, 4;
     %jmp T_14.17;
 T_14.16 ;
     %load/vec4 v0x6522f9016bf0_0;
     %load/vec4 v0x6522f9017cc0_0;
+=======
+    %assign/vec4/a/d v0x5bd6333fb760, 0, 4;
+    %jmp T_14.17;
+T_14.16 ;
+    %load/vec4 v0x5bd6333fab90_0;
+    %load/vec4 v0x5bd6333fbc60_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 7;
     %pad/u 9;
     %muli 4, 0, 9;
     %pad/u 10;
+<<<<<<< HEAD
     %load/vec4 v0x6522f9017560_0;
+=======
+    %load/vec4 v0x5bd6333fb500_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 4;
     %pad/u 10;
     %add;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
+<<<<<<< HEAD
     %assign/vec4/a/d v0x6522f90177c0, 0, 4;
 T_14.17 ;
     %pushi/vec4 1, 0, 1;
@@ -2366,10 +4532,21 @@ T_14.17 ;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
     %assign/vec4/a/d v0x6522f9017a80, 0, 4;
+=======
+    %assign/vec4/a/d v0x5bd6333fb760, 0, 4;
+T_14.17 ;
+    %pushi/vec4 1, 0, 1;
+    %load/vec4 v0x5bd6333fbc60_0;
+    %pad/u 4;
+    %ix/vec4 3;
+    %ix/load 4, 0, 0; Constant delay
+    %assign/vec4/a/d v0x5bd6333fba20, 0, 4;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 T_14.13 ;
 T_14.1 ;
     %jmp T_14;
     .thread T_14;
+<<<<<<< HEAD
     .scope S_0x6522f90160c0;
 T_15 ;
     %wait E_0x6522f9016520;
@@ -2390,12 +4567,35 @@ T_15 ;
     %flag_get/vec4 9;
     %jmp/0 T_15.2, 9;
     %load/vec4 v0x6522f90170a0_0;
+=======
+    .scope S_0x5bd6333fa060;
+T_15 ;
+    %wait E_0x5bd6333fa4c0;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x5bd6333fbba0_0, 0, 1;
+    %pushi/vec4 0, 0, 2;
+    %store/vec4 v0x5bd6333fbc60_0, 0, 2;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x5bd6333fb100_0, 0, 1;
+    %load/vec4 v0x5bd6333faab0_0;
+    %store/vec4 v0x5bd6333faea0_0, 0, 32;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x5bd6333fa740_0, 0, 1;
+    %load/vec4 v0x5bd6333fb420_0;
+    %store/vec4 v0x5bd6333fa640_0, 0, 10;
+    %load/vec4 v0x5bd6333fbf00_0;
+    %flag_set/vec4 9;
+    %flag_get/vec4 9;
+    %jmp/0 T_15.2, 9;
+    %load/vec4 v0x5bd6333fb040_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %nor/r;
     %and;
 T_15.2;
     %flag_set/vec4 8;
     %jmp/0xz  T_15.0, 8;
     %pushi/vec4 0, 0, 32;
+<<<<<<< HEAD
     %store/vec4 v0x6522f9017da0_0, 0, 32;
 T_15.3 ;
     %load/vec4 v0x6522f9017da0_0;
@@ -2410,6 +4610,22 @@ T_15.3 ;
     %load/vec4a v0x6522f90180c0, 4;
     %pad/u 10;
     %load/vec4 v0x6522f9017480_0;
+=======
+    %store/vec4 v0x5bd6333fbd40_0, 0, 32;
+T_15.3 ;
+    %load/vec4 v0x5bd6333fbd40_0;
+    %cmpi/s 4, 0, 32;
+    %jmp/0xz T_15.4, 5;
+    %ix/getv/s 4, v0x5bd6333fbd40_0;
+    %load/vec4a v0x5bd6333fc1a0, 4;
+    %flag_set/vec4 9;
+    %flag_get/vec4 9;
+    %jmp/0 T_15.7, 9;
+    %ix/getv/s 4, v0x5bd6333fbd40_0;
+    %load/vec4a v0x5bd6333fc060, 4;
+    %pad/u 10;
+    %load/vec4 v0x5bd6333fb420_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %cmp/e;
     %flag_get/vec4 4;
     %and;
@@ -2417,6 +4633,7 @@ T_15.7;
     %flag_set/vec4 8;
     %jmp/0xz  T_15.5, 8;
     %pushi/vec4 1, 0, 1;
+<<<<<<< HEAD
     %store/vec4 v0x6522f9017c00_0, 0, 1;
     %load/vec4 v0x6522f9017da0_0;
     %parti/s 2, 0, 2;
@@ -2439,41 +4656,94 @@ T_15.0 ;
     %jmp/0 T_15.12, 8;
     %pushi/vec4 0, 0, 24;
     %load/vec4 v0x6522f9017cc0_0;
+=======
+    %store/vec4 v0x5bd6333fbba0_0, 0, 1;
+    %load/vec4 v0x5bd6333fbd40_0;
+    %parti/s 2, 0, 2;
+    %store/vec4 v0x5bd6333fbc60_0, 0, 2;
+T_15.5 ;
+    %load/vec4 v0x5bd6333fbd40_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd6333fbd40_0, 0, 32;
+    %jmp T_15.3;
+T_15.4 ;
+T_15.0 ;
+    %load/vec4 v0x5bd6333faf80_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_15.8, 8;
+    %load/vec4 v0x5bd6333fbba0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_15.10, 8;
+    %load/vec4 v0x5bd6333fac70_0;
+    %flag_set/vec4 8;
+    %jmp/0 T_15.12, 8;
+    %pushi/vec4 0, 0, 24;
+    %load/vec4 v0x5bd6333fbc60_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 7;
     %pad/u 9;
     %muli 4, 0, 9;
     %pad/u 10;
+<<<<<<< HEAD
     %load/vec4 v0x6522f9017560_0;
+=======
+    %load/vec4 v0x5bd6333fb500_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 4;
     %pad/u 10;
     %add;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f90177c0, 4;
+=======
+    %load/vec4a v0x5bd6333fb760, 4;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %parti/s 8, 0, 2;
     %concat/vec4; draw_concat_vec4
     %jmp/1 T_15.13, 8;
 T_15.12 ; End of true expr.
+<<<<<<< HEAD
     %load/vec4 v0x6522f9017cc0_0;
+=======
+    %load/vec4 v0x5bd6333fbc60_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 7;
     %pad/u 9;
     %muli 4, 0, 9;
     %pad/u 10;
+<<<<<<< HEAD
     %load/vec4 v0x6522f9017560_0;
+=======
+    %load/vec4 v0x5bd6333fb500_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 4;
     %pad/u 10;
     %add;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f90177c0, 4;
+=======
+    %load/vec4a v0x5bd6333fb760, 4;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %jmp/0 T_15.13, 8;
  ; End of false expr.
     %blend;
 T_15.13;
+<<<<<<< HEAD
     %store/vec4 v0x6522f9016f00_0, 0, 32;
     %jmp T_15.11;
 T_15.10 ;
     %pushi/vec4 1, 0, 1;
     %store/vec4 v0x6522f9017160_0, 0, 1;
     %load/vec4 v0x6522f90170a0_0;
+=======
+    %store/vec4 v0x5bd6333faea0_0, 0, 32;
+    %jmp T_15.11;
+T_15.10 ;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0x5bd6333fb100_0, 0, 1;
+    %load/vec4 v0x5bd6333fb040_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %flag_set/vec4 8;
     %jmp/0 T_15.14, 8;
     %pushi/vec4 0, 0, 1;
@@ -2484,6 +4754,7 @@ T_15.14 ; End of true expr.
  ; End of false expr.
     %blend;
 T_15.15;
+<<<<<<< HEAD
     %store/vec4 v0x6522f90167a0_0, 0, 1;
     %load/vec4 v0x6522f9017480_0;
     %store/vec4 v0x6522f90166a0_0, 0, 10;
@@ -2493,12 +4764,28 @@ T_15.8 ;
     %flag_set/vec4 8;
     %jmp/0xz  T_15.16, 8;
     %load/vec4 v0x6522f9017c00_0;
+=======
+    %store/vec4 v0x5bd6333fa740_0, 0, 1;
+    %load/vec4 v0x5bd6333fb420_0;
+    %store/vec4 v0x5bd6333fa640_0, 0, 10;
+T_15.11 ;
+T_15.8 ;
+    %load/vec4 v0x5bd6333fb1a0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_15.16, 8;
+    %load/vec4 v0x5bd6333fbba0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %nor/r;
     %flag_set/vec4 8;
     %jmp/0xz  T_15.18, 8;
     %pushi/vec4 1, 0, 1;
+<<<<<<< HEAD
     %store/vec4 v0x6522f9017160_0, 0, 1;
     %load/vec4 v0x6522f90170a0_0;
+=======
+    %store/vec4 v0x5bd6333fb100_0, 0, 1;
+    %load/vec4 v0x5bd6333fb040_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %flag_set/vec4 8;
     %jmp/0 T_15.20, 8;
     %pushi/vec4 0, 0, 1;
@@ -2509,13 +4796,20 @@ T_15.20 ; End of true expr.
  ; End of false expr.
     %blend;
 T_15.21;
+<<<<<<< HEAD
     %store/vec4 v0x6522f90167a0_0, 0, 1;
     %load/vec4 v0x6522f9017480_0;
     %store/vec4 v0x6522f90166a0_0, 0, 10;
+=======
+    %store/vec4 v0x5bd6333fa740_0, 0, 1;
+    %load/vec4 v0x5bd6333fb420_0;
+    %store/vec4 v0x5bd6333fa640_0, 0, 10;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 T_15.18 ;
 T_15.16 ;
     %jmp T_15;
     .thread T_15, $push;
+<<<<<<< HEAD
     .scope S_0x6522f9028b80;
 T_16 ;
     %pushi/vec4 0, 0, 32;
@@ -2532,10 +4826,29 @@ T_16.2 ;
     %jmp/0xz T_16.3, 5;
     %pushi/vec4 0, 0, 32;
     %load/vec4 v0x6522f9029c90_0;
+=======
+    .scope S_0x5bd63340eae0;
+T_16 ;
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v0x5bd63340fae0_0, 0, 32;
+T_16.0 ;
+    %load/vec4 v0x5bd63340fae0_0;
+    %cmpi/s 1024, 0, 32;
+    %jmp/0xz T_16.1, 5;
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v0x5bd63340fb80_0, 0, 32;
+T_16.2 ;
+    %load/vec4 v0x5bd63340fb80_0;
+    %cmpi/s 4, 0, 32;
+    %jmp/0xz T_16.3, 5;
+    %pushi/vec4 0, 0, 32;
+    %load/vec4 v0x5bd63340fae0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/s 35;
     %pad/s 37;
     %muli 4, 0, 37;
     %pad/s 38;
+<<<<<<< HEAD
     %load/vec4 v0x6522f9029d30_0;
     %pad/s 38;
     %add;
@@ -2573,6 +4886,45 @@ T_17.0 ;
     %flag_get/vec4 9;
     %jmp/0 T_17.4, 9;
     %load/vec4 v0x6522f9029750_0;
+=======
+    %load/vec4 v0x5bd63340fb80_0;
+    %pad/s 38;
+    %add;
+    %ix/vec4/s 4;
+    %store/vec4a v0x5bd63340fc40, 4, 0;
+    %load/vec4 v0x5bd63340fb80_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd63340fb80_0, 0, 32;
+    %jmp T_16.2;
+T_16.3 ;
+    %load/vec4 v0x5bd63340fae0_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd63340fae0_0, 0, 32;
+    %jmp T_16.0;
+T_16.1 ;
+    %vpi_call 16 50 "$readmemh", "program.hex", v0x5bd63340fc40 {0 0 0};
+    %end;
+    .thread T_16;
+    .scope S_0x5bd63340eae0;
+T_17 ;
+    %wait E_0x5bd63324b310;
+    %load/vec4 v0x5bd63340fd00_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_17.0, 8;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd63340f4d0_0, 0;
+    %pushi/vec4 0, 0, 2;
+    %assign/vec4 v0x5bd63340f5a0_0, 0;
+    %jmp T_17.1;
+T_17.0 ;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd63340f4d0_0, 0;
+    %load/vec4 v0x5bd63340f7d0_0;
+    %flag_set/vec4 9;
+    %flag_get/vec4 9;
+    %jmp/0 T_17.4, 9;
+    %load/vec4 v0x5bd63340f5a0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 32;
     %pushi/vec4 0, 0, 32;
     %cmp/e;
@@ -2581,6 +4933,7 @@ T_17.0 ;
 T_17.4;
     %flag_set/vec4 8;
     %jmp/0xz  T_17.2, 8;
+<<<<<<< HEAD
     %load/vec4 v0x6522f9029890_0;
     %assign/vec4 v0x6522f90297f0_0, 0;
     %pushi/vec4 3, 0, 2;
@@ -2598,16 +4951,44 @@ T_17.2 ;
     %cmpi/e 1, 0, 32;
     %jmp/0xz  T_17.7, 4;
     %load/vec4 v0x6522f90297f0_0;
+=======
+    %load/vec4 v0x5bd63340f6e0_0;
+    %assign/vec4 v0x5bd63340f640_0, 0;
+    %pushi/vec4 3, 0, 2;
+    %assign/vec4 v0x5bd63340f5a0_0, 0;
+T_17.2 ;
+    %load/vec4 v0x5bd63340f5a0_0;
+    %pad/u 32;
+    %cmpi/ne 0, 0, 32;
+    %jmp/0xz  T_17.5, 4;
+    %load/vec4 v0x5bd63340f5a0_0;
+    %subi 1, 0, 2;
+    %assign/vec4 v0x5bd63340f5a0_0, 0;
+    %load/vec4 v0x5bd63340f5a0_0;
+    %pad/u 32;
+    %cmpi/e 1, 0, 32;
+    %jmp/0xz  T_17.7, 4;
+    %load/vec4 v0x5bd63340f640_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9029df0, 4;
     %ix/load 4, 0, 0;
     %ix/load 5, 0, 0;
     %flag_set/imm 4, 0;
     %assign/vec4/off/d v0x6522f90295b0_0, 4, 5;
     %load/vec4 v0x6522f90297f0_0;
+=======
+    %load/vec4a v0x5bd63340fc40, 4;
+    %ix/load 4, 0, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd63340f400_0, 4, 5;
+    %load/vec4 v0x5bd63340f640_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
@@ -2616,12 +4997,21 @@ T_17.2 ;
     %pad/s 18;
     %add;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9029df0, 4;
     %ix/load 4, 32, 0;
     %ix/load 5, 0, 0;
     %flag_set/imm 4, 0;
     %assign/vec4/off/d v0x6522f90295b0_0, 4, 5;
     %load/vec4 v0x6522f90297f0_0;
+=======
+    %load/vec4a v0x5bd63340fc40, 4;
+    %ix/load 4, 32, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd63340f400_0, 4, 5;
+    %load/vec4 v0x5bd63340f640_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
@@ -2630,12 +5020,21 @@ T_17.2 ;
     %pad/s 18;
     %add;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9029df0, 4;
     %ix/load 4, 64, 0;
     %ix/load 5, 0, 0;
     %flag_set/imm 4, 0;
     %assign/vec4/off/d v0x6522f90295b0_0, 4, 5;
     %load/vec4 v0x6522f90297f0_0;
+=======
+    %load/vec4a v0x5bd63340fc40, 4;
+    %ix/load 4, 64, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd63340f400_0, 4, 5;
+    %load/vec4 v0x5bd63340f640_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
@@ -2644,6 +5043,7 @@ T_17.2 ;
     %pad/s 18;
     %add;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9029df0, 4;
     %ix/load 4, 96, 0;
     %ix/load 5, 0, 0;
@@ -2651,11 +5051,21 @@ T_17.2 ;
     %assign/vec4/off/d v0x6522f90295b0_0, 4, 5;
     %pushi/vec4 1, 0, 1;
     %assign/vec4 v0x6522f9029680_0, 0;
+=======
+    %load/vec4a v0x5bd63340fc40, 4;
+    %ix/load 4, 96, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd63340f400_0, 4, 5;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x5bd63340f4d0_0, 0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 T_17.7 ;
 T_17.5 ;
 T_17.1 ;
     %jmp T_17;
     .thread T_17;
+<<<<<<< HEAD
     .scope S_0x6522f9028b80;
 T_18 ;
     %wait E_0x6522f8e7a2f0;
@@ -2675,6 +5085,27 @@ T_18.0 ;
     %flag_get/vec4 9;
     %jmp/0 T_18.4, 9;
     %load/vec4 v0x6522f9028fd0_0;
+=======
+    .scope S_0x5bd63340eae0;
+T_18 ;
+    %wait E_0x5bd63324b310;
+    %load/vec4 v0x5bd63340fd00_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_18.0, 8;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd63340f970_0, 0;
+    %pushi/vec4 0, 0, 2;
+    %assign/vec4 v0x5bd63340edf0_0, 0;
+    %jmp T_18.1;
+T_18.0 ;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd63340f970_0, 0;
+    %load/vec4 v0x5bd63340f0a0_0;
+    %flag_set/vec4 9;
+    %flag_get/vec4 9;
+    %jmp/0 T_18.4, 9;
+    %load/vec4 v0x5bd63340edf0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 32;
     %pushi/vec4 0, 0, 32;
     %cmp/e;
@@ -2683,6 +5114,7 @@ T_18.0 ;
 T_18.4;
     %flag_set/vec4 8;
     %jmp/0xz  T_18.2, 8;
+<<<<<<< HEAD
     %load/vec4 v0x6522f90291b0_0;
     %assign/vec4 v0x6522f90290d0_0, 0;
     %pushi/vec4 3, 0, 2;
@@ -2700,16 +5132,44 @@ T_18.2 ;
     %cmpi/e 1, 0, 32;
     %jmp/0xz  T_18.7, 4;
     %load/vec4 v0x6522f90290d0_0;
+=======
+    %load/vec4 v0x5bd63340efd0_0;
+    %assign/vec4 v0x5bd63340eef0_0, 0;
+    %pushi/vec4 3, 0, 2;
+    %assign/vec4 v0x5bd63340edf0_0, 0;
+T_18.2 ;
+    %load/vec4 v0x5bd63340edf0_0;
+    %pad/u 32;
+    %cmpi/ne 0, 0, 32;
+    %jmp/0xz  T_18.5, 4;
+    %load/vec4 v0x5bd63340edf0_0;
+    %subi 1, 0, 2;
+    %assign/vec4 v0x5bd63340edf0_0, 0;
+    %load/vec4 v0x5bd63340edf0_0;
+    %pad/u 32;
+    %cmpi/e 1, 0, 32;
+    %jmp/0xz  T_18.7, 4;
+    %load/vec4 v0x5bd63340eef0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9029df0, 4;
     %ix/load 4, 0, 0;
     %ix/load 5, 0, 0;
     %flag_set/imm 4, 0;
     %assign/vec4/off/d v0x6522f9029a50_0, 4, 5;
     %load/vec4 v0x6522f90290d0_0;
+=======
+    %load/vec4a v0x5bd63340fc40, 4;
+    %ix/load 4, 0, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd63340f8a0_0, 4, 5;
+    %load/vec4 v0x5bd63340eef0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
@@ -2718,12 +5178,21 @@ T_18.2 ;
     %pad/s 18;
     %add;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9029df0, 4;
     %ix/load 4, 32, 0;
     %ix/load 5, 0, 0;
     %flag_set/imm 4, 0;
     %assign/vec4/off/d v0x6522f9029a50_0, 4, 5;
     %load/vec4 v0x6522f90290d0_0;
+=======
+    %load/vec4a v0x5bd63340fc40, 4;
+    %ix/load 4, 32, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd63340f8a0_0, 4, 5;
+    %load/vec4 v0x5bd63340eef0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
@@ -2732,12 +5201,21 @@ T_18.2 ;
     %pad/s 18;
     %add;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9029df0, 4;
     %ix/load 4, 64, 0;
     %ix/load 5, 0, 0;
     %flag_set/imm 4, 0;
     %assign/vec4/off/d v0x6522f9029a50_0, 4, 5;
     %load/vec4 v0x6522f90290d0_0;
+=======
+    %load/vec4a v0x5bd63340fc40, 4;
+    %ix/load 4, 64, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd63340f8a0_0, 4, 5;
+    %load/vec4 v0x5bd63340eef0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
@@ -2746,6 +5224,7 @@ T_18.2 ;
     %pad/s 18;
     %add;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9029df0, 4;
     %ix/load 4, 96, 0;
     %ix/load 5, 0, 0;
@@ -2753,11 +5232,21 @@ T_18.2 ;
     %assign/vec4/off/d v0x6522f9029a50_0, 4, 5;
     %pushi/vec4 1, 0, 1;
     %assign/vec4 v0x6522f9029b20_0, 0;
+=======
+    %load/vec4a v0x5bd63340fc40, 4;
+    %ix/load 4, 96, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd63340f8a0_0, 4, 5;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x5bd63340f970_0, 0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 T_18.7 ;
 T_18.5 ;
 T_18.1 ;
     %jmp T_18;
     .thread T_18;
+<<<<<<< HEAD
     .scope S_0x6522f9028b80;
 T_19 ;
     %wait E_0x6522f8e7a2f0;
@@ -2767,15 +5256,33 @@ T_19 ;
     %load/vec4 v0x6522f90294e0_0;
     %parti/s 32, 0, 2;
     %load/vec4 v0x6522f9029320_0;
+=======
+    .scope S_0x5bd63340eae0;
+T_19 ;
+    %wait E_0x5bd63324b310;
+    %load/vec4 v0x5bd63340f260_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_19.0, 8;
+    %load/vec4 v0x5bd63340f330_0;
+    %parti/s 32, 0, 2;
+    %load/vec4 v0x5bd63340f170_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
+<<<<<<< HEAD
     %assign/vec4/a/d v0x6522f9029df0, 0, 4;
     %load/vec4 v0x6522f90294e0_0;
     %parti/s 32, 32, 7;
     %load/vec4 v0x6522f9029320_0;
+=======
+    %assign/vec4/a/d v0x5bd63340fc40, 0, 4;
+    %load/vec4 v0x5bd63340f330_0;
+    %parti/s 32, 32, 7;
+    %load/vec4 v0x5bd63340f170_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
@@ -2785,10 +5292,17 @@ T_19 ;
     %add;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
+<<<<<<< HEAD
     %assign/vec4/a/d v0x6522f9029df0, 0, 4;
     %load/vec4 v0x6522f90294e0_0;
     %parti/s 32, 64, 8;
     %load/vec4 v0x6522f9029320_0;
+=======
+    %assign/vec4/a/d v0x5bd63340fc40, 0, 4;
+    %load/vec4 v0x5bd63340f330_0;
+    %parti/s 32, 64, 8;
+    %load/vec4 v0x5bd63340f170_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
@@ -2798,10 +5312,17 @@ T_19 ;
     %add;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
+<<<<<<< HEAD
     %assign/vec4/a/d v0x6522f9029df0, 0, 4;
     %load/vec4 v0x6522f90294e0_0;
     %parti/s 32, 96, 8;
     %load/vec4 v0x6522f9029320_0;
+=======
+    %assign/vec4/a/d v0x5bd63340fc40, 0, 4;
+    %load/vec4 v0x5bd63340f330_0;
+    %parti/s 32, 96, 8;
+    %load/vec4 v0x5bd63340f170_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
@@ -2811,6 +5332,7 @@ T_19 ;
     %add;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
+<<<<<<< HEAD
     %assign/vec4/a/d v0x6522f9029df0, 0, 4;
 T_19.0 ;
     %jmp T_19;
@@ -2861,6 +5383,66 @@ T_23 ;
     %end;
     .thread T_23;
     .scope S_0x6522f8fbe700;
+=======
+    %assign/vec4/a/d v0x5bd63340fc40, 0, 4;
+T_19.0 ;
+    %jmp T_19;
+    .thread T_19;
+    .scope S_0x5bd633408100;
+T_20 ;
+    %wait E_0x5bd63324b310;
+    %load/vec4 v0x5bd633408f00_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_20.0, 8;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v0x5bd633408fa0_0, 0;
+    %pushi/vec4 0, 0, 5;
+    %assign/vec4 v0x5bd6334091e0_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd6334092c0_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %assign/vec4 v0x5bd633409040_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd633409120_0, 0;
+    %jmp T_20.1;
+T_20.0 ;
+    %load/vec4 v0x5bd633408490_0;
+    %assign/vec4 v0x5bd633408fa0_0, 0;
+    %load/vec4 v0x5bd633408760_0;
+    %assign/vec4 v0x5bd6334091e0_0, 0;
+    %load/vec4 v0x5bd633408850_0;
+    %assign/vec4 v0x5bd6334092c0_0, 0;
+    %load/vec4 v0x5bd6334085a0_0;
+    %assign/vec4 v0x5bd633409040_0, 0;
+    %load/vec4 v0x5bd633408690_0;
+    %assign/vec4 v0x5bd633409120_0, 0;
+T_20.1 ;
+    %jmp T_20;
+    .thread T_20;
+    .scope S_0x5bd6333a34f0;
+T_21 ;
+    %pushi/vec4 0, 0, 1;
+    %store/vec4 v0x5bd633414f90_0, 0, 1;
+    %pushi/vec4 1, 0, 1;
+    %store/vec4 v0x5bd633415210_0, 0, 1;
+    %end;
+    .thread T_21;
+    .scope S_0x5bd6333a34f0;
+T_22 ;
+    %delay 5000, 0;
+    %load/vec4 v0x5bd633414f90_0;
+    %inv;
+    %store/vec4 v0x5bd633414f90_0, 0, 1;
+    %jmp T_22;
+    .thread T_22;
+    .scope S_0x5bd6333a34f0;
+T_23 ;
+    %vpi_call 2 27 "$dumpfile", "cpu_run_tb.vcd" {0 0 0};
+    %vpi_call 2 28 "$dumpvars", 32'sb00000000000000000000000000000000, S_0x5bd6333a34f0 {0 0 0};
+    %end;
+    .thread T_23;
+    .scope S_0x5bd6333a34f0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 T_24 ;
     %vpi_call 2 36 "$display", "===========================================" {0 0 0};
     %vpi_call 2 37 "$display", "CPU RUN TB (Verilog-2005): start @ PC=0, stop at first NOP" {0 0 0};
@@ -2873,11 +5455,16 @@ T_24.0 %dup/vec4;
     %jmp/1 T_24.1, 4;
     %pushi/vec4 1, 0, 32;
     %sub;
+<<<<<<< HEAD
     %wait E_0x6522f8e7a2f0;
+=======
+    %wait E_0x5bd63324b310;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %jmp T_24.0;
 T_24.1 ;
     %pop/vec4 1;
     %pushi/vec4 0, 0, 1;
+<<<<<<< HEAD
     %assign/vec4 v0x6522f902eeb0_0, 0;
     %pushi/vec4 0, 0, 32;
     %store/vec4 v0x6522f902ed70_0, 0, 32;
@@ -2899,6 +5486,29 @@ T_24.2 ;
     %vpi_call 2 54 "$display", "C%0d | F_pc=%0d F_inst=0x%08h | EX_alu_out=%0d | EX_taken=%0b -> EX_ra=%0b | EX_rb=%0b | stall_d=%0b EX_true_taken=%0b", v0x6522f902ed70_0, v0x6522f902d090_0, v0x6522f902ecd0_0, v0x6522f902c210_0, v0x6522f902c9a0_0, v0x6522f902bd20_0, v0x6522f902c2d0_0, v0x6522f902e970_0, v0x6522f902ca40_0 {0 0 0};
 T_24.3 ;
     %load/vec4 v0x6522f902ecd0_0;
+=======
+    %assign/vec4 v0x5bd633415210_0, 0;
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v0x5bd6334150d0_0, 0, 32;
+    %fork t_1, S_0x5bd633414e00;
+    %jmp t_0;
+    .scope S_0x5bd633414e00;
+t_1 ;
+T_24.2 ;
+    %wait E_0x5bd63324b310;
+    %load/vec4 v0x5bd6334150d0_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd6334150d0_0, 0, 32;
+    %load/vec4 v0x5bd633412ca0_0;
+    %store/vec4 v0x5bd633415030_0, 0, 32;
+    %load/vec4 v0x5bd6334150d0_0;
+    %cmpi/s 70, 0, 32;
+    %flag_or 5, 4;
+    %jmp/0xz  T_24.3, 5;
+    %vpi_call 2 54 "$display", "C%0d | F_pc=%0d F_inst=0x%08h | EX_alu_out=%0d | EX_taken=%0b -> EX_ra=%0b | EX_rb=%0b | stall_d=%0b EX_true_taken=%0b", v0x5bd6334150d0_0, v0x5bd633412fb0_0, v0x5bd633415030_0, v0x5bd633411fb0_0, v0x5bd6334128c0_0, v0x5bd633411cd0_0, v0x5bd633412070_0, v0x5bd633414cd0_0, v0x5bd633412960_0 {0 0 0};
+T_24.3 ;
+    %load/vec4 v0x5bd633415030_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %cmpi/e 0, 0, 32;
     %jmp/0xz  T_24.5, 4;
     %pushi/vec4 5, 0, 32;
@@ -2909,6 +5519,7 @@ T_24.7 %dup/vec4;
     %jmp/1 T_24.8, 4;
     %pushi/vec4 1, 0, 32;
     %sub;
+<<<<<<< HEAD
     %wait E_0x6522f8e7a2f0;
     %jmp T_24.7;
 T_24.8 ;
@@ -2917,11 +5528,22 @@ T_24.8 ;
     %disable S_0x6522f902eaa0;
 T_24.5 ;
     %load/vec4 v0x6522f902ed70_0;
+=======
+    %wait E_0x5bd63324b310;
+    %jmp T_24.7;
+T_24.8 ;
+    %pop/vec4 1;
+    %vpi_call 2 69 "$display", "---- End of program reached at PC=%0d after %0d cycles ----", v0x5bd633412fb0_0, v0x5bd6334150d0_0 {0 0 0};
+    %disable S_0x5bd633414e00;
+T_24.5 ;
+    %load/vec4 v0x5bd6334150d0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %cmpi/s 2000, 0, 32;
     %flag_or 5, 4; GT is !LE
     %flag_inv 5;
     %jmp/0xz  T_24.9, 5;
     %vpi_call 2 75 "$display", "** TIMEOUT: exceeded cycle limit, stopping." {0 0 0};
+<<<<<<< HEAD
     %disable S_0x6522f902eaa0;
 T_24.9 ;
     %jmp T_24.2;
@@ -2939,23 +5561,56 @@ T_24.11 ;
     %load/vec4 v0x6522f902ee10_0;
     %addi 1, 0, 32;
     %store/vec4 v0x6522f902ee10_0, 0, 32;
+=======
+    %disable S_0x5bd633414e00;
+T_24.9 ;
+    %jmp T_24.2;
+    %end;
+    .scope S_0x5bd6333a34f0;
+t_0 %join;
+    %vpi_call 2 81 "$display", "\012==== REGISTER FILE DUMP ====" {0 0 0};
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v0x5bd633415170_0, 0, 32;
+T_24.11 ;
+    %load/vec4 v0x5bd633415170_0;
+    %cmpi/s 32, 0, 32;
+    %jmp/0xz T_24.12, 5;
+    %vpi_call 2 83 "$display", "x%0d = 0x%08h (%0d)", v0x5bd633415170_0, &A<v0x5bd63340e600, v0x5bd633415170_0 >, &A<v0x5bd63340e600, v0x5bd633415170_0 > {0 0 0};
+    %load/vec4 v0x5bd633415170_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd633415170_0, 0, 32;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %jmp T_24.11;
 T_24.12 ;
     %vpi_call 2 85 "$display", "============================\012" {0 0 0};
     %vpi_call 2 87 "$display", "\012==== MEMORY LINES (0..3) ====" {0 0 0};
     %pushi/vec4 0, 0, 32;
+<<<<<<< HEAD
     %store/vec4 v0x6522f902ee10_0, 0, 32;
 T_24.13 ;
     %load/vec4 v0x6522f902ee10_0;
     %cmpi/s 8, 0, 32;
     %jmp/0xz T_24.14, 5;
     %load/vec4 v0x6522f902ee10_0;
+=======
+    %store/vec4 v0x5bd633415170_0, 0, 32;
+T_24.13 ;
+    %load/vec4 v0x5bd633415170_0;
+    %cmpi/s 8, 0, 32;
+    %jmp/0xz T_24.14, 5;
+    %load/vec4 v0x5bd633415170_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/s 35;
     %pad/s 37;
     %muli 4, 0, 37;
     %ix/vec4/s 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9029df0, 4;
     %load/vec4 v0x6522f902ee10_0;
+=======
+    %load/vec4a v0x5bd63340fc40, 4;
+    %load/vec4 v0x5bd633415170_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/s 35;
     %pad/s 37;
     %muli 4, 0, 37;
@@ -2964,8 +5619,13 @@ T_24.13 ;
     %pad/s 38;
     %add;
     %ix/vec4/s 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9029df0, 4;
     %load/vec4 v0x6522f902ee10_0;
+=======
+    %load/vec4a v0x5bd63340fc40, 4;
+    %load/vec4 v0x5bd633415170_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/s 35;
     %pad/s 37;
     %muli 4, 0, 37;
@@ -2974,8 +5634,13 @@ T_24.13 ;
     %pad/s 38;
     %add;
     %ix/vec4/s 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9029df0, 4;
     %load/vec4 v0x6522f902ee10_0;
+=======
+    %load/vec4a v0x5bd63340fc40, 4;
+    %load/vec4 v0x5bd633415170_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/s 35;
     %pad/s 37;
     %muli 4, 0, 37;
@@ -2984,27 +5649,49 @@ T_24.13 ;
     %pad/s 38;
     %add;
     %ix/vec4/s 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9029df0, 4;
     %vpi_call 2 89 "$display", "Line %0d: %08h  %08h  %08h  %08h", v0x6522f902ee10_0, S<3,vec4,u32>, S<2,vec4,u32>, S<1,vec4,u32>, S<0,vec4,u32> {4 0 0};
     %load/vec4 v0x6522f902ee10_0;
     %addi 1, 0, 32;
     %store/vec4 v0x6522f902ee10_0, 0, 32;
+=======
+    %load/vec4a v0x5bd63340fc40, 4;
+    %vpi_call 2 89 "$display", "Line %0d: %08h  %08h  %08h  %08h", v0x5bd633415170_0, S<3,vec4,u32>, S<2,vec4,u32>, S<1,vec4,u32>, S<0,vec4,u32> {4 0 0};
+    %load/vec4 v0x5bd633415170_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd633415170_0, 0, 32;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %jmp T_24.13;
 T_24.14 ;
     %vpi_call 2 100 "$display", "\012==== BACKING DATA MEMORY (u_data_mem) ====" {0 0 0};
     %pushi/vec4 8, 0, 32;
+<<<<<<< HEAD
     %store/vec4 v0x6522f902ee10_0, 0, 32;
 T_24.15 ;
     %load/vec4 v0x6522f902ee10_0;
     %cmpi/s 24, 0, 32;
     %jmp/0xz T_24.16, 5;
     %load/vec4 v0x6522f902ee10_0;
+=======
+    %store/vec4 v0x5bd633415170_0, 0, 32;
+T_24.15 ;
+    %load/vec4 v0x5bd633415170_0;
+    %cmpi/s 24, 0, 32;
+    %jmp/0xz T_24.16, 5;
+    %load/vec4 v0x5bd633415170_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/s 35;
     %pad/s 37;
     %muli 4, 0, 37;
     %ix/vec4/s 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9029df0, 4;
     %load/vec4 v0x6522f902ee10_0;
+=======
+    %load/vec4a v0x5bd63340fc40, 4;
+    %load/vec4 v0x5bd633415170_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/s 35;
     %pad/s 37;
     %muli 4, 0, 37;
@@ -3013,8 +5700,13 @@ T_24.15 ;
     %pad/s 38;
     %add;
     %ix/vec4/s 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9029df0, 4;
     %load/vec4 v0x6522f902ee10_0;
+=======
+    %load/vec4a v0x5bd63340fc40, 4;
+    %load/vec4 v0x5bd633415170_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/s 35;
     %pad/s 37;
     %muli 4, 0, 37;
@@ -3023,8 +5715,13 @@ T_24.15 ;
     %pad/s 38;
     %add;
     %ix/vec4/s 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9029df0, 4;
     %load/vec4 v0x6522f902ee10_0;
+=======
+    %load/vec4a v0x5bd63340fc40, 4;
+    %load/vec4 v0x5bd633415170_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/s 35;
     %pad/s 37;
     %muli 4, 0, 37;
@@ -3033,15 +5730,24 @@ T_24.15 ;
     %pad/s 38;
     %add;
     %ix/vec4/s 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9029df0, 4;
     %vpi_call 2 102 "$display", "Line %0d: %08d %08d %08d %08d", v0x6522f902ee10_0, S<3,vec4,u32>, S<2,vec4,u32>, S<1,vec4,u32>, S<0,vec4,u32> {4 0 0};
     %load/vec4 v0x6522f902ee10_0;
     %addi 1, 0, 32;
     %store/vec4 v0x6522f902ee10_0, 0, 32;
+=======
+    %load/vec4a v0x5bd63340fc40, 4;
+    %vpi_call 2 102 "$display", "Line %0d: %08d %08d %08d %08d", v0x5bd633415170_0, S<3,vec4,u32>, S<2,vec4,u32>, S<1,vec4,u32>, S<0,vec4,u32> {4 0 0};
+    %load/vec4 v0x5bd633415170_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd633415170_0, 0, 32;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %jmp T_24.15;
 T_24.16 ;
     %vpi_call 2 114 "$display", "\012==== D-CACHE CONTENT ====" {0 0 0};
     %pushi/vec4 0, 0, 32;
+<<<<<<< HEAD
     %store/vec4 v0x6522f902ee10_0, 0, 32;
 T_24.17 ;
     %load/vec4 v0x6522f902ee10_0;
@@ -3049,12 +5755,26 @@ T_24.17 ;
     %jmp/0xz T_24.18, 5;
     %vpi_call 2 116 "$display", "Entry %0d | valid=%0b dirty=%0b tag=%0d", v0x6522f902ee10_0, &A<v0x6522f9018200, v0x6522f902ee10_0 >, &A<v0x6522f9017a80, v0x6522f902ee10_0 >, &A<v0x6522f90180c0, v0x6522f902ee10_0 > {0 0 0};
     %load/vec4 v0x6522f902ee10_0;
+=======
+    %store/vec4 v0x5bd633415170_0, 0, 32;
+T_24.17 ;
+    %load/vec4 v0x5bd633415170_0;
+    %cmpi/s 4, 0, 32;
+    %jmp/0xz T_24.18, 5;
+    %vpi_call 2 116 "$display", "Entry %0d | valid=%0b dirty=%0b tag=%0d", v0x5bd633415170_0, &A<v0x5bd6333fc1a0, v0x5bd633415170_0 >, &A<v0x5bd6333fba20, v0x5bd633415170_0 >, &A<v0x5bd6333fc060, v0x5bd633415170_0 > {0 0 0};
+    %load/vec4 v0x5bd633415170_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/s 35;
     %pad/s 37;
     %muli 4, 0, 37;
     %ix/vec4/s 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f90177c0, 4;
     %load/vec4 v0x6522f902ee10_0;
+=======
+    %load/vec4a v0x5bd6333fb760, 4;
+    %load/vec4 v0x5bd633415170_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/s 35;
     %pad/s 37;
     %muli 4, 0, 37;
@@ -3063,8 +5783,13 @@ T_24.17 ;
     %pad/s 38;
     %add;
     %ix/vec4/s 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f90177c0, 4;
     %load/vec4 v0x6522f902ee10_0;
+=======
+    %load/vec4a v0x5bd6333fb760, 4;
+    %load/vec4 v0x5bd633415170_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/s 35;
     %pad/s 37;
     %muli 4, 0, 37;
@@ -3073,8 +5798,13 @@ T_24.17 ;
     %pad/s 38;
     %add;
     %ix/vec4/s 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f90177c0, 4;
     %load/vec4 v0x6522f902ee10_0;
+=======
+    %load/vec4a v0x5bd6333fb760, 4;
+    %load/vec4 v0x5bd633415170_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/s 35;
     %pad/s 37;
     %muli 4, 0, 37;
@@ -3083,11 +5813,19 @@ T_24.17 ;
     %pad/s 38;
     %add;
     %ix/vec4/s 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f90177c0, 4;
     %vpi_call 2 122 "$display", "    DATA: %08h %08h %08h %08h", S<3,vec4,u32>, S<2,vec4,u32>, S<1,vec4,u32>, S<0,vec4,u32> {4 0 0};
     %load/vec4 v0x6522f902ee10_0;
     %addi 1, 0, 32;
     %store/vec4 v0x6522f902ee10_0, 0, 32;
+=======
+    %load/vec4a v0x5bd6333fb760, 4;
+    %vpi_call 2 122 "$display", "    DATA: %08h %08h %08h %08h", S<3,vec4,u32>, S<2,vec4,u32>, S<1,vec4,u32>, S<0,vec4,u32> {4 0 0};
+    %load/vec4 v0x5bd633415170_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd633415170_0, 0, 32;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %jmp T_24.17;
 T_24.18 ;
     %vpi_call 2 129 "$display", "==========================================" {0 0 0};
@@ -3096,6 +5834,7 @@ T_24.18 ;
     %vpi_call 2 133 "$finish" {0 0 0};
     %end;
     .thread T_24;
+<<<<<<< HEAD
     .scope S_0x6522f8fa2da0;
 T_25 ;
     %pushi/vec4 0, 0, 32;
@@ -3112,10 +5851,29 @@ T_25.2 ;
     %jmp/0xz T_25.3, 5;
     %pushi/vec4 0, 0, 32;
     %load/vec4 v0x6522f902f6e0_0;
+=======
+    .scope S_0x5bd6333bee90;
+T_25 ;
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v0x5bd633415a80_0, 0, 32;
+T_25.0 ;
+    %load/vec4 v0x5bd633415a80_0;
+    %cmpi/s 1024, 0, 32;
+    %jmp/0xz T_25.1, 5;
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v0x5bd633415b60_0, 0, 32;
+T_25.2 ;
+    %load/vec4 v0x5bd633415b60_0;
+    %cmpi/s 4, 0, 32;
+    %jmp/0xz T_25.3, 5;
+    %pushi/vec4 0, 0, 32;
+    %load/vec4 v0x5bd633415a80_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/s 35;
     %pad/s 37;
     %muli 4, 0, 37;
     %pad/s 38;
+<<<<<<< HEAD
     %load/vec4 v0x6522f902f7c0_0;
     %pad/s 38;
     %add;
@@ -3129,10 +5887,26 @@ T_25.3 ;
     %load/vec4 v0x6522f902f6e0_0;
     %addi 1, 0, 32;
     %store/vec4 v0x6522f902f6e0_0, 0, 32;
+=======
+    %load/vec4 v0x5bd633415b60_0;
+    %pad/s 38;
+    %add;
+    %ix/vec4/s 4;
+    %store/vec4a v0x5bd633415c40, 4, 0;
+    %load/vec4 v0x5bd633415b60_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd633415b60_0, 0, 32;
+    %jmp T_25.2;
+T_25.3 ;
+    %load/vec4 v0x5bd633415a80_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd633415a80_0, 0, 32;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %jmp T_25.0;
 T_25.1 ;
     %end;
     .thread T_25;
+<<<<<<< HEAD
     .scope S_0x6522f8fa2da0;
 T_26 ;
     %wait E_0x6522f9024490;
@@ -3152,6 +5926,27 @@ T_26.0 ;
     %flag_get/vec4 9;
     %jmp/0 T_26.4, 9;
     %load/vec4 v0x6522f902f570_0;
+=======
+    .scope S_0x5bd6333bee90;
+T_26 ;
+    %wait E_0x5bd633409840;
+    %load/vec4 v0x5bd633415d00_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_26.0, 8;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd633415790_0, 0;
+    %pushi/vec4 0, 0, 2;
+    %assign/vec4 v0x5bd633415910_0, 0;
+    %jmp T_26.1;
+T_26.0 ;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd633415790_0, 0;
+    %load/vec4 v0x5bd6334153a0_0;
+    %flag_set/vec4 9;
+    %flag_get/vec4 9;
+    %jmp/0 T_26.4, 9;
+    %load/vec4 v0x5bd633415910_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 32;
     %pushi/vec4 0, 0, 32;
     %cmp/e;
@@ -3160,6 +5955,7 @@ T_26.0 ;
 T_26.4;
     %flag_set/vec4 8;
     %jmp/0xz  T_26.2, 8;
+<<<<<<< HEAD
     %load/vec4 v0x6522f902efa0_0;
     %assign/vec4 v0x6522f902fa20_0, 0;
     %pushi/vec4 3, 0, 2;
@@ -3177,16 +5973,44 @@ T_26.2 ;
     %cmpi/e 1, 0, 32;
     %jmp/0xz  T_26.7, 4;
     %load/vec4 v0x6522f902fa20_0;
+=======
+    %load/vec4 v0x5bd633415300_0;
+    %assign/vec4 v0x5bd633415dc0_0, 0;
+    %pushi/vec4 3, 0, 2;
+    %assign/vec4 v0x5bd633415910_0, 0;
+T_26.2 ;
+    %load/vec4 v0x5bd633415910_0;
+    %pad/u 32;
+    %cmpi/ne 0, 0, 32;
+    %jmp/0xz  T_26.5, 4;
+    %load/vec4 v0x5bd633415910_0;
+    %subi 1, 0, 2;
+    %assign/vec4 v0x5bd633415910_0, 0;
+    %load/vec4 v0x5bd633415910_0;
+    %pad/u 32;
+    %cmpi/e 1, 0, 32;
+    %jmp/0xz  T_26.7, 4;
+    %load/vec4 v0x5bd633415dc0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f902f8a0, 4;
     %ix/load 4, 0, 0;
     %ix/load 5, 0, 0;
     %flag_set/imm 4, 0;
     %assign/vec4/off/d v0x6522f902f310_0, 4, 5;
     %load/vec4 v0x6522f902fa20_0;
+=======
+    %load/vec4a v0x5bd633415c40, 4;
+    %ix/load 4, 0, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd6334156b0_0, 4, 5;
+    %load/vec4 v0x5bd633415dc0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
@@ -3195,12 +6019,21 @@ T_26.2 ;
     %pad/s 18;
     %add;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f902f8a0, 4;
     %ix/load 4, 32, 0;
     %ix/load 5, 0, 0;
     %flag_set/imm 4, 0;
     %assign/vec4/off/d v0x6522f902f310_0, 4, 5;
     %load/vec4 v0x6522f902fa20_0;
+=======
+    %load/vec4a v0x5bd633415c40, 4;
+    %ix/load 4, 32, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd6334156b0_0, 4, 5;
+    %load/vec4 v0x5bd633415dc0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
@@ -3209,12 +6042,21 @@ T_26.2 ;
     %pad/s 18;
     %add;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f902f8a0, 4;
     %ix/load 4, 64, 0;
     %ix/load 5, 0, 0;
     %flag_set/imm 4, 0;
     %assign/vec4/off/d v0x6522f902f310_0, 4, 5;
     %load/vec4 v0x6522f902fa20_0;
+=======
+    %load/vec4a v0x5bd633415c40, 4;
+    %ix/load 4, 64, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd6334156b0_0, 4, 5;
+    %load/vec4 v0x5bd633415dc0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
@@ -3223,6 +6065,7 @@ T_26.2 ;
     %pad/s 18;
     %add;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f902f8a0, 4;
     %ix/load 4, 96, 0;
     %ix/load 5, 0, 0;
@@ -3230,11 +6073,21 @@ T_26.2 ;
     %assign/vec4/off/d v0x6522f902f310_0, 4, 5;
     %pushi/vec4 1, 0, 1;
     %assign/vec4 v0x6522f902f3f0_0, 0;
+=======
+    %load/vec4a v0x5bd633415c40, 4;
+    %ix/load 4, 96, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd6334156b0_0, 4, 5;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x5bd633415790_0, 0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 T_26.7 ;
 T_26.5 ;
 T_26.1 ;
     %jmp T_26;
     .thread T_26;
+<<<<<<< HEAD
     .scope S_0x6522f8fa2da0;
 T_27 ;
     %wait E_0x6522f9024490;
@@ -3244,15 +6097,33 @@ T_27 ;
     %load/vec4 v0x6522f902f220_0;
     %parti/s 32, 0, 2;
     %load/vec4 v0x6522f902f0e0_0;
+=======
+    .scope S_0x5bd6333bee90;
+T_27 ;
+    %wait E_0x5bd633409840;
+    %load/vec4 v0x5bd6334154e0_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_27.0, 8;
+    %load/vec4 v0x5bd633415580_0;
+    %parti/s 32, 0, 2;
+    %load/vec4 v0x5bd633415440_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
+<<<<<<< HEAD
     %assign/vec4/a/d v0x6522f902f8a0, 0, 4;
     %load/vec4 v0x6522f902f220_0;
     %parti/s 32, 32, 7;
     %load/vec4 v0x6522f902f0e0_0;
+=======
+    %assign/vec4/a/d v0x5bd633415c40, 0, 4;
+    %load/vec4 v0x5bd633415580_0;
+    %parti/s 32, 32, 7;
+    %load/vec4 v0x5bd633415440_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
@@ -3262,10 +6133,17 @@ T_27 ;
     %add;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
+<<<<<<< HEAD
     %assign/vec4/a/d v0x6522f902f8a0, 0, 4;
     %load/vec4 v0x6522f902f220_0;
     %parti/s 32, 64, 8;
     %load/vec4 v0x6522f902f0e0_0;
+=======
+    %assign/vec4/a/d v0x5bd633415c40, 0, 4;
+    %load/vec4 v0x5bd633415580_0;
+    %parti/s 32, 64, 8;
+    %load/vec4 v0x5bd633415440_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
@@ -3275,10 +6153,17 @@ T_27 ;
     %add;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
+<<<<<<< HEAD
     %assign/vec4/a/d v0x6522f902f8a0, 0, 4;
     %load/vec4 v0x6522f902f220_0;
     %parti/s 32, 96, 8;
     %load/vec4 v0x6522f902f0e0_0;
+=======
+    %assign/vec4/a/d v0x5bd633415c40, 0, 4;
+    %load/vec4 v0x5bd633415580_0;
+    %parti/s 32, 96, 8;
+    %load/vec4 v0x5bd633415440_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
@@ -3288,6 +6173,7 @@ T_27 ;
     %add;
     %ix/vec4 3;
     %ix/load 4, 0, 0; Constant delay
+<<<<<<< HEAD
     %assign/vec4/a/d v0x6522f902f8a0, 0, 4;
 T_27.0 ;
     %jmp T_27;
@@ -3298,10 +6184,23 @@ T_28 ;
     %store/vec4 v0x6522f9030180_0, 0, 32;
 T_28.0 ;
     %load/vec4 v0x6522f9030180_0;
+=======
+    %assign/vec4/a/d v0x5bd633415c40, 0, 4;
+T_27.0 ;
+    %jmp T_27;
+    .thread T_27;
+    .scope S_0x5bd6333bf270;
+T_28 ;
+    %pushi/vec4 0, 0, 32;
+    %store/vec4 v0x5bd633416520_0, 0, 32;
+T_28.0 ;
+    %load/vec4 v0x5bd633416520_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %cmpi/s 1024, 0, 32;
     %flag_or 5, 4;
     %jmp/0xz T_28.1, 5;
     %pushi/vec4 0, 0, 32;
+<<<<<<< HEAD
     %store/vec4 v0x6522f9030260_0, 0, 32;
 T_28.2 ;
     %load/vec4 v0x6522f9030260_0;
@@ -3309,10 +6208,20 @@ T_28.2 ;
     %jmp/0xz T_28.3, 5;
     %pushi/vec4 0, 0, 32;
     %load/vec4 v0x6522f9030180_0;
+=======
+    %store/vec4 v0x5bd633416600_0, 0, 32;
+T_28.2 ;
+    %load/vec4 v0x5bd633416600_0;
+    %cmpi/s 4, 0, 32;
+    %jmp/0xz T_28.3, 5;
+    %pushi/vec4 0, 0, 32;
+    %load/vec4 v0x5bd633416520_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/s 35;
     %pad/s 37;
     %muli 4, 0, 37;
     %pad/s 38;
+<<<<<<< HEAD
     %load/vec4 v0x6522f9030260_0;
     %pad/s 38;
     %add;
@@ -3350,6 +6259,45 @@ T_29.0 ;
     %flag_get/vec4 9;
     %jmp/0 T_29.4, 9;
     %load/vec4 v0x6522f90300a0_0;
+=======
+    %load/vec4 v0x5bd633416600_0;
+    %pad/s 38;
+    %add;
+    %ix/vec4/s 4;
+    %store/vec4a v0x5bd6334166e0, 4, 0;
+    %load/vec4 v0x5bd633416600_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd633416600_0, 0, 32;
+    %jmp T_28.2;
+T_28.3 ;
+    %load/vec4 v0x5bd633416520_0;
+    %addi 1, 0, 32;
+    %store/vec4 v0x5bd633416520_0, 0, 32;
+    %jmp T_28.0;
+T_28.1 ;
+    %vpi_call 18 33 "$readmemh", "program.hex", v0x5bd6334166e0, 32'sb00000000000000000000000000000000, 32'sb00000000000000000000000000011111 {0 0 0};
+    %end;
+    .thread T_28;
+    .scope S_0x5bd6333bf270;
+T_29 ;
+    %wait E_0x5bd633415fc0;
+    %load/vec4 v0x5bd633416830_0;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_29.0, 8;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd633416140_0, 0;
+    %pushi/vec4 0, 0, 2;
+    %assign/vec4 v0x5bd633416440_0, 0;
+    %jmp T_29.1;
+T_29.0 ;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0x5bd633416140_0, 0;
+    %load/vec4 v0x5bd6334162c0_0;
+    %flag_set/vec4 9;
+    %flag_get/vec4 9;
+    %jmp/0 T_29.4, 9;
+    %load/vec4 v0x5bd633416440_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 32;
     %pushi/vec4 0, 0, 32;
     %cmp/e;
@@ -3358,6 +6306,7 @@ T_29.0 ;
 T_29.4;
     %flag_set/vec4 8;
     %jmp/0xz  T_29.2, 8;
+<<<<<<< HEAD
     %load/vec4 v0x6522f902fe60_0;
     %assign/vec4 v0x6522f9030550_0, 0;
     %pushi/vec4 3, 0, 2;
@@ -3375,16 +6324,44 @@ T_29.2 ;
     %cmpi/e 1, 0, 32;
     %jmp/0xz  T_29.7, 4;
     %load/vec4 v0x6522f9030550_0;
+=======
+    %load/vec4 v0x5bd633416200_0;
+    %assign/vec4 v0x5bd6334168f0_0, 0;
+    %pushi/vec4 3, 0, 2;
+    %assign/vec4 v0x5bd633416440_0, 0;
+T_29.2 ;
+    %load/vec4 v0x5bd633416440_0;
+    %pad/u 32;
+    %cmpi/ne 0, 0, 32;
+    %jmp/0xz  T_29.5, 4;
+    %load/vec4 v0x5bd633416440_0;
+    %subi 1, 0, 2;
+    %assign/vec4 v0x5bd633416440_0, 0;
+    %load/vec4 v0x5bd633416440_0;
+    %pad/u 32;
+    %cmpi/e 1, 0, 32;
+    %jmp/0xz  T_29.7, 4;
+    %load/vec4 v0x5bd6334168f0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9030340, 4;
     %ix/load 4, 0, 0;
     %ix/load 5, 0, 0;
     %flag_set/imm 4, 0;
     %assign/vec4/off/d v0x6522f902fca0_0, 4, 5;
     %load/vec4 v0x6522f9030550_0;
+=======
+    %load/vec4a v0x5bd6334166e0, 4;
+    %ix/load 4, 0, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd633416040_0, 4, 5;
+    %load/vec4 v0x5bd6334168f0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
@@ -3393,12 +6370,21 @@ T_29.2 ;
     %pad/s 18;
     %add;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9030340, 4;
     %ix/load 4, 32, 0;
     %ix/load 5, 0, 0;
     %flag_set/imm 4, 0;
     %assign/vec4/off/d v0x6522f902fca0_0, 4, 5;
     %load/vec4 v0x6522f9030550_0;
+=======
+    %load/vec4a v0x5bd6334166e0, 4;
+    %ix/load 4, 32, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd633416040_0, 4, 5;
+    %load/vec4 v0x5bd6334168f0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
@@ -3407,12 +6393,21 @@ T_29.2 ;
     %pad/s 18;
     %add;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9030340, 4;
     %ix/load 4, 64, 0;
     %ix/load 5, 0, 0;
     %flag_set/imm 4, 0;
     %assign/vec4/off/d v0x6522f902fca0_0, 4, 5;
     %load/vec4 v0x6522f9030550_0;
+=======
+    %load/vec4a v0x5bd6334166e0, 4;
+    %ix/load 4, 64, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd633416040_0, 4, 5;
+    %load/vec4 v0x5bd6334168f0_0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     %pad/u 15;
     %pad/u 17;
     %muli 4, 0, 17;
@@ -3421,6 +6416,7 @@ T_29.2 ;
     %pad/s 18;
     %add;
     %ix/vec4 4;
+<<<<<<< HEAD
     %load/vec4a v0x6522f9030340, 4;
     %ix/load 4, 96, 0;
     %ix/load 5, 0, 0;
@@ -3428,6 +6424,15 @@ T_29.2 ;
     %assign/vec4/off/d v0x6522f902fca0_0, 4, 5;
     %pushi/vec4 1, 0, 1;
     %assign/vec4 v0x6522f902fda0_0, 0;
+=======
+    %load/vec4a v0x5bd6334166e0, 4;
+    %ix/load 4, 96, 0;
+    %ix/load 5, 0, 0;
+    %flag_set/imm 4, 0;
+    %assign/vec4/off/d v0x5bd633416040_0, 4, 5;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0x5bd633416140_0, 0;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 T_29.7 ;
 T_29.5 ;
 T_29.1 ;

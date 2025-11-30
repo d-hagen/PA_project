@@ -16,6 +16,10 @@ module regfile #(
   input  wire                 D_addi,
   input  wire                 D_jmp,
   input  wire                 D_mul,
+<<<<<<< HEAD
+=======
+  input  wire                 D_link_we,      // JALX Instruction Flag
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 
   // Bypass enables (encoding: {forward_ra, forward_rb})
   input  wire [1:0]           EX_D_bp,
@@ -25,6 +29,11 @@ module regfile #(
   // Bypass data sources
   input  wire [XLEN-1:0]      EX_alu_out,   // EX result (valid when EX_D_bp used and not a load-use)
   input  wire [XLEN-1:0]      MEM_data_mem, // data available at MEM stage (ALU result or load data, per your design)
+<<<<<<< HEAD
+=======
+  input  wire                 WB_link_we,    // JALX Write Enable
+  input  wire [XLEN-1:0]      WB_link_addr,  // JALX Data (PC + 1)
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 
   // Writeback
   input  wire                 WB_we,
@@ -48,11 +57,23 @@ module regfile #(
   initial begin
     for (i = 0; i < REG_NUM; i = i + 1) regs[i] = {XLEN{1'b0}};
   end
+<<<<<<< HEAD
 
   // Write port (x0 hardwired to 0)
   always @(posedge clk) begin
     if (WB_we && (WB_rd != {ADDR_SIZE{1'b0}}))
       regs[WB_rd] <= WB_data_mem;
+=======
+  
+wire [XLEN-1:0] WB_data_memwrite = (WB_link_we) ? WB_link_addr : WB_data_mem;
+
+wire WB_RegWrite_Enable = WB_we | WB_link_we;
+
+  // Write port (x0 hardwired to 0)
+  always @(posedge clk) begin
+    if (WB_RegWrite_Enable && (WB_rd != {ADDR_SIZE{1'b0}}))
+      regs[WB_rd] <= WB_data_memwrite;
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     regs[0] <= {XLEN{1'b0}};
   end
 
@@ -65,22 +86,35 @@ module regfile #(
   wire [XLEN-1:0] ra_fwd =
       EX_D_bp[1]  ? EX_alu_out   :
       MEM_D_bp[1] ? MEM_data_mem :
+<<<<<<< HEAD
       WB_D_bp[1]  ? WB_data_mem  :
+=======
+      WB_D_bp[1]  ? WB_data_memwrite  :
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
                     ra_raw;
 
   wire [XLEN-1:0] rb_fwd =
       EX_D_bp[0]  ? EX_alu_out   :
       MEM_D_bp[0] ? MEM_data_mem :
+<<<<<<< HEAD
       WB_D_bp[0]  ? WB_data_mem  :
+=======
+      WB_D_bp[0]  ? WB_data_memwrite  :
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
                     rb_raw;
 
   // Outputs
   assign D_a2 = ra_fwd;
   assign D_b2 = rb_fwd;
 
+<<<<<<< HEAD
   assign D_a  = D_jmp?  ra_fwd :
                 D_brn ? {{(XLEN-12){D_pc[11]}}, D_pc} : 
                 ra_fwd;
+=======
+  assign D_a = (D_brn && !(D_jmp || D_link_we)) ? pc_extended : ra_fwd;
+
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
   assign D_b  = (D_str || D_ld || D_addi || D_brn)
                 ? {{(XLEN-11){D_imd[10]}}, D_imd}  //{{(XLEN-11){D_imd[10]}}
                 : rb_fwd;

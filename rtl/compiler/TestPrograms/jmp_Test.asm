@@ -1,6 +1,10 @@
 # ---------- Initialization ----------
 addi r1  r1  r1  1       # r1 = 1
+<<<<<<< HEAD
 addi r2  r2  r2  2       # r2 = 2
+=======
+addi r2  r2  r2  2       # r2 = 21
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 addi r3  r3  r3  3       # r3 = 3
 
 # ---------- Jump 1: Skip 2 instructions ----------

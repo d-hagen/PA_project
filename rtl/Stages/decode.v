@@ -16,7 +16,12 @@ module decode #(parameter XLEN=32)(
   output wire              D_brn,
   output wire              D_addi,
   output wire              D_mul,
+<<<<<<< HEAD
   output wire              D_jmp   
+=======
+  output wire              D_jmp,
+  output wire              D_link_we   
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 
 );
 
@@ -60,9 +65,17 @@ module decode #(parameter XLEN=32)(
   localparam RD_BEQ    = 5'b00001;    // branch if equal
   localparam RD_BLT    = 5'b00010;    // branch if less-than
   localparam RD_BGT    = 5'b00011;    // branch if greater-than
+<<<<<<< HEAD
 
   wire is_ctrl = (D_opc == OPC_CTRL);
   wire is_jmp  = is_ctrl && (D_rd == RD_JMP);
+=======
+  localparam RD_JALX   = 5'b00100;    // jump and link register (not used here)
+
+  wire is_ctrl = (D_opc == OPC_CTRL);
+  wire is_jmp  = is_ctrl && (D_rd == RD_JMP);
+  wire is_jalx = is_ctrl && (D_rd == RD_JALX);
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
   wire is_beq  = is_ctrl && (D_rd == RD_BEQ);
   wire is_blt  = is_ctrl && (D_rd == RD_BLT);
   wire is_bgt  = is_ctrl && (D_rd == RD_BGT);
@@ -73,12 +86,21 @@ module decode #(parameter XLEN=32)(
   assign D_str  = (D_opc[4:0] == OPC_STORE);
   assign D_byt  =  D_opc[5];
 
+<<<<<<< HEAD
   assign D_mul  = (D_opc == OPC_MUL);
   assign D_we   = ((D_opc <= OPC_GT) || D_ld || D_mul);
   assign D_brn  = is_ctrl;
   assign D_addi = (D_opc == OPC_ADDI);
   assign D_jmp = is_jmp;
   
+=======
+  assign D_link_we = is_jalx;
+  assign D_jmp = is_jmp;
+  assign D_mul  = (D_opc == OPC_MUL);
+  assign D_we   = ((D_opc <= OPC_GT) || D_ld || D_mul); 
+  assign D_brn  = is_ctrl;
+  assign D_addi = (D_opc == OPC_ADDI);
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
  
   assign D_alu_op =
          (D_opc == OPC_ADD)                 ? 4'b0000 :
@@ -93,7 +115,12 @@ module decode #(parameter XLEN=32)(
          (D_opc == OPC_LT || is_blt)        ? 4'b1001 : // LT
          (D_opc == OPC_GT || is_bgt)        ? 4'b1010 : // GT
          (D_mul)                            ? 4'b1011 :
+<<<<<<< HEAD
 
                                             4'b0000;  // default (ADD)
+=======
+         (is_jmp || is_jalx || D_addi)      ? 4'b0000 : // ADD for jumps and addi
+                                            4'b0000;  // default (ADD,jump,jalx,addi,etc)
+>>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 
 endmodule
