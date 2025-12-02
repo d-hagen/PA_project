@@ -4,7 +4,7 @@ module cpu #(
   parameter integer XLEN      = 32,
   parameter integer REG_NUM   = 32,
   parameter integer ADDR_SIZE = 5,
-  parameter integer PC_BITS   = 12,
+  parameter integer PC_BITS   = 20,
   parameter [PC_BITS-1:0] RESET_PC = {PC_BITS{1'b0}}
 )(
   input  wire clk,
@@ -13,7 +13,6 @@ module cpu #(
 
   // ===== Program Counter wires =====
   wire [PC_BITS-1:0] F_pc;            // current PC (Fetch stage)
-  wire [PC_BITS-1:0] pc_plus_1 = F_pc + {{(PC_BITS-1){1'b0}}, 1'b1};
 
   // ===== Instruction fetch output =====
   wire [XLEN-1:0] F_inst;             // fetched instruction
@@ -52,7 +51,7 @@ module cpu #(
 
   // ===== I-Cache <-> Instruction Memory wires =====
   wire        Ic_mem_req;
-  wire [9:0]  Ic_mem_addr;
+  wire [PC_BITS-5:0]  Ic_mem_addr;
   wire [127:0] F_mem_inst;
   wire        F_mem_valid;
   wire        F_stall;      // from I-cache to your F-stage control
@@ -197,7 +196,8 @@ module cpu #(
   regfile #(
     .XLEN(XLEN),
     .REG_NUM(REG_NUM),
-    .ADDR_SIZE(ADDR_SIZE)
+    .ADDR_SIZE(ADDR_SIZE),
+    .PC_BITS(PC_BITS)
   ) u_regfile (
     // From Decode
     .clk        (clk),
@@ -254,7 +254,8 @@ module cpu #(
 
 
   d_to_ex_reg #(
-    .XLEN(XLEN)
+    .XLEN(XLEN),
+    .PC_BITS(PC_BITS)
   ) u_d_to_ex_reg (
     .clk      (clk),
     .rst      (rst),
@@ -308,7 +309,8 @@ module cpu #(
   wire       EX_true_taken;       // resolved direction
 
   alu #(
-    .XLEN(XLEN)
+    .XLEN(XLEN),
+    .PC_BITS(PC_BITS)
   ) u_alu (
     .EX_a           (EX_a),
     .EX_a2          (EX_a2),
@@ -392,12 +394,12 @@ module cpu #(
 
   // ============ D-cache <-> backing data memory ===============
   wire             Dc_mem_req;
-  wire [9:0]       Dc_mem_addr;     // 16 lines in backing memory
+  wire [PC_BITS-5:0]       Dc_mem_addr;     // 16 lines in backing memory
   wire [127:0]     MEM_data_line;
   wire             MEM_mem_valid;
 
   wire             Dc_wb_we;
-  wire [9:0]       Dc_wb_addr;
+  wire [PC_BITS-5:0]       Dc_wb_addr;
   wire [127:0]     Dc_wb_wline;
   wire [XLEN-1:0]  MEM_data_mem;
 

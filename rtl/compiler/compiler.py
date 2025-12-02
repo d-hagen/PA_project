@@ -12,31 +12,26 @@ OPCODES = {
     "not":   0b000101,
     "shl":   0b000110,
     "shr":   0b000111,
-    "addi":  0b001000,   # add immediate
+    "addi":  0b001000,
     "lt":    0b001001,
     "gt":    0b001010,
     "load":  0b001011,
     "store": 0b001100,
     "ldb":   0b101011,
     "strb":  0b101100,
-    "ctrl":  0b001101,   # used internally for jmp/beq/blt/bgt
-    "mul":   0b001110,   
-
-    # Shorthands for control ops (mapped to OPC_CTRL with rd sub-op):
+    "ctrl":  0b001101,
     "jmp":   0b001101,
     "beq":   0b001101,
     "blt":   0b001101,
     "bgt":   0b001101,
 }
 
-# CTRL subop codes in the RD field
 RD_JMP = 0b00000
 RD_BEQ = 0b00001
 RD_BLT = 0b00010
 RD_BGT = 0b00011
 CTRL_RD_FOR = {"jmp": RD_JMP, "beq": RD_BEQ, "blt": RD_BLT, "bgt": RD_BGT}
 
-# ============================ utils ================================
 REG_RE = re.compile(r"^r(\d+)$", re.IGNORECASE)
 
 def parse_reg(tok: str) -> int:
@@ -49,20 +44,13 @@ def parse_reg(tok: str) -> int:
     return n
 
 def parse_imm(tok: str) -> int:
-    # supports 0x.., 0b.., decimal, and negative values
     val = int(tok, 0)
-
-    # 11-bit *signed* immediate range: -1024..1023
     if not (-0x400 <= val <= 0x3FF):
         raise ValueError(f"Immediate out of 11-bit signed range (-1024..1023): {tok}")
-
-    # Encode as 11-bit two's complement
     return val & 0x7FF
 
-# ========================== assembler ==============================
 def assemble_line(line: str, lineno: int) -> Optional[int]:
     raw = line.rstrip("\n")
-    # strip inline comments
     clean = re.split(r"//|#|;", raw, maxsplit=1)[0].strip()
     if not clean:
         return None
@@ -82,7 +70,6 @@ def assemble_line(line: str, lineno: int) -> Optional[int]:
     rd  = parse_reg(rd_t)
     imm = parse_imm(imm_t)
 
-    # Map control shorthands to OPC_CTRL and force RD sub-op
     if op_l in CTRL_RD_FOR:
         opc = OPCODES["ctrl"]
         rd  = CTRL_RD_FOR[op_l]
@@ -94,24 +81,23 @@ def assemble_line(line: str, lineno: int) -> Optional[int]:
          | ( imm & 0x7FF)
     return word
 
-# Precompute the bubble NOP: addi r0 r0 r0 0 = 0x20000000
-NOP_BUBBLE = ((OPCODES["addi"] & 0x3F) << 26)  # rest zeros
+NOP_BUBBLE = ((OPCODES["addi"] & 0x3F) << 26)
 NOP_BUBBLE_COMMENT = "NOP (addi r0 r0 r0 0)"
 NOP_END = 0x00000000
 NOP_END_COMMENT = "NOP (end of program)"
 
 # ============================= main ================================
 def main():
-    ap = argparse.ArgumentParser(description="Assembler -> program.hex (32 lines; bubble NOP=ADDI r0,r0,r0,0; last NOP=0)")
-    ap.add_argument("input", help="assembly source (each line: opcode ra rb rd imm)")
-    ap.add_argument("-o", "--output", default="program.hex", help="output hex file (default: program.hex)")
+    ap = argparse.ArgumentParser(description="Assembler -> program.hex (32 lines)")
+    ap.add_argument("input", help="assembly source")
+    ap.add_argument("-o", "--output", default="program.hex")
     args = ap.parse_args()
 
     in_path  = pathlib.Path(args.input)
     out_path = pathlib.Path(args.output)
 
     lines = in_path.read_text().splitlines()
-    assembled = []  # list[(word:int, original:str)]
+    assembled = []
 
     for i, line in enumerate(lines, start=1):
         try:
@@ -123,23 +109,18 @@ def main():
             sys.exit(1)
 
     MAX_WORDS = 32
-
-    # Ensure at most 32 user words (we’ll force last to END NOP anyway)
     if len(assembled) > MAX_WORDS:
-        print(f"Warning: input has {len(assembled)} instructions; truncating to {MAX_WORDS}.", file=sys.stderr)
         assembled = assembled[:MAX_WORDS]
 
-    # Pad with bubble NOP (0x20000000) up to slot 31
     while len(assembled) < MAX_WORDS:
         assembled.append((NOP_BUBBLE, NOP_BUBBLE_COMMENT))
 
-    # Force the last slot [31] to END NOP (0x00000000)
     assembled[-1] = (NOP_END, "[31] " + NOP_END_COMMENT)
 
-    # Write out with index and original asm
     with out_path.open("w") as f:
         for idx, (w, original) in enumerate(assembled):
-            f.write(f"{w:08x}    // [{idx}] {original}\n")
+            step = idx * 4
+            f.write(f"{w:08x}    // [step {step}] {original}\n")
 
     print(f"Wrote {len(assembled)} instructions to {out_path}")
 

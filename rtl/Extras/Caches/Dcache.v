@@ -1,85 +1,94 @@
 module dcache #(
-    parameter XLEN = 32
+    parameter XLEN      = 32,
+    parameter LINE_BITS = 16       // upper 16 bits of the 20-bit address
 )(
-    input  wire             clk,
-    input  wire             rst,
+    input  wire                 clk,
+    input  wire                 rst,
 
     // MEM stage interface
-    input  wire             MEM_ld,
-    input  wire             MEM_str,
-    input  wire             MEM_byt,
-    input  wire [XLEN-1:0]  MEM_alu_out,
-    input  wire [XLEN-1:0]  MEM_b2,
-    output reg  [XLEN-1:0]  MEM_data_mem,
-    output reg              MEM_stall,
+    input  wire                 MEM_ld,
+    input  wire                 MEM_str,
+    input  wire                 MEM_byt,         // 1 = byte, 0 = word
+    input  wire [XLEN-1:0]      MEM_alu_out,     // full 32-bit addr, we use low 20 bits
+    input  wire [XLEN-1:0]      MEM_b2,
+    output reg  [XLEN-1:0]      MEM_data_mem,
+    output reg                  MEM_stall,
 
-    // Backing memory read interface
-    output reg              Dc_mem_req,
-    output reg  [9:0]       Dc_mem_addr,
-    input  wire [127:0]     MEM_data_line,
-    input  wire             MEM_mem_valid,
+    // Backing memory read interface (line read)
+    output reg                  Dc_mem_req,
+    output reg  [LINE_BITS-1:0] Dc_mem_addr,     // line index [19:4]
+    input  wire [127:0]         MEM_data_line,   // 4×32-bit words
+    input  wire                 MEM_mem_valid,
 
-    // Backing memory write-back interface
-    output reg              Dc_wb_we,
-    output reg  [9:0]       Dc_wb_addr,
-    output reg  [127:0]     Dc_wb_wline
+    // Backing memory write-back interface (eviction)
+    output reg                  Dc_wb_we,
+    output reg  [LINE_BITS-1:0] Dc_wb_addr,      // line index
+    output reg  [127:0]         Dc_wb_wline
 );
 
-    // Cache storage
-    reg        valid [0:3];
-    reg        dirty [0:3];
-    reg [3:0]  tag   [0:3];
-    reg [31:0] data  [0:3][0:3];
+    // Tiny 4-line fully-associative cache
+    reg                     valid [0:3];
+    reg                     dirty [0:3];
+    reg [LINE_BITS-1:0]     tag   [0:3];         // full line index
+    reg [31:0]              data  [0:3][0:3];    // [entry][word-in-line]
 
     // Control state
-    reg [1:0] fifo_ptr;
-    reg       hit;
-    reg [1:0] hit_idx;
-    reg [9:0] miss_line;
+    reg [1:0]               fifo_ptr;
+    reg                     hit;
+    reg [1:0]               hit_idx;
+    reg [LINE_BITS-1:0]     miss_line;
+
+    // temporaries for byte store/load
+    reg [31:0]              tmp_store_word;
+    reg [31:0]              tmp_load_word;
 
     integer i;
 
-    // Address decode
-    wire [11:0] addr_word = MEM_alu_out[10:0];
-    wire [9:0] addr_line = addr_word[11:2];
-    wire [1:0] addr_off  = addr_word[1:0];
+    // ----------------------------------------------------------------
+    // Address decode for 20-bit scheme:
+    // addr[19:4] = line index (16 bits)
+    // addr[3:2]  = word index in line (0..3)
+    // addr[1:0]  = byte index in word (0..3)
+    // ----------------------------------------------------------------
+    wire [LINE_BITS-1:0] addr_line = MEM_alu_out[19:4];
+    wire [1:0]           addr_word = MEM_alu_out[3:2];
+    wire [1:0]           addr_byte = MEM_alu_out[1:0];
 
     wire op_active = MEM_ld | MEM_str;
 
-    // Sequential logic
+    // ===================== Sequential logic ==========================
     always @(posedge clk) begin
         if (rst) begin
             for (i = 0; i < 4; i = i + 1) begin
                 valid[i] <= 1'b0;
                 dirty[i] <= 1'b0;
-                tag[i]   <= 4'd0;
+                tag[i]   <= {LINE_BITS{1'b0}};
             end
             fifo_ptr    <= 2'd0;
-            miss_line   <= 9'd0;
+            miss_line   <= {LINE_BITS{1'b0}};
             Dc_wb_we    <= 1'b0;
-            Dc_wb_addr  <= 4'd0;
+            Dc_wb_addr  <= {LINE_BITS{1'b0}};
             Dc_wb_wline <= 128'd0;
-
         end else begin
             Dc_wb_we <= 1'b0;
 
-            // Track miss line
+            // Track which line we missed on
             if (Dc_mem_req && !hit && op_active)
                 miss_line <= addr_line;
 
-            // Refill
+            // Refill from backing memory
             if (MEM_mem_valid) begin
-                // Optional write-back
+                // Optional write-back of victim line
                 if (valid[fifo_ptr] && dirty[fifo_ptr]) begin
                     Dc_wb_we            <= 1'b1;
-                    Dc_wb_addr          <= tag[fifo_ptr];
+                    Dc_wb_addr          <= tag[fifo_ptr];  // full line index
                     Dc_wb_wline[31:0]   <= data[fifo_ptr][0];
                     Dc_wb_wline[63:32]  <= data[fifo_ptr][1];
                     Dc_wb_wline[95:64]  <= data[fifo_ptr][2];
                     Dc_wb_wline[127:96] <= data[fifo_ptr][3];
                 end
 
-                // Install new line
+                // Install new line into fifo_ptr entry
                 valid[fifo_ptr] <= 1'b1;
                 dirty[fifo_ptr] <= 1'b0;
                 tag[fifo_ptr]   <= miss_line;
@@ -94,27 +103,37 @@ module dcache #(
 
             // Store-hit update
             if (MEM_str && hit) begin
-                if (MEM_byt)
-                    data[hit_idx][addr_off] <= {24'b0, MEM_b2[7:0]};
-                else
-                    data[hit_idx][addr_off] <= MEM_b2;
+                if (MEM_byt) begin
+                    // Byte store: read-modify-write a temporary word
+                    tmp_store_word = data[hit_idx][addr_word];
+                    case (addr_byte)
+                        2'b00: tmp_store_word[7:0]   = MEM_b2[7:0];
+                        2'b01: tmp_store_word[15:8]  = MEM_b2[7:0];
+                        2'b10: tmp_store_word[23:16] = MEM_b2[7:0];
+                        2'b11: tmp_store_word[31:24] = MEM_b2[7:0];
+                    endcase
+                    data[hit_idx][addr_word] <= tmp_store_word;
+                end else begin
+                    // Word store (assumed aligned: addr_byte == 2'b00)
+                    data[hit_idx][addr_word] <= MEM_b2;
+                end
 
                 dirty[hit_idx] <= 1'b1;
             end
         end
     end
 
-    // Combinational logic
+    // ===================== Combinational logic =======================
     always @(*) begin
         hit          = 1'b0;
         hit_idx      = 2'd0;
         MEM_stall    = 1'b0;
-        MEM_data_mem = MEM_alu_out;
+        MEM_data_mem = MEM_alu_out;   // default passthrough on non-loads
 
-        Dc_mem_req    = 1'b0;
-        Dc_mem_addr   = addr_line;
+        Dc_mem_req   = 1'b0;
+        Dc_mem_addr  = addr_line;
 
-        // Tag lookup
+        // Tag lookup (fully associative)
         if (op_active && !MEM_mem_valid) begin
             for (i = 0; i < 4; i = i + 1) begin
                 if (valid[i] && (tag[i] == addr_line)) begin
@@ -124,23 +143,35 @@ module dcache #(
             end
         end
 
-        // Load
+        // ---------------- Loads ----------------
         if (MEM_ld) begin
             if (hit) begin
-                MEM_data_mem = MEM_byt ?
-                               {24'b0, data[hit_idx][addr_off][7:0]} :
-                               data[hit_idx][addr_off];
+                tmp_load_word = data[hit_idx][addr_word];
+                if (MEM_byt) begin
+                    // Byte load, zero-extend
+                    case (addr_byte)
+                        2'b00: MEM_data_mem = {24'b0, tmp_load_word[7:0]};
+                        2'b01: MEM_data_mem = {24'b0, tmp_load_word[15:8]};
+                        2'b10: MEM_data_mem = {24'b0, tmp_load_word[23:16]};
+                        2'b11: MEM_data_mem = {24'b0, tmp_load_word[31:24]};
+                    endcase
+                end else begin
+                    // Word load (assumed aligned)
+                    MEM_data_mem = tmp_load_word;
+                end
             end else begin
-                MEM_stall  = 1'b1;
+                // Miss: stall and request line from memory
+                MEM_stall   = 1'b1;
                 Dc_mem_req  = MEM_mem_valid ? 1'b0 : 1'b1;
                 Dc_mem_addr = addr_line;
             end
         end
 
-        // Store
+        // ---------------- Stores ----------------
         if (MEM_str) begin
             if (!hit) begin
-                MEM_stall  = 1'b1;
+                // Miss on store: fetch line first (write-allocate)
+                MEM_stall   = 1'b1;
                 Dc_mem_req  = MEM_mem_valid ? 1'b0 : 1'b1;
                 Dc_mem_addr = addr_line;
             end

@@ -5,7 +5,7 @@ module cpu_run_tb;
   localparam integer XLEN      = 32;
   localparam integer REG_NUM   = 32;
   localparam integer ADDR_SIZE = 5;
-  localparam integer PC_BITS   = 12;
+  localparam integer PC_BITS   = 20;
   localparam integer END_PC    = 22;
 
   reg clk = 1'b0;
@@ -50,8 +50,8 @@ module cpu_run_tb;
         curr_inst = dut.F_inst;
 
         // Added EX_mul display here
-       if (cycles <= 70) begin
-          $display("C%0d | F_pc=%0d F_inst=0x%08h | EX_alu_out=%0d | EX_taken=%0b -> EX_ra=%0b | EX_rb=%0b | stall_d=%0b EX_true_taken=%0b",
+       if (cycles <= 100) begin
+          $display("C%0d | F_pc=%0d F_inst=0x%08h | EX_alu_out=%0d | EX_taken=%0b -> EX_ra=%0d | EX_rb=%0d | stall_d=%0b EX_true_taken=%0b",
                   cycles,
                   dut.F_pc,
                   curr_inst,

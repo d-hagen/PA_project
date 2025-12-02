@@ -1,6 +1,6 @@
 module d_to_ex_reg #(
     parameter XLEN    = 32,
-    parameter PC_BITS = 12 // Added PC_BITS parameter for target PC width
+    parameter PC_BITS = 20 // Added PC_BITS parameter for target PC width
 )(
     input  wire             clk,
     input  wire             rst,

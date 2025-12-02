@@ -39,7 +39,7 @@ module alu #(
       if (EX_true_taken)                        
         next_pc = EX_a + EX_b;   ///branch target
       else
-        next_pc = EX_a + {{(XLEN-1){1'b0}}, 1'b1}; //next instruction after branch
+        next_pc = EX_a + {{(XLEN-3){1'b0}}, 3'b100}; //next instruction after branch
 
       EX_alu_out =  next_pc;     /// correct location to jump to
       EX_taken   = (EX_BP_taken ^ EX_true_taken || EX_BP_target_pc ^  EX_alu_out);   /// if they dont match -> flush the pipeline

@@ -1,7 +1,8 @@
 module regfile #(
   parameter XLEN=32,
   parameter REG_NUM=32,
-  parameter ADDR_SIZE=5
+  parameter ADDR_SIZE=5,
+  parameter PC_BITS = 20
 )(
   input  wire                 clk,
 
@@ -9,7 +10,7 @@ module regfile #(
   input  wire [ADDR_SIZE-1:0] D_ra,
   input  wire [ADDR_SIZE-1:0] D_rb,
   input  wire [10:0]          D_imd,
-  input  wire [11:0]          D_pc,
+  input  wire [PC_BITS-1:0]          D_pc,
   input  wire                 D_ld,
   input  wire                 D_str,
   input  wire                 D_brn,

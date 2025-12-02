@@ -12,8 +12,6 @@ Stages/decode.v
 
 # ==== Reg and Mem====
 Memory/regfile.v
-Memory/instruct_reg.v
-Memory/data_mem.v
 Memory/joined_mem.v
 
 
