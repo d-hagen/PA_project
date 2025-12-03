@@ -8,9 +8,9 @@
 // This is *not* a real page-table walker, just a test stub.
 
 module ptw #(
-    parameter VA_WIDTH     = 32,
-    parameter PPN_WIDTH    = 20,
-    parameter PTW_LATENCY  = 8   // cycles between request and response
+    parameter VA_WIDTH     = 20,
+    parameter PPN_WIDTH    = 8,
+    parameter PTW_LATENCY  = 3   // cycles between request and response
 )(
     input  wire                    clk,
     input  wire                    rst,
@@ -33,7 +33,7 @@ module ptw #(
     localparam CNT_BITS = $clog2(PTW_LATENCY + 1);
     reg [CNT_BITS-1:0]     cnt;
 
-    always @(posedge clk or posedge rst) begin
+    always @(posedge clk) begin
         if (rst) begin
             busy        <= 1'b0;
             va_latched  <= {VA_WIDTH{1'b0}};
@@ -61,7 +61,7 @@ module ptw #(
 
                     // Compute "PA": lower 20 bits of VA + 4
                     // (test mapping: VA = PA - 4 on low 20 bits)
-                    F_ptw_pa    <= va_latched[PPN_WIDTH-1:0] + 20'd4;
+                    F_ptw_pa    <= va_latched[PPN_WIDTH-1:0];
 
                     // Signal to ITLB that a translation is ready (for 1 cycle)
                     F_ptw_valid <= 1'b1;

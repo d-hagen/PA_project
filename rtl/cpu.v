@@ -15,15 +15,28 @@ module cpu #(
   // =======================
   // Wire declarations
   // =======================
-
+  
   // ----- Program Counter / Fetch -----
-  wire [VPC_BITS-1:0] F_pc;            // current PC (Fetch stage)
-  wire [XLEN-1:0]    F_inst;          // fetched instruction
+  wire [VPC_BITS-1:0] F_pc_va;            // current PC (Fetch stage)
+  wire [PC_BITS-1:0]  F_pc;  
+  wire [XLEN-1:0]     F_inst;          // fetched instruction
 
   // Branch Predictor / buffer
   wire                 F_BP_taken;
   wire [VPC_BITS-1:0]  F_BP_target_pc;
   wire                 F_stall;
+
+  // ===== ITLB / PTW wires =====
+  wire F_admin = 1'b0;    // always normal mode for now
+
+  wire                F_ptw_valid;      // PTW → ITLB: translation valid
+  wire [7:0]  F_ptw_pa;         // PTW → ITLB: translated PA/PPN
+
+  wire                Itlb_stall;       // ITLB stall out
+  wire                Itlb_pa_request;  // ITLB → PTW: translation request
+  wire [19:0] Itlb_va;          // ITLB → PTW: VA needing translation
+
+
 
   // Decode stage / F→D reg
   wire [XLEN-1:0]    D_inst;
@@ -128,7 +141,7 @@ module cpu #(
     .EX_alt_pc      (EX_alu_out),
     .F_BP_target_pc (F_BP_target_pc),
     .stall_D        (stall_D),
-    .F_pc           (F_pc)
+    .F_pc_va           (F_pc_va)
   );
 
   // =======================
@@ -139,16 +152,47 @@ module cpu #(
   ) u_branch_buffer (
     .clk            (clk),
     .rst            (rst),
-    .F_pc           (F_pc),
+    .F_pc_va         (F_pc_va),
     .EX_brn         (EX_brn),
     .F_stall        (F_stall),
     .MEM_stall      (MEM_stall),
+    .Itlb_stall     (Itlb_stall),
     .EX_pc          (EX_a),
     .EX_alu_out     (EX_alu_out),
     .EX_true_taken  (EX_true_taken),
     .F_BP_target_pc (F_BP_target_pc),
     .F_BP_taken     (F_BP_taken)
   );
+
+   itlb #(
+    ) u_itlb(
+      .clk            (clk),
+      .rst            (rst),
+      .va_in          (F_pc_va),
+      .F_admin        (F_admin),
+      .F_ptw_valid  (F_ptw_valid),          
+      .F_ptw_pa     (F_ptw_pa),            
+
+      //out
+      .F_pc(F_pc),                
+      .Itlb_stall(Itlb_stall),           
+      .Itlb_pa_request(Itlb_pa_request),     
+      .Itlb_va(Itlb_va)              
+  );
+
+
+    ptw #(
+    ) u_ptw(
+      .clk            (clk),
+      .rst            (rst),
+      .Itlb_pa_request (Itlb_pa_request),
+      .Itlb_va(Itlb_va),
+
+      .F_ptw_valid(F_ptw_valid),
+      .F_ptw_pa(F_ptw_pa)  
+    );
+
+
 
   // =======================
   // I-Cache
@@ -179,7 +223,7 @@ module cpu #(
   ) u_f2d (
     .clk            (clk),
     .rst            (rst),
-    .F_pc           (F_pc),
+    .F_pc           (F_pc_va),
     .F_inst         (F_inst),
     .F_BP_taken     (F_BP_taken),
     .F_BP_target_pc (F_BP_target_pc),

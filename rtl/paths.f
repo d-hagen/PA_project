@@ -28,6 +28,11 @@ pipeline_brakes/decode.v
 Extras/Hazard_unit.v
 Extras/Branch_Predictor.v
 
+# ==== VM====
+
+Extras/tlbs/tlb.v
+Extras/tlbs/ptw.v
+
 
 # ==== Caches====
 Extras/Caches/Icache.v

@@ -7,7 +7,7 @@ module branch_buffer #(
     input  wire                  rst,
 
     // Fetch-time lookup
-    input  wire [PC_BITS-1:0]    F_pc,           
+    input  wire [PC_BITS-1:0]    F_pc_va,           
 
     // Execute-time update
     input  wire                  EX_brn,         // instruction in EX is a branch
@@ -16,6 +16,7 @@ module branch_buffer #(
     input  wire                  EX_true_taken,  // resolved direction
     input  wire                  F_stall,
     input  wire                  MEM_stall,
+    input  wire                  Itlb_stall,
 
     // Predicted outputs to IF
     output wire [PC_BITS-1:0]    F_BP_target_pc, // predicted next PC
@@ -38,7 +39,7 @@ module branch_buffer #(
         f_hit_idx = {INDX{1'b0}};
         // Simple priority-encode the first match
         for (i = 0; i < DEPTH; i = i + 1) begin
-            if (!f_hit && (pc_buf[i] == F_pc)) begin
+            if (!f_hit && (pc_buf[i] == F_pc_va)) begin
                 f_hit     = 1'b1;
                 f_hit_idx = i[INDX-1:0];  // location of hit 
             end
@@ -49,8 +50,8 @@ module branch_buffer #(
 
     // PC + 4 for sequential fall-through (PC is byte address, word-aligned)
     wire [PC_BITS-1:0] seq_pc =
-        F_pc + ( (!F_stall && !MEM_stall) ? {{(PC_BITS-3){1'b0}}, 3'd4} : {PC_BITS{1'b0}} );
-        // For PC_BITS = 20 this is effectively: F_pc + 20'd4 when not stalled
+        F_pc_va + ( (!F_stall && !MEM_stall && !Itlb_stall) ? {{(PC_BITS-3){1'b0}}, 3'd4} : {PC_BITS{1'b0}} );
+        // For PC_BITS = 32 this is effectively: F_pc_va + 32'd4 when not stalled
 
     assign F_BP_taken     = taken_on_hit;
     assign F_BP_target_pc = (f_hit && taken_on_hit) ? target_buf[f_hit_idx]

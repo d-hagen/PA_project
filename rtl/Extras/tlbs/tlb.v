@@ -1,8 +1,9 @@
 module itlb #(
     parameter VA_WIDTH          = 32,
+    parameter PC_BITS           = 20,
     parameter PAGE_OFFSET_WIDTH = 12,       // 4 KiB pages
     parameter VPN_WIDTH         = VA_WIDTH - PAGE_OFFSET_WIDTH, // 20-bit VPN
-    parameter PPN_WIDTH         = 20,       // size of PPN (your PA bits)
+    parameter PPN_WIDTH         = PC_BITS - PAGE_OFFSET_WIDTH,       // size of PPN (your PA bits)
     parameter NUM_ENTRIES       = 16
 )(
     input                       clk,
@@ -16,11 +17,11 @@ module itlb #(
     input                       F_ptw_valid,          // like F_mem_valid
     input  [PPN_WIDTH-1:0]      F_ptw_pa,             // translated PPN from PTW
 
-    output [PPN_WIDTH-1:0]      F_pc,                 // PPN (or PA-high) out
+    output [PC_BITS-1:0]        F_pc,                 // PPN (or PA-high) out
     output                      Itlb_stall,           // stall pipeline on miss
 
-    output                      Itlb_pa_request,      // request to PTW (like Ic_mem_req)
-    output [VA_WIDTH-1:0]       Itlb_va               // VA sent to PTW (like Ic_mem_addr)
+    output                       Itlb_pa_request,      // request to PTW (like Ic_mem_req)
+    output [VPN_WIDTH-1:0]       Itlb_va               // VA sent to PTW (like Ic_mem_addr)
 );
 
     // ----------------------------------------------------------------
@@ -42,6 +43,7 @@ module itlb #(
     // Extract VPN from VA
     wire [VPN_WIDTH-1:0] va_vpn = va_in[VA_WIDTH-1:PAGE_OFFSET_WIDTH];
 
+
     // ----------------------------------------------------------------
     // Combinational lookup + PTW request logic
     // ----------------------------------------------------------------
@@ -49,7 +51,7 @@ module itlb #(
     reg hit;
     reg [PPN_WIDTH-1:0] hit_ppn;
 
-    always @* begin
+   always @(*) begin
         hit     = 1'b0;
         hit_ppn = {PPN_WIDTH{1'b0}};
 
@@ -71,7 +73,7 @@ module itlb #(
     // - normal miss: value is irrelevant (stall is high), so drive 0
     assign F_pc =
         F_admin ? va_in[PPN_WIDTH-1:0] :     // admin mode bypass
-        hit     ? hit_ppn              :     // normal hit
+        hit     ? {hit_ppn, va_in[PAGE_OFFSET_WIDTH-1:0]}  :     // normal hit
                   {PPN_WIDTH{1'b0}};         // normal miss (unused while stalled)
 
     // Stall whenever we are in normal mode and do not hit in the TLB
@@ -90,7 +92,7 @@ module itlb #(
     // Sequential logic: reset, record miss VPN, refill on PTW return
     // ----------------------------------------------------------------
 
-    always @(posedge clk or posedge rst) begin
+    always @(posedge clk) begin
         if (rst) begin
             for (i = 0; i < NUM_ENTRIES; i = i + 1) begin
                 vpn_buf[i] <= {VPN_WIDTH{1'b0}};

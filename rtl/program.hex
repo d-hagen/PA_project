@@ -1,3 +1,4 @@
+20000000    // [step 116] NOP (addi r0 r0 r0 0)
 20210801    // [step 0] addi r1  r1  r1   1      # r1 = 1 (base addr for bytes)
 20421002    // [step 4] addi r2  r2  r2   2      # r2 = 2
 20631803    // [step 8] addi r3  r3  r3   3      # r3 = 3

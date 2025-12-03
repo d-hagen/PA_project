@@ -10,21 +10,21 @@ module pc #(
     input  wire                 EX_taken,    // branch/jump taken
     input  wire [PCLEN-1:0]     EX_alt_pc,   // alternate PC when taken
 
-    input                       stall_D,
+    input                           stall_D,
 
     input    wire [PCLEN-1:0]      F_BP_target_pc, 
-    output reg    [PCLEN-1:0]      F_pc         // current/fetch PC
+    output reg    [PCLEN-1:0]      F_pc_va         // current/fetch PC
 );
 
     always @(posedge clk or posedge rst) begin
         if (rst) begin
-            F_pc <= RESET_PC;
+            F_pc_va <= RESET_PC;
         end else if (EX_taken) begin
-            F_pc <= EX_alt_pc;
+            F_pc_va <= EX_alt_pc;
         end else if (stall_D) begin
-            F_pc <= F_pc;   // hold
+            F_pc_va <= F_pc_va;   // hold
         end else begin
-            F_pc <= F_BP_target_pc;     // sequential
+            F_pc_va <= F_BP_target_pc;     // sequential
         end
     end
 
