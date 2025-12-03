@@ -1,5 +1,5 @@
 module branch_buffer #(
-    parameter integer PC_BITS = 20,   // PC is 20 bits: [19:0] byte address, word-aligned
+    parameter integer PC_BITS = 32,   // PC is 20 bits: [19:0] byte address, word-aligned
     parameter integer DEPTH   = 8,
     parameter integer INDX    = 3     // log2(DEPTH)
 )(

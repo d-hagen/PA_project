@@ -2,7 +2,8 @@ module regfile #(
   parameter XLEN=32,
   parameter REG_NUM=32,
   parameter ADDR_SIZE=5,
-  parameter PC_BITS = 20
+  parameter PC_BITS = 20,
+  parameter VPC_BITS = 32
 )(
   input  wire                 clk,
 
@@ -10,7 +11,7 @@ module regfile #(
   input  wire [ADDR_SIZE-1:0] D_ra,
   input  wire [ADDR_SIZE-1:0] D_rb,
   input  wire [10:0]          D_imd,
-  input  wire [PC_BITS-1:0]          D_pc,
+  input  wire [VPC_BITS-1:0]   D_pc,
   input  wire                 D_ld,
   input  wire                 D_str,
   input  wire                 D_brn,
@@ -37,9 +38,7 @@ module regfile #(
   output wire [XLEN-1:0]      D_b2
 );
 
-  // Extend immediates/PC (adjust sign/zero extension to your ISA)
-  wire [XLEN-1:0] offset       = {{(XLEN-11){D_imd[10]}}, D_imd};
-  wire [XLEN-1:0] pc_extended  = {{(XLEN-11){D_pc[10]}},  D_pc};
+ 
 
   // Register file storage
   reg [XLEN-1:0] regs [0:REG_NUM-1];
@@ -77,7 +76,7 @@ module regfile #(
   assign D_a2 = ra_fwd;
   assign D_b2 = rb_fwd;
 
-  assign D_a  = D_brn ? {{(XLEN-12){D_pc[11]}}, D_pc} : ra_fwd;
+  assign D_a  = D_brn ? D_pc : ra_fwd;
   assign D_b  = (D_str || D_ld || D_addi || D_brn)
                 ? {{(XLEN-11){D_imd[10]}}, D_imd}  //{{(XLEN-11){D_imd[10]}}
                 : rb_fwd;

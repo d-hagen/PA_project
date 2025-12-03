@@ -1,6 +1,7 @@
 module d_to_ex_reg #(
     parameter XLEN    = 32,
-    parameter PC_BITS = 20 // Added PC_BITS parameter for target PC width
+    parameter PC_BITS = 20, // Added PC_BITS parameter for target PC width
+    parameter integer VPC_BITS = 32
 )(
     input  wire             clk,
     input  wire             rst,
@@ -19,7 +20,7 @@ module d_to_ex_reg #(
     input  wire                 D_we,       // Register write enable
     input  wire                 D_mul,      // Multiply instruction
     input  wire                 D_BP_taken, // BP: Was branch taken?
-    input  wire [PC_BITS-1:0]   D_BP_target_pc, // BP: Target PC to be flopped
+    input  wire [VPC_BITS-1:0]   D_BP_target_pc, // BP: Target PC to be flopped
           
     // Stall/Flush/Taken Signals
     input wire                  stall_D,
@@ -43,7 +44,7 @@ module d_to_ex_reg #(
     output wire                 EX_we,
     output wire                 EX_brn,     // branch mode
     output wire                 EX_BP_taken,    // BP: Was branch taken?
-    output wire [PC_BITS-1:0]   EX_BP_target_pc, // BP: Flopped target PC
+    output wire [VPC_BITS-1:0]   EX_BP_target_pc, // BP: Flopped target PC
 
     output wire                 EX_mul
 );
@@ -55,7 +56,7 @@ module d_to_ex_reg #(
     reg [4:0]       ex_rd_r;
     reg             ex_ld_r, ex_str_r,ex_byt_r, ex_we_r, ex_mul_r;
     // New register for the BP Target PC
-    reg [PC_BITS-1:0] ex_bp_target_pc_r; 
+    reg [VPC_BITS-1:0] ex_bp_target_pc_r; 
 
     // Flop control logic
     always @(posedge clk) begin

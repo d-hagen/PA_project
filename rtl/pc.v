@@ -2,7 +2,7 @@
 // `default_nettype none
 
 module pc #(
-    parameter integer PCLEN = 12,
+    parameter integer PCLEN = 32,
     parameter [PCLEN-1:0] RESET_PC = {PCLEN{1'b0}}
 )(
     input  wire                 clk,
@@ -12,7 +12,7 @@ module pc #(
 
     input                       stall_D,
 
-    input    wire [PCLEN-1:0]          F_BP_target_pc, 
+    input    wire [PCLEN-1:0]      F_BP_target_pc, 
     output reg    [PCLEN-1:0]      F_pc         // current/fetch PC
 );
 

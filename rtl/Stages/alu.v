@@ -1,6 +1,7 @@
 module alu #(
   parameter XLEN = 32,
-  parameter integer PC_BITS = 12
+  parameter integer PC_BITS = 20,
+  parameter integer VPC_BITS = 32
 ) (
   input  wire [XLEN-1:0]     EX_a,
   input  wire [XLEN-1:0]     EX_a2,
@@ -9,7 +10,7 @@ module alu #(
   input  wire [3:0]          EX_alu_op,
   input  wire                EX_brn,
   input  wire                EX_BP_taken,
-  input wire [PC_BITS-1:0]   EX_BP_target_pc, // BP: Flopped target PC
+  input wire [VPC_BITS-1:0]   EX_BP_target_pc, // BP: Flopped target PC
 
 
   output reg  [XLEN-1:0]     EX_alu_out,
