@@ -30,8 +30,8 @@ Extras/Branch_Predictor.v
 
 # ==== VM====
 
-Extras/tlbs/tlb.v
-Extras/tlbs/ptw.v
+Extras/tlbs/itlb.v
+Extras/tlbs/ptw_new.v
 
 
 # ==== Caches====

@@ -1,4 +1,4 @@
-addi  r2  r2  r2   100
+addi  r2  r2  r2   1000
 
 addi  r3  r3  r3   200
 
@@ -8,7 +8,7 @@ addi  r5  r5  r5   400
 
 addi  r6  r6  r6   500
 
-store  r0  r2  r0   40
+store  r2  r2  r0   1000
 store  r0  r3  r0   48
 store  r0  r4  r0   52
 store  r0  r5  r0   56

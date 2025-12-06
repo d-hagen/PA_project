@@ -36,6 +36,13 @@ module cpu #(
   wire                Itlb_pa_request;  // ITLB → PTW: translation request
   wire [19:0] Itlb_va;          // ITLB → PTW: VA needing translation
 
+  wire        Ptw_mem_req;
+  wire [19:0] Ptw_mem_addr;   // PC_BITS = 20
+  wire [31:0] Ptw_mem_rdata;
+  wire        Ptw_mem_valid;
+
+  // From dcache
+
 
 
   // Decode stage / F→D reg
@@ -123,6 +130,7 @@ module cpu #(
   wire [127:0]       Dc_wb_wline;
   wire [XLEN-1:0]    MEM_data_mem;
 
+
   // MEM → WB pipeline register wires
   wire [XLEN-1:0]    WB_data_mem;
   wire [4:0]         WB_rd;
@@ -181,15 +189,30 @@ module cpu #(
   );
 
 
-    ptw #(
-    ) u_ptw(
-      .clk            (clk),
-      .rst            (rst),
-      .Itlb_pa_request (Itlb_pa_request),
-      .Itlb_va(Itlb_va),
+    ptw_2level #(
+      .VA_WIDTH          (32),
+      .PC_BITS           (20),
+      .PAGE_OFFSET_WIDTH (12)
+    ) u_ptw (
+      .clk             (clk),
+      .rst             (rst),
 
-      .F_ptw_valid(F_ptw_valid),
-      .F_ptw_pa(F_ptw_pa)  
+      // From ITLB
+      .Itlb_pa_request (Itlb_pa_request),
+      .Itlb_va         (Itlb_va),
+
+      // Back to ITLB
+      .F_ptw_valid     (F_ptw_valid),
+      .F_ptw_pa        (F_ptw_pa),
+
+      // Word-level memory interface to backing store
+      .Ptw_mem_req     (Ptw_mem_req),
+      .Ptw_mem_addr    (Ptw_mem_addr),
+      .Ptw_mem_rdata   (Ptw_mem_rdata),
+      .Ptw_mem_valid   (Ptw_mem_valid),
+
+      // Cache busy indicator
+      .MEM_stall         (MEM_stall)
     );
 
 
@@ -229,6 +252,7 @@ module cpu #(
     .F_BP_target_pc (F_BP_target_pc),
     .stall_D        (stall_D),
     .MEM_stall      (MEM_stall),
+    .Itlb_stall     (Itlb_stall),
     .EX_taken       (EX_taken),
     .D_pc           (D_pc),
     .D_inst         (D_inst),
@@ -466,7 +490,15 @@ module cpu #(
     // Backing memory: line write-back
     .Dc_wb_we     (Dc_wb_we),
     .Dc_wb_addr   (Dc_wb_addr),
-    .Dc_wb_wline  (Dc_wb_wline)
+    .Dc_wb_wline  (Dc_wb_wline),
+
+
+    //PTW 
+    .Ptw_req       (Ptw_mem_req),
+    .Ptw_addr      (Ptw_mem_addr),
+    .Ptw_rdata     (Ptw_mem_rdata),
+    .Ptw_valid     (Ptw_mem_valid)
+
   );
 
   // =======================

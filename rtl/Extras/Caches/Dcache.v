@@ -23,7 +23,14 @@ module dcache #(
     // Backing memory write-back interface (eviction)
     output reg                  Dc_wb_we,
     output reg  [LINE_BITS-1:0] Dc_wb_addr,      // line index
-    output reg  [127:0]         Dc_wb_wline
+    output reg  [127:0]         Dc_wb_wline,
+
+    input  wire                 Ptw_req,
+    input  wire [19:0]          Ptw_addr,
+    output reg  [31:0]          Ptw_rdata,
+    output reg                  Ptw_valid,
+
+    output wire                 Dc_busy
 );
 
     // Tiny 4-line fully-associative cache
@@ -42,6 +49,9 @@ module dcache #(
     reg [31:0]              tmp_store_word;
     reg [31:0]              tmp_load_word;
 
+    reg                     ptw_busy;
+    reg [19:0]              ptw_addr_q;
+
     integer i;
 
     // ----------------------------------------------------------------
@@ -54,7 +64,11 @@ module dcache #(
     wire [1:0]           addr_word = MEM_alu_out[3:2];
     wire [1:0]           addr_byte = MEM_alu_out[1:0];
 
+    wire [LINE_BITS-1:0] ptw_line  = Ptw_addr[19:4];
+
     wire op_active = MEM_ld | MEM_str;
+
+    assign Dc_busy = MEM_stall | ptw_busy;
 
     // ===================== Sequential logic ==========================
     always @(posedge clk) begin
@@ -69,42 +83,58 @@ module dcache #(
             Dc_wb_we    <= 1'b0;
             Dc_wb_addr  <= {LINE_BITS{1'b0}};
             Dc_wb_wline <= 128'd0;
-        end else begin
-            Dc_wb_we <= 1'b0;
 
-            // Track which line we missed on
+            ptw_busy    <= 1'b0;
+            ptw_addr_q  <= 20'd0;
+            Ptw_rdata   <= 32'd0;
+            Ptw_valid   <= 1'b0;
+        end else begin
+            Dc_wb_we  <= 1'b0;
+            Ptw_valid <= 1'b0;
+
             if (Dc_mem_req && !hit && op_active)
                 miss_line <= addr_line;
 
-            // Refill from backing memory
-            if (MEM_mem_valid) begin
-                // Optional write-back of victim line
-                if (valid[fifo_ptr] && dirty[fifo_ptr]) begin
-                    Dc_wb_we            <= 1'b1;
-                    Dc_wb_addr          <= tag[fifo_ptr];  // full line index
-                    Dc_wb_wline[31:0]   <= data[fifo_ptr][0];
-                    Dc_wb_wline[63:32]  <= data[fifo_ptr][1];
-                    Dc_wb_wline[95:64]  <= data[fifo_ptr][2];
-                    Dc_wb_wline[127:96] <= data[fifo_ptr][3];
-                end
-
-                // Install new line into fifo_ptr entry
-                valid[fifo_ptr] <= 1'b1;
-                dirty[fifo_ptr] <= 1'b0;
-                tag[fifo_ptr]   <= miss_line;
-
-                data[fifo_ptr][0] <= MEM_data_line[31:0];
-                data[fifo_ptr][1] <= MEM_data_line[63:32];
-                data[fifo_ptr][2] <= MEM_data_line[95:64];
-                data[fifo_ptr][3] <= MEM_data_line[127:96];
-
-                fifo_ptr <= fifo_ptr + 1'b1;
+            if (!ptw_busy && !op_active && !MEM_mem_valid && Ptw_req) begin
+                ptw_busy   <= 1'b1;
+                ptw_addr_q <= Ptw_addr;
             end
 
-            // Store-hit update
+            if (MEM_mem_valid) begin
+                if (ptw_busy) begin
+                    case (ptw_addr_q[3:2])
+                        2'b00: Ptw_rdata <= MEM_data_line[31:0];
+                        2'b01: Ptw_rdata <= MEM_data_line[63:32];
+                        2'b10: Ptw_rdata <= MEM_data_line[95:64];
+                        2'b11: Ptw_rdata <= MEM_data_line[127:96];
+                    endcase
+                    Ptw_valid <= 1'b1;
+                    ptw_busy  <= 1'b0;
+                end else begin
+                    if (valid[fifo_ptr] && dirty[fifo_ptr]) begin
+                        Dc_wb_we            <= 1'b1;
+                        Dc_wb_addr          <= tag[fifo_ptr];  // full line index
+                        Dc_wb_wline[31:0]   <= data[fifo_ptr][0];
+                        Dc_wb_wline[63:32]  <= data[fifo_ptr][1];
+                        Dc_wb_wline[95:64]  <= data[fifo_ptr][2];
+                        Dc_wb_wline[127:96] <= data[fifo_ptr][3];
+                    end
+
+                    valid[fifo_ptr] <= 1'b1;
+                    dirty[fifo_ptr] <= 1'b0;
+                    tag[fifo_ptr]   <= miss_line;
+
+                    data[fifo_ptr][0] <= MEM_data_line[31:0];
+                    data[fifo_ptr][1] <= MEM_data_line[63:32];
+                    data[fifo_ptr][2] <= MEM_data_line[95:64];
+                    data[fifo_ptr][3] <= MEM_data_line[127:96];
+
+                    fifo_ptr <= fifo_ptr + 1'b1;
+                end
+            end
+
             if (MEM_str && hit) begin
                 if (MEM_byt) begin
-                    // Byte store: read-modify-write a temporary word
                     tmp_store_word = data[hit_idx][addr_word];
                     case (addr_byte)
                         2'b00: tmp_store_word[7:0]   = MEM_b2[7:0];
@@ -114,7 +144,6 @@ module dcache #(
                     endcase
                     data[hit_idx][addr_word] <= tmp_store_word;
                 end else begin
-                    // Word store (assumed aligned: addr_byte == 2'b00)
                     data[hit_idx][addr_word] <= MEM_b2;
                 end
 
@@ -133,7 +162,6 @@ module dcache #(
         Dc_mem_req   = 1'b0;
         Dc_mem_addr  = addr_line;
 
-        // Tag lookup (fully associative)
         if (op_active && !MEM_mem_valid) begin
             for (i = 0; i < 4; i = i + 1) begin
                 if (valid[i] && (tag[i] == addr_line)) begin
@@ -175,6 +203,11 @@ module dcache #(
                 Dc_mem_req  = MEM_mem_valid ? 1'b0 : 1'b1;
                 Dc_mem_addr = addr_line;
             end
+        end
+
+        if (!op_active && !MEM_mem_valid && !ptw_busy && Ptw_req) begin
+            Dc_mem_req  = 1'b1;
+            Dc_mem_addr = ptw_line;
         end
     end
 

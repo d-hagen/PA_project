@@ -1,151 +1,124 @@
 module itlb #(
-    parameter VA_WIDTH    = 32,
-    parameter PA_WIDTH    = 20,
-    parameter NUM_ENTRIES = 16
+    parameter VA_WIDTH          = 32,
+    parameter PC_BITS           = 20,
+    parameter PAGE_OFFSET_WIDTH = 12,       // 4 KiB pages
+    parameter VPN_WIDTH         = VA_WIDTH - PAGE_OFFSET_WIDTH, // 20-bit VPN
+    parameter PPN_WIDTH         = PC_BITS - PAGE_OFFSET_WIDTH,       // size of PPN (your PA bits)
+    parameter NUM_ENTRIES       = 16
 )(
-    input                      clk,
-    input                      reset,
+    input                       clk,
+    input                       rst,
 
-    // Fetch stage virtual address
-    input  [VA_WIDTH-1:0]      pc,
+    input  [VA_WIDTH-1:0]       va_in,
 
-    // Control input to change admin mode from D stage
-    input                      D_admin_change,   // when 1 -> force admin_mode = 0
+    input                       F_admin,
 
-    // Write interface for TLB entries (FIFO policy)
-    input                      Wb_tlb_we,
-    input  [VA_WIDTH-1:0]      WB_tlb_value_va,
-    input  [PA_WIDTH-1:0]      WB_tlb_value_pa,
+    // Page table walker interface
+    input                       F_ptw_valid,          // like F_mem_valid
+    input  [PPN_WIDTH-1:0]      F_ptw_pa,             // translated PPN from PTW
 
-    // Outputs
-    output                     hit,      // TLB hit (only when admin_mode = 0)
-    output [PA_WIDTH-1:0]      F_pc,     // physical PC to fetch
-    output                     F_admin   // current/next admin mode bit for pipeline
+    output [PC_BITS-1:0]        F_pc,                 // PPN (or PA-high) out
+    output                      Itlb_stall,           // stall pipeline on miss
+
+    output                       Itlb_pa_request,      // request to PTW (like Ic_mem_req)
+    output [VPN_WIDTH-1:0]       Itlb_va               // VA sent to PTW (like Ic_mem_addr)
 );
 
-    // ------------------------------------------------------------
-    // Internal TLB storage
-    // ------------------------------------------------------------
-    reg [VA_WIDTH-1:0] va_array [0:NUM_ENTRIES-1];
-    reg [PA_WIDTH-1:0] pa_array [0:NUM_ENTRIES-1];
-    reg                valid_array [0:NUM_ENTRIES-1];
+    // ----------------------------------------------------------------
+    // Internal ITLB storage
+    // ----------------------------------------------------------------
 
-    // FIFO write pointer
-    reg [3:0] write_ptr;
+    reg [VPN_WIDTH-1:0]  vpn_buf   [0:NUM_ENTRIES-1];
+    reg [PPN_WIDTH-1:0]  ppn_buf   [0:NUM_ENTRIES-1];
+    reg [NUM_ENTRIES-1:0] valid;
 
-    // Admin mode state (stored in ITLB)
-    reg admin_mode;         // 0 = user mode, 1 = admin mode
-    reg next_admin_mode;    // combinational "next" value
+    // simple FIFO replacement pointer (0..15)
+    reg [3:0] fifo_ptr;
+
+    // VPN for which the current PTW request is outstanding
+    reg [VPN_WIDTH-1:0] miss_vpn;
 
     integer i;
 
-    // For lookup
-    reg                found;
-    reg [PA_WIDTH-1:0] found_pa;
+    // Extract VPN from VA
+    wire [VPN_WIDTH-1:0] va_vpn = va_in[VA_WIDTH-1:PAGE_OFFSET_WIDTH];
 
-    // ============================================================
-    // RESET + FIFO WRITE LOGIC + ADMIN REGISTER UPDATE
-    // ============================================================
-    always @(posedge clk or posedge reset) begin
-        if (reset) begin
+
+    // ----------------------------------------------------------------
+    // Combinational lookup + PTW request logic
+    // ----------------------------------------------------------------
+
+    reg hit;
+    reg [PPN_WIDTH-1:0] hit_ppn;
+
+   always @(*) begin
+        hit     = 1'b0;
+        hit_ppn = {PPN_WIDTH{1'b0}};
+
+        // Normal mode lookup (skip lookup while PTW is returning,
+        // similar to icache skipping tag lookup when F_mem_valid is high)
+        if (!F_admin && !F_ptw_valid) begin
             for (i = 0; i < NUM_ENTRIES; i = i + 1) begin
-                va_array[i]    <= {VA_WIDTH{1'b0}};
-                pa_array[i]    <= {PA_WIDTH{1'b0}};
-                valid_array[i] <= 1'b0;
-            end
-            write_ptr     <= 4'd0;
-            admin_mode    <= 1'b0;   // start in user mode
-        end else begin
-            // FIFO-style TLB write
-            if (Wb_tlb_we) begin
-                va_array[write_ptr]    <= WB_tlb_value_va;
-                pa_array[write_ptr]    <= WB_tlb_value_pa;
-                valid_array[write_ptr] <= 1'b1;
-
-                if (write_ptr == (NUM_ENTRIES-1))
-                    write_ptr <= 4'd0;
-                else
-                    write_ptr <= write_ptr + 4'd1;
-            end
-
-            // Update admin_mode with precomputed next_admin_mode
-            admin_mode <= next_admin_mode;
-        end
-    end
-
-    // ============================================================
-    // COMBINATIONAL: LOOKUP, MISS DETECT, ADMIN MODE NEXT STATE
-    // ============================================================
-    reg [PA_WIDTH-1:0] out_pa;
-    reg                out_hit;
-    reg                miss_event;
-
-    always @(*) begin
-        // ---------------------------------------------------------
-        // Defaults
-        // ---------------------------------------------------------
-        out_hit         = 1'b0;
-        out_pa          = {PA_WIDTH{1'b0}};
-        miss_event      = 1'b0;
-        next_admin_mode = admin_mode;   // start from current state
-
-        found    = 1'b0;
-        found_pa = {PA_WIDTH{1'b0}};
-
-        // ---------------------------------------------------------
-        // Translation behavior depends on current admin_mode
-        // ---------------------------------------------------------
-        if (admin_mode && !D_admin_change   ) begin
-            // ADMIN MODE: bypass TLB, just pass through VA low bits
-            out_hit    = 1'b0;                  // no real TLB hit
-            out_pa     = pc[PA_WIDTH-1:0];
-            miss_event = 1'b0;                  // no new miss event in admin mode
-        end else begin
-            // USER MODE: normal TLB lookup
-            for (i = 0; i < NUM_ENTRIES; i = i + 1) begin
-                if (valid_array[i] && (va_array[i] == pc)) begin
-                    found    = 1'b1;
-                    found_pa = pa_array[i];
+                if (!hit && valid[i] && (vpn_buf[i] == va_vpn)) begin
+                    hit     = 1'b1;
+                    hit_ppn = ppn_buf[i];
                 end
             end
-
-            if (found) begin
-                out_hit    = 1'b1;
-                out_pa     = found_pa;
-                miss_event = 1'b0;
-            end else begin
-                // MISS IN USER MODE:
-                // - F_pc = 666
-                // - enter admin mode
-                out_hit    = 1'b0;
-                out_pa     = 20'd666;
-                miss_event = 1'b1;
-            end
         end
-
-        // ---------------------------------------------------------
-        // ADMIN MODE STATE UPDATE RULES
-        //
-        // 1. D_admin_change == 1 → force admin_mode = 0
-        // 2. miss_event == 1    → set admin_mode = 1
-        //
-        // Priority:
-        //   - clear (D_admin_change) has priority over set.
-        // ---------------------------------------------------------
-        if (D_admin_change) begin
-            next_admin_mode = 1'b0;
-        end else if (miss_event) begin
-            next_admin_mode = 1'b1;
-        end
-
-  
     end
 
-    // ------------------------------------------------------------
-    // Final outputs
-    // ------------------------------------------------------------
-    assign hit     = out_hit;          // TLB hit in user mode only
-    assign F_pc    = out_pa;           // physical PC (or 666, or passthrough in admin)
-    assign F_admin = next_admin_mode;  // mode bit to send down pipeline
+    // F_pc:
+    // - admin mode: lower 20 bits of VA
+    // - normal hit: PPN from TLB
+    // - normal miss: value is irrelevant (stall is high), so drive 0
+    assign F_pc =
+        F_admin ? va_in[PPN_WIDTH-1:0] :     // admin mode bypass
+        hit     ? {hit_ppn, va_in[PAGE_OFFSET_WIDTH-1:0]}  :     // normal hit
+                  {PPN_WIDTH{1'b0}};         // normal miss (unused while stalled)
+
+    // Stall whenever we are in normal mode and do not hit in the TLB
+    assign Itlb_stall = (!F_admin) && (!hit);
+
+    // Request to PTW only when:
+    //  - in normal mode
+    //  - we don't hit
+    //  - PTW is not currently returning a result
+    assign Itlb_pa_request = (!F_admin) && (!hit) && (!F_ptw_valid);
+
+    // VA sent to PTW (analogous to Ic_mem_addr = pc_line; here we send full VA)
+    assign Itlb_va = va_in[VA_WIDTH-1:PAGE_OFFSET_WIDTH]; // VA[31:12]
+
+    // ----------------------------------------------------------------
+    // Sequential logic: reset, record miss VPN, refill on PTW return
+    // ----------------------------------------------------------------
+
+    always @(posedge clk) begin
+        if (rst) begin
+            for (i = 0; i < NUM_ENTRIES; i = i + 1) begin
+                vpn_buf[i] <= {VPN_WIDTH{1'b0}};
+                ppn_buf[i] <= {PPN_WIDTH{1'b0}};
+                valid[i]   <= 1'b0;
+            end
+            fifo_ptr <= 4'd0;
+            miss_vpn <= {VPN_WIDTH{1'b0}};
+        end else begin
+            // latch VPN at time of miss request
+            // (assumes va_in is held constant while Itlb_stall=1,
+            // just like F_pc is held while F_stall=1 in the icache)
+            if (Itlb_pa_request && !hit) begin
+                miss_vpn <= va_vpn;
+            end
+
+            // refill one TLB entry when PTW returns a translation
+            if (F_ptw_valid) begin
+                // simple FIFO replacement policy
+                vpn_buf[fifo_ptr] <= miss_vpn;
+                ppn_buf[fifo_ptr] <= F_ptw_pa;
+                valid[fifo_ptr]   <= 1'b1;
+
+                fifo_ptr          <= fifo_ptr + 1'b1;
+            end
+        end
+    end
 
 endmodule

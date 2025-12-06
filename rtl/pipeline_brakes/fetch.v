@@ -11,8 +11,9 @@ module f_to_d_reg #(
 
     input                         stall_D,
     input                         MEM_stall,
+    input                         Itlb_stall,
     input                         EX_taken,
-    input wire  [VPC_BITS-1:0]      F_BP_target_pc,  
+    input wire  [VPC_BITS-1:0]    F_BP_target_pc,  
 
     output wire [VPC_BITS-1:0]     D_pc,
     output wire [XLEN-1:0]        D_inst,
@@ -29,7 +30,7 @@ module f_to_d_reg #(
     localparam [XLEN-1:0] NOP = 32'b00100000000000000000000000000000;  // or addi r0 r0 r0 0
 
     always @(posedge clk) begin
-        if (rst) begin
+        if (rst || Itlb_stall) begin
             d_pc           <= {VPC_BITS{1'b0}};
             d_inst         <= NOP;
             d_bp_taken     <= 0;
