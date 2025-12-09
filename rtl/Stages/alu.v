@@ -1,15 +1,20 @@
-module alu #(parameter XLEN = 32) (
-  input  wire [XLEN-1:0] EX_a,
-  input  wire [XLEN-1:0] EX_a2,
-  input  wire [XLEN-1:0] EX_b,
-  input  wire [XLEN-1:0] EX_b2,
-  input  wire [3:0]      EX_alu_op,
-  input  wire            EX_brn,
-  input  wire            EX_BP_taken,
+module alu #(
+  parameter XLEN = 32,
+  parameter integer PC_BITS = 12
+) (
+  input  wire [XLEN-1:0]     EX_a,
+  input  wire [XLEN-1:0]     EX_a2,
+  input  wire [XLEN-1:0]     EX_b,
+  input  wire [XLEN-1:0]     EX_b2,
+  input  wire [3:0]          EX_alu_op,
+  input  wire                EX_brn,
+  input  wire                EX_BP_taken,
+  input wire [PC_BITS-1:0]   EX_BP_target_pc, // BP: Flopped target PC
 
-  output reg  [XLEN-1:0] EX_alu_out,
-  output reg             EX_taken, //flush or no flush 
-  output reg             EX_true_taken //true taken independent of flushing
+
+  output reg  [XLEN-1:0]     EX_alu_out,
+  output reg                 EX_taken, //flush or no flush 
+  output reg                 EX_true_taken //true taken independent of flushing
 );
 
   localparam SHW = (XLEN <= 1) ? 1 : $clog2(XLEN);
@@ -22,8 +27,7 @@ module alu #(parameter XLEN = 32) (
     EX_true_taken  = 1'b0;
     next_pc       = {XLEN{1'b0}};
 
-    if (EX_brn) begin
-     
+      if (EX_brn) begin   // branch operations
       case (EX_alu_op)
         4'b1000: EX_true_taken = (EX_a2 == EX_b2);
         4'b1001: EX_true_taken = (EX_a2 <  EX_b2);

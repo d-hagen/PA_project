@@ -1,13 +1,15 @@
-module icache_simple (
+module icache #(
+  parameter integer PC_BITS = 12
+  )(
     input  wire        clk,
     input  wire        rst,
 
-    input  wire [4:0]  F_pc,         // 0..31, word index
+    input  wire [PC_BITS-1:0]   F_pc,         // 0..31, word index
     input  wire [127:0] F_mem_inst,  // full line from memory
     input  wire         F_mem_valid,
 
-    output reg          F_mem_req,
-    output reg  [2:0]   F_mem_addr,  // line index 0..7
+    output reg          Ic_mem_req,
+    output reg  [9:0]   Ic_mem_addr,  // line index 0..7
 
     output reg  [31:0]  F_inst,
     output reg          F_stall
@@ -23,11 +25,11 @@ module icache_simple (
     reg [1:0] hit_idx;
 
     // line index for which the current miss request was issued
-    reg [2:0] miss_line;
+    reg [9:0] miss_line;
 
     integer i;
 
-    wire [2:0] pc_line = F_pc[4:2];   // 0..7, which 128-bit line
+    wire [PC_BITS-1:0] pc_line = F_pc[PC_BITS-1:2];   // 0..7, which 128-bit line
     wire [1:0] pc_word = F_pc[1:0];   // 0..3, which 32-bit word in the line
 
     // reset + sequential state
@@ -41,7 +43,7 @@ module icache_simple (
         end else begin
             // latch line index at time of miss request
             // (assumes F_pc is held constant while F_stall=1)
-            if (F_mem_req && !hit) begin
+            if (Ic_mem_req && !hit) begin
                 miss_line <= pc_line;
             end
 
@@ -67,9 +69,9 @@ module icache_simple (
         hit_idx   = 2'd0;
         F_stall   = 1'b0;
         F_inst    = 32'h2000_0000;  // default NOP (or whatever)
-        F_mem_addr = pc_line;
+        Ic_mem_addr = pc_line;
 
-        F_mem_req = 1'b0;
+        Ic_mem_req = 1'b0;
 
         // ask memory for the line corresponding to current PC
 
@@ -87,8 +89,8 @@ module icache_simple (
             F_inst = data[hit_idx][pc_word];
         end else begin
             F_stall   = 1'b1;
-            F_mem_req = F_mem_valid ? 1'b0 : 1'b1 ;
-            F_mem_addr = pc_line ;
+            Ic_mem_req = F_mem_valid ? 1'b0 : 1'b1 ;
+            Ic_mem_addr = pc_line ;
 
         end
     end

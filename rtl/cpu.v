@@ -4,7 +4,7 @@ module cpu #(
   parameter integer XLEN      = 32,
   parameter integer REG_NUM   = 32,
   parameter integer ADDR_SIZE = 5,
-  parameter integer PC_BITS   = 5,
+  parameter integer PC_BITS   = 12,
   parameter [PC_BITS-1:0] RESET_PC = {PC_BITS{1'b0}}
 )(
   input  wire clk,
@@ -15,6 +15,9 @@ module cpu #(
   wire [PC_BITS-1:0] F_pc;            // current PC (Fetch stage)
   wire [PC_BITS-1:0] pc_plus_1 = F_pc + {{(PC_BITS-1){1'b0}}, 1'b1};
 
+    // NEW: Extend PC+1 to XLEN for writing to the Register File
+  wire [XLEN-1:0] pc_plus_1_ext = {{ (XLEN-PC_BITS){1'b0} }, pc_plus_1};
+
   // ===== Instruction fetch output =====
   wire [XLEN-1:0] F_inst;             // fetched instruction
 
@@ -22,10 +25,9 @@ module cpu #(
   wire        stall_D;
 
   // Branch Predictor
-  wire       F_BP_taken;        
-  wire [4:0] F_BP_target_pc; 
-
-
+  wire                   F_BP_taken;        
+  wire [PC_BITS-1:0]     F_BP_target_pc; 
+  wire [XLEN-1:0]        F_link_addr; 
 
 
 
@@ -33,9 +35,10 @@ module cpu #(
   wire [XLEN-1:0]  EX_alu_out;
   wire             EX_taken;
 
+
   // ===== PC Register =====
   pc #(
-    .XLEN(PC_BITS),
+    .PCLEN(PC_BITS),
     .RESET_PC(RESET_PC)
   ) u_pc (
     .clk       (clk),
@@ -51,14 +54,14 @@ module cpu #(
   
 
   // ===== I-Cache <-> Instruction Memory wires =====
-  wire        F_mem_req;
-  wire [2:0]  F_mem_addr;
+  wire        Ic_mem_req;
+  wire [9:0]  Ic_mem_addr;
   wire [127:0] F_mem_inst;
   wire        F_mem_valid;
   wire        F_stall;      // from I-cache to your F-stage control
 
   // ===== I-Cache =====
-  icache_simple u_icache (
+  icache u_icache (
     .clk       (clk),
     .rst       (rst),
 
@@ -67,36 +70,25 @@ module cpu #(
     .F_mem_inst  (F_mem_inst),  // data from instruction memory
     .F_mem_valid (F_mem_valid), // valid from instruction memory
 
-    .F_mem_req   (F_mem_req),   // request to instruction memory
-    .F_mem_addr  (F_mem_addr),  // address to instruction memory
+    .Ic_mem_req   (Ic_mem_req),   // request to instruction memory
+    .Ic_mem_addr  (Ic_mem_addr),  // address to instruction memory
 
     .F_inst      (F_inst),      // instruction to F stage
     .F_stall     (F_stall)      // stall signal to F-stage/pipeline
   );
 
-  // ===== Instruction Memory (backing store) =====
-  instruct_mem #(
-    .XLEN    (XLEN),
-    .LATENCY (2)           // or whatever you want
-  ) u_instruct_mem (
-    .clk       (clk),
-    .rst       (rst),
-
-    .F_mem_req   (F_mem_req),    // from I-cache
-    .F_mem_addr  (F_mem_addr),   // from I-cache
-
-    .F_mem_inst  (F_mem_inst),   // to I-cache
-    .F_mem_valid (F_mem_valid)   // to I-cache
-  );
-
+ 
 
 
 
 
  
-  wire [XLEN-1:0] D_inst;
+  wire [XLEN-1:0]    D_inst;
   wire [PC_BITS-1:0] D_pc;
   wire               D_BP_taken;
+  wire [PC_BITS-1:0] D_BP_target_pc;
+  wire [XLEN-1:0]    D_link_addr; // PC+1 (extended)
+
 
   f_to_d_reg #(
     .XLEN(XLEN),
@@ -107,11 +99,19 @@ module cpu #(
     .F_pc     (F_pc),
     .F_inst   (F_inst),
     .F_BP_taken(F_BP_taken),
+    .F_BP_target_pc(F_BP_target_pc),
+    .F_link_addr (pc_plus_1_ext), // Input
+
     .stall_D  (stall_D),
+    .MEM_stall (MEM_stall),
     .EX_taken (EX_taken),
     .D_pc     (D_pc),
     .D_inst   (D_inst),
-    .D_BP_taken(D_BP_taken)
+    .D_BP_taken(D_BP_taken),
+    .D_BP_target_pc(D_BP_target_pc),
+    .D_link_addr (D_link_addr) // Output
+
+   
   );
 
 
@@ -130,6 +130,8 @@ module cpu #(
   wire              D_addi;
   wire              D_mul;
   wire              D_byt;
+  wire              D_jmp;
+  wire              D_link_we;
 
   decode #(
         .XLEN(XLEN)
@@ -148,7 +150,9 @@ module cpu #(
     .D_byt    (D_byt),
     .D_brn    (D_brn),
     .D_addi   (D_addi),
-    .D_mul    (D_mul)
+    .D_mul    (D_mul),
+    .D_jmp    (D_jmp),
+    .D_link_we(D_link_we)
   );
 
   // ----- Hazard unit wires -----
@@ -206,7 +210,7 @@ module cpu #(
   regfile #(
     .XLEN(XLEN),
     .REG_NUM(REG_NUM),
-    .ADDR_SIZE(PC_BITS)
+    .ADDR_SIZE(ADDR_SIZE)
   ) u_regfile (
     // From Decode
     .clk        (clk),
@@ -218,7 +222,9 @@ module cpu #(
     .D_str      (D_str),
     .D_brn      (D_brn),
     .D_addi     (D_addi),
-
+    .D_jmp      (D_jmp),
+    .D_mul      (D_mul),
+    .D_link_we  (D_link_we),      // JALX Instruction Flag
     //From Hazard_unit
     .EX_D_bp    (EX_D_bp),
     .MEM_D_bp   (MEM_D_bp),
@@ -232,6 +238,8 @@ module cpu #(
     .WB_we      (WB_we),
     .WB_rd      (WB_rd),
     .WB_data_mem(WB_data_mem),
+    .WB_link_we (WB_link_we),   // JALX Write Enable
+    .WB_link_addr(WB_link_addr), // JALX Data (PC + 1)
 
 
     // Outputs to Execute
@@ -246,19 +254,23 @@ module cpu #(
   // ===== D → EX pipeline register =====
 
 
-  wire [XLEN-1:0] EX_a;
-  wire [XLEN-1:0] EX_a2;
-  wire [XLEN-1:0] EX_b;
-  wire [XLEN-1:0] EX_b2;
-  wire [3:0]       EX_alu_op;
-  wire [4:0]       EX_rd;
-  wire             EX_ld;
-  wire             EX_str;
-  wire             EX_byt;
-  wire             EX_we;
-  wire             EX_brn;
-  wire             EX_mul;
-  wire             EX_BP_taken;
+  wire [XLEN-1:0]       EX_a;
+  wire [XLEN-1:0]       EX_a2;
+  wire [XLEN-1:0]       EX_b;
+  wire [XLEN-1:0]       EX_b2;
+  wire [3:0]            EX_alu_op;
+  wire [4:0]            EX_rd;
+  wire                  EX_ld;
+  wire                  EX_str;
+  wire                  EX_byt;
+  wire                  EX_we;
+  wire                  EX_brn;
+  wire                  EX_mul;
+  wire                  EX_BP_taken;
+  wire [PC_BITS-1:0]    EX_BP_target_pc;
+  wire [XLEN-1:0]       EX_link_addr; // JALX Link Address
+  wire                  EX_link_we;   // JALX Link Write Enable
+
 
   d_to_ex_reg #(
     .XLEN(XLEN)
@@ -277,12 +289,16 @@ module cpu #(
     .D_ld     (D_ld),
     .D_str    (D_str),
     .D_byt    (D_byt),
-
+    .D_jmp    (D_jmp),  
     .D_we     (D_we),
     .D_mul    (D_mul),
     .D_BP_taken(D_BP_taken),
+    .D_BP_target_pc(D_BP_target_pc),
+    .D_link_addr (D_link_addr), // Input
+
 
     .stall_D  (stall_D),
+    .MEM_stall (MEM_stall),
     .EX_taken (EX_taken),
 
 
@@ -299,7 +315,10 @@ module cpu #(
     .EX_we    (EX_we),
     .EX_brn   (EX_brn),
     .EX_mul   (EX_mul),
-    .EX_BP_taken(EX_BP_taken)
+    .EX_BP_taken(EX_BP_taken),
+    .EX_BP_target_pc(EX_BP_target_pc),
+    .EX_link_addr (EX_link_addr), // Output
+    .EX_link_we   (EX_link_we)    // Output
   );
 
 
@@ -313,16 +332,17 @@ module cpu #(
   alu #(
     .XLEN(XLEN)
   ) u_alu (
-    .EX_a         (EX_a),
-    .EX_a2        (EX_a2),
-    .EX_b         (EX_b),
-    .EX_b2        (EX_b2),
-    .EX_alu_op    (EX_alu_op),
-    .EX_brn       (EX_brn),
-    .EX_BP_taken  (EX_BP_taken),
-    .EX_alu_out   (EX_alu_out),
-    .EX_taken     (EX_taken),
-    .EX_true_taken (EX_true_taken)
+    .EX_a           (EX_a),
+    .EX_a2          (EX_a2),
+    .EX_b           (EX_b),
+    .EX_b2          (EX_b2),
+    .EX_alu_op      (EX_alu_op),
+    .EX_brn         (EX_brn),
+    .EX_BP_taken    (EX_BP_taken),
+    .EX_BP_target_pc(EX_BP_target_pc),
+    .EX_alu_out     (EX_alu_out),
+    .EX_taken       (EX_taken),
+    .EX_true_taken  (EX_true_taken)
   );
 
 
@@ -334,9 +354,10 @@ module cpu #(
     .F_pc            (F_pc),
     .EX_brn          (EX_brn),
     .F_stall         (F_stall),
+    .MEM_stall       (MEM_stall),
     .EX_pc           (EX_a[PC_BITS-1:0]),
     .EX_alu_out      (EX_alu_out[PC_BITS-1:0]),
-    .EX_true_taken    (EX_true_taken),
+    .EX_true_taken   (EX_true_taken),
     .F_BP_target_pc  (F_BP_target_pc),
     .F_BP_taken      (F_BP_taken)
   );
@@ -344,15 +365,17 @@ module cpu #(
 
 
   // ===== EX → MEM pipeline register wires =====
-  wire [XLEN-1:0] MEM_alu_out;
-  wire             MEM_taken;
-  wire [XLEN-1:0] MEM_b2;
-  wire [XLEN-1:0] MEM_a2;
-  wire [4:0]       MEM_rd;
-  wire             MEM_we;
-  wire             MEM_ld;
-  wire             MEM_str;
-  wire             MEM_byt;
+  wire [XLEN-1:0]   MEM_alu_out;
+  wire              MEM_taken;
+  wire [XLEN-1:0]   MEM_b2;
+  wire [XLEN-1:0]   MEM_a2;
+  wire [4:0]        MEM_rd;
+  wire              MEM_we;
+  wire              MEM_ld;
+  wire              MEM_str;
+  wire              MEM_byt;
+  wire  [XLEN-1:0]  MEM_link_addr;
+  wire              MEM_link_we;
 
 
   // ===== EX → MEM pipeline register =====
@@ -372,6 +395,9 @@ module cpu #(
     .EX_ld      (EX_ld),
     .EX_str     (EX_str),
     .EX_byt     (EX_byt),
+    .MEM_stall (MEM_stall),
+    .EX_link_addr (EX_link_addr), // Input
+    .EX_link_we   (EX_link_we),   // Input
 
     // To Memory stage (MEM)
     .MEM_alu_out(MEM_alu_out),
@@ -382,7 +408,9 @@ module cpu #(
     .MEM_we     (MEM_we),
     .MEM_ld     (MEM_ld),
     .MEM_str    (MEM_str),
-    .MEM_byt    (MEM_byt)
+    .MEM_byt    (MEM_byt),
+    .MEM_link_addr (MEM_link_addr), // Input
+    .MEM_link_we   (MEM_link_we)      // Input
   );
 
 
@@ -390,23 +418,77 @@ module cpu #(
 
 
 
-  // ===== Memory stage output wires =====
-  wire [XLEN-1:0] MEM_data_mem;
+  // ============ D-cache <-> backing data memory ===============
+  wire             Dc_mem_req;
+  wire [9:0]       Dc_mem_addr;     // 16 lines in backing memory
+  wire [127:0]     MEM_data_line;
+  wire             MEM_mem_valid;
 
-  // ===== Memory stage =====
-  memory #(
-    .XLEN(XLEN),
-    .REG_NUM(REG_NUM),
-    .ADDR_SIZE(ADDR_SIZE)
-  ) u_memory (
+  wire             Dc_wb_we;
+  wire [9:0]       Dc_wb_addr;
+  wire [127:0]     Dc_wb_wline;
+  wire [XLEN-1:0]  MEM_data_mem;
+
+
+
+  dcache #(
+    .XLEN(XLEN)
+  ) u_dcache (
     .clk         (clk),
+    .rst         (rst),
     .MEM_ld      (MEM_ld),
     .MEM_str     (MEM_str),
     .MEM_byt     (MEM_byt),
     .MEM_alu_out (MEM_alu_out),
     .MEM_b2      (MEM_b2),
-    .MEM_data_mem(MEM_data_mem)
+
+    // To MEM stage
+    .MEM_data_mem(MEM_data_mem),
+    .MEM_stall   (MEM_stall),
+
+    // Backing memory: line read
+    .Dc_mem_req   (Dc_mem_req),
+    .Dc_mem_addr  (Dc_mem_addr),
+    .MEM_data_line    (MEM_data_line),
+    .MEM_mem_valid (MEM_mem_valid),
+
+    // Backing memory: line write-back
+    .Dc_wb_we    (Dc_wb_we),
+    .Dc_wb_addr  (Dc_wb_addr),
+    .Dc_wb_wline (Dc_wb_wline)
+
   );
+
+    // Unified instruction + data memory
+unified_mem #(
+    .XLEN    (XLEN),
+    .LATENCY (3)       // same latency you used before
+) u_unified_mem (
+    .clk  (clk),
+    .rst  (rst),
+
+    // ================== Instruction side ==================
+    .Ic_mem_req  (Ic_mem_req),   // from your fetch/I-cache
+    .Ic_mem_addr (Ic_mem_addr),  // line index
+    .F_mem_inst  (F_mem_inst),   // 128-bit instruction line
+    .F_mem_valid (F_mem_valid),
+
+    // ====================== Data side ======================
+    // Line read
+    .Dc_mem_req    (Dc_mem_req),
+    .Dc_mem_addr   (Dc_mem_addr),
+    .MEM_data_line (MEM_data_line),
+    .MEM_mem_valid (MEM_mem_valid),
+
+    // Line write-back
+    .Dc_wb_we    (Dc_wb_we),
+    .Dc_wb_addr  (Dc_wb_addr),
+    .Dc_wb_wline (Dc_wb_wline)
+);
+
+
+  
+  
 
 
 
@@ -414,7 +496,8 @@ module cpu #(
   wire [XLEN-1:0]  WB_data_mem;
   wire [4:0]       WB_rd;
   wire             WB_we;
-
+  wire  [XLEN-1:0]  WB_link_addr;
+  wire              WB_link_we;
   // ===== MEM → WB pipeline register =====
   mem_to_wb_reg #(
     .XLEN(XLEN)
@@ -426,11 +509,14 @@ module cpu #(
     .MEM_data_mem(MEM_data_mem),
     .MEM_rd      (MEM_rd),
     .MEM_we      (MEM_we),
-
+    .MEM_link_addr (D_link_addr), // Input
+    .MEM_link_we   (D_link_we),      // Input
     // To Writeback stage (WB)
     .WB_data_mem (WB_data_mem),
     .WB_rd       (WB_rd),
-    .WB_we       (WB_we)
+    .WB_we       (WB_we),
+    .WB_link_addr (WB_link_addr), // Output
+    .WB_link_we   (WB_link_we)    // Output
   );
   
 
