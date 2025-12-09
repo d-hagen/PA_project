@@ -27,10 +27,7 @@ OPCODES = {
     "beq":   0b001101,
     "blt":   0b001101,
     "bgt":   0b001101,
-<<<<<<< HEAD
-=======
     "jalx":  0b001101,
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 }
 
 # CTRL subop codes in the RD field
@@ -38,12 +35,8 @@ RD_JMP = 0b00000
 RD_BEQ = 0b00001
 RD_BLT = 0b00010
 RD_BGT = 0b00011
-<<<<<<< HEAD
-CTRL_RD_FOR = {"jmp": RD_JMP, "beq": RD_BEQ, "blt": RD_BLT, "bgt": RD_BGT}
-=======
 RD_JALX= 0b00100
 CTRL_RD_FOR = {"jmp": RD_JMP, "beq": RD_BEQ, "blt": RD_BLT, "bgt": RD_BGT, "jalx": RD_JALX}
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 
 # ============================ utils ================================
 REG_RE = re.compile(r"^r(\d+)$", re.IGNORECASE)
