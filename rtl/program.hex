@@ -1,20 +1,20 @@
 20210801    // [0] addi r1  r1  r1  1       # r1 = 1
-20421002    // [1] addi r2  r2  r2  2       # r2 = 2
+20421002    // [1] addi r2  r2  r2  2       # r2 = 21
 20631803    // [2] addi r3  r3  r3  3       # r3 = 3
-34200003    // [3] jmp  r1  r0  r0  3    # jump ahead 4 = ra + immediate (skip next 2)
+34222008    // [3] jalx  r1 r2 r3  8    # jump to pc 8 skip next 2 PC=3
 214a5063    // [4] addi r10 r10 r10 99      # should be skipped
 216b5858    // [5] addi r11 r11 r11 88      # should be skipped
 218c604d    // [6] addi r12 r12 r12 77      # first executes after jump
 20000000    // [7] addi r0  r0  r0  0       # NOP for spacing
-34200004    // [8] jmp  r1  r0  r0  4       # jump ahead 4 (skip next 3)
+34622001    // [8] jalx r3 r2 r1  1     # jump to pc 3 PC=8
 21ad6842    // [9] addi r13 r13 r13 66      # skipped
 21ce7037    // [10] addi r14 r14 r14 55      # skipped
 21ef782c    // [11] addi r15 r15 r15 44      # skipped
 22108021    // [12] addi r16 r16 r16 33      # executes after jump
-34200002    // [13] jmp  r1  r0  r0  2       # jump ahead 2 (skip next 1)
-22318816    // [14] addi r17 r17 r17 22      # skipped
-2252900b    // [15] addi r18 r18 r18 11      # executes after jump
-2294a009    // [16] addi r20 r20 r20 9       # mark program end
+20000000    // [13] NOP (addi r0 r0 r0 0)
+20000000    // [14] NOP (addi r0 r0 r0 0)
+20000000    // [15] NOP (addi r0 r0 r0 0)
+20000000    // [16] NOP (addi r0 r0 r0 0)
 20000000    // [17] NOP (addi r0 r0 r0 0)
 20000000    // [18] NOP (addi r0 r0 r0 0)
 20000000    // [19] NOP (addi r0 r0 r0 0)

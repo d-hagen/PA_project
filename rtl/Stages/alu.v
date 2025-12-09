@@ -8,10 +8,6 @@ module alu #(
   input  wire [XLEN-1:0]     EX_b2,
   input  wire [3:0]          EX_alu_op,
   input  wire                EX_brn,
-<<<<<<< HEAD
-  input  wire                EX_jmp,
-=======
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
   input  wire                EX_BP_taken,
   input wire [PC_BITS-1:0]   EX_BP_target_pc, // BP: Flopped target PC
 
@@ -31,30 +27,13 @@ module alu #(
     EX_true_taken  = 1'b0;
     next_pc       = {XLEN{1'b0}};
 
-<<<<<<< HEAD
-    if (EX_brn) begin
-     if (EX_jmp) begin
-      EX_true_taken = 1'b1; 
-     end else begin
-=======
       if (EX_brn) begin   // branch operations
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
       case (EX_alu_op)
         4'b1000: EX_true_taken = (EX_a2 == EX_b2);
         4'b1001: EX_true_taken = (EX_a2 <  EX_b2);
         4'b1010: EX_true_taken = (EX_a2 >  EX_b2);
         default: EX_true_taken = 1'b1;
       endcase
-<<<<<<< HEAD
-      end
-      if (EX_true_taken)                        
-        next_pc = EX_a + EX_b;   ///branch target
-      else
-        next_pc = EX_a + {{(XLEN-1){1'b0}}, 1'b1}; //next instruction after branch
-
-      EX_alu_out =  next_pc;     /// correct location to jump to
-      EX_taken   = (EX_BP_taken ^ EX_true_taken || EX_BP_target_pc ^  EX_alu_out);   /// if they dont match -> flush the pipeline
-=======
 
       if (EX_true_taken)                        
         next_pc = EX_a + EX_b;            ///branch target
@@ -63,7 +42,6 @@ module alu #(
 
       EX_alu_out =  next_pc;                              /// correct location to jump to
       EX_taken   = (EX_BP_taken ^ EX_true_taken);         /// if they dont match -> flush the pipeline
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 
     end else begin   // non jump operations
       case (EX_alu_op)

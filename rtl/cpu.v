@@ -14,11 +14,8 @@ module cpu #(
   // ===== Program Counter wires =====
   wire [PC_BITS-1:0] F_pc;            // current PC (Fetch stage)
   wire [PC_BITS-1:0] pc_plus_1 = F_pc + {{(PC_BITS-1){1'b0}}, 1'b1};
-<<<<<<< HEAD
-=======
     // NEW: Extend PC+1 to XLEN for writing to the Register File
   wire [XLEN-1:0] pc_plus_1_ext = {{ (XLEN-PC_BITS){1'b0} }, pc_plus_1};
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 
   // ===== Instruction fetch output =====
   wire [XLEN-1:0] F_inst;             // fetched instruction
@@ -89,11 +86,8 @@ module cpu #(
   wire [PC_BITS-1:0] D_pc;
   wire               D_BP_taken;
   wire [PC_BITS-1:0] D_BP_target_pc;
-<<<<<<< HEAD
-=======
   wire [XLEN-1:0]    D_link_addr; // PC+1 (extended)
 
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 
   f_to_d_reg #(
     .XLEN(XLEN),
@@ -105,24 +99,17 @@ module cpu #(
     .F_inst   (F_inst),
     .F_BP_taken(F_BP_taken),
     .F_BP_target_pc(F_BP_target_pc),
-<<<<<<< HEAD
-=======
     .F_link_addr (pc_plus_1_ext), // Input
 
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     .stall_D  (stall_D),
     .MEM_stall (MEM_stall),
     .EX_taken (EX_taken),
     .D_pc     (D_pc),
     .D_inst   (D_inst),
     .D_BP_taken(D_BP_taken),
-<<<<<<< HEAD
-    .D_BP_target_pc(D_BP_target_pc)
-=======
     .D_BP_target_pc(D_BP_target_pc),
     .D_link_addr (D_link_addr) // Output
 
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
    
   );
 
@@ -142,11 +129,8 @@ module cpu #(
   wire              D_addi;
   wire              D_mul;
   wire              D_byt;
-<<<<<<< HEAD
-=======
   wire              D_jmp;
   wire              D_link_we;
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 
   decode #(
         .XLEN(XLEN)
@@ -166,12 +150,8 @@ module cpu #(
     .D_brn    (D_brn),
     .D_addi   (D_addi),
     .D_mul    (D_mul),
-<<<<<<< HEAD
-    .D_jmp    (D_jmp)
-=======
     .D_jmp    (D_jmp),
     .D_link_we(D_link_we)
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
   );
 
   // ----- Hazard unit wires -----
@@ -226,10 +206,6 @@ module cpu #(
   wire [XLEN-1:0]      D_b2;       // value of raddr2
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
   regfile #(
     .XLEN(XLEN),
     .REG_NUM(REG_NUM),
@@ -247,11 +223,7 @@ module cpu #(
     .D_addi     (D_addi),
     .D_jmp      (D_jmp),
     .D_mul      (D_mul),
-<<<<<<< HEAD
-
-=======
     .D_link_we  (D_link_we),      // JALX Instruction Flag
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     //From Hazard_unit
     .EX_D_bp    (EX_D_bp),
     .MEM_D_bp   (MEM_D_bp),
@@ -265,11 +237,8 @@ module cpu #(
     .WB_we      (WB_we),
     .WB_rd      (WB_rd),
     .WB_data_mem(WB_data_mem),
-<<<<<<< HEAD
-=======
     .WB_link_we (WB_link_we),   // JALX Write Enable
     .WB_link_addr(WB_link_addr), // JALX Data (PC + 1)
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 
 
     // Outputs to Execute
@@ -298,11 +267,8 @@ module cpu #(
   wire                  EX_mul;
   wire                  EX_BP_taken;
   wire [PC_BITS-1:0]    EX_BP_target_pc;
-<<<<<<< HEAD
-=======
   wire [XLEN-1:0]       EX_link_addr; // JALX Link Address
   wire                  EX_link_we;   // JALX Link Write Enable
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 
 
   d_to_ex_reg #(
@@ -327,10 +293,7 @@ module cpu #(
     .D_mul    (D_mul),
     .D_BP_taken(D_BP_taken),
     .D_BP_target_pc(D_BP_target_pc),
-<<<<<<< HEAD
-=======
     .D_link_addr (D_link_addr), // Input
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 
 
     .stall_D  (stall_D),
@@ -352,13 +315,9 @@ module cpu #(
     .EX_brn   (EX_brn),
     .EX_mul   (EX_mul),
     .EX_BP_taken(EX_BP_taken),
-<<<<<<< HEAD
-    .EX_BP_target_pc(EX_BP_target_pc)
-=======
     .EX_BP_target_pc(EX_BP_target_pc),
     .EX_link_addr (EX_link_addr), // Output
     .EX_link_we   (EX_link_we)    // Output
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
   );
 
 
@@ -378,10 +337,6 @@ module cpu #(
     .EX_b2          (EX_b2),
     .EX_alu_op      (EX_alu_op),
     .EX_brn         (EX_brn),
-<<<<<<< HEAD
-    .EX_jmp         (EX_jmp),
-=======
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     .EX_BP_taken    (EX_BP_taken),
     .EX_BP_target_pc(EX_BP_target_pc),
     .EX_alu_out     (EX_alu_out),
@@ -409,17 +364,6 @@ module cpu #(
 
 
   // ===== EX → MEM pipeline register wires =====
-<<<<<<< HEAD
-  wire [XLEN-1:0] MEM_alu_out;
-  wire             MEM_taken;
-  wire [XLEN-1:0] MEM_b2;
-  wire [XLEN-1:0] MEM_a2;
-  wire [4:0]       MEM_rd;
-  wire             MEM_we;
-  wire             MEM_ld;
-  wire             MEM_str;
-  wire             MEM_byt;
-=======
   wire [XLEN-1:0]   MEM_alu_out;
   wire              MEM_taken;
   wire [XLEN-1:0]   MEM_b2;
@@ -431,7 +375,6 @@ module cpu #(
   wire              MEM_byt;
   wire  [XLEN-1:0]  MEM_link_addr;
   wire              MEM_link_we;
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 
 
   // ===== EX → MEM pipeline register =====
@@ -452,11 +395,8 @@ module cpu #(
     .EX_str     (EX_str),
     .EX_byt     (EX_byt),
     .MEM_stall (MEM_stall),
-<<<<<<< HEAD
-=======
     .EX_link_addr (EX_link_addr), // Input
     .EX_link_we   (EX_link_we),   // Input
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
 
     // To Memory stage (MEM)
     .MEM_alu_out(MEM_alu_out),
@@ -467,13 +407,9 @@ module cpu #(
     .MEM_we     (MEM_we),
     .MEM_ld     (MEM_ld),
     .MEM_str    (MEM_str),
-<<<<<<< HEAD
-    .MEM_byt    (MEM_byt)
-=======
     .MEM_byt    (MEM_byt),
     .MEM_link_addr (MEM_link_addr), // Input
     .MEM_link_we   (MEM_link_we)      // Input
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
   );
 
 
@@ -559,12 +495,8 @@ unified_mem #(
   wire [XLEN-1:0]  WB_data_mem;
   wire [4:0]       WB_rd;
   wire             WB_we;
-<<<<<<< HEAD
-
-=======
   wire  [XLEN-1:0]  WB_link_addr;
   wire              WB_link_we;
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
   // ===== MEM → WB pipeline register =====
   mem_to_wb_reg #(
     .XLEN(XLEN)
@@ -576,13 +508,6 @@ unified_mem #(
     .MEM_data_mem(MEM_data_mem),
     .MEM_rd      (MEM_rd),
     .MEM_we      (MEM_we),
-<<<<<<< HEAD
-
-    // To Writeback stage (WB)
-    .WB_data_mem (WB_data_mem),
-    .WB_rd       (WB_rd),
-    .WB_we       (WB_we)
-=======
     .MEM_link_addr (D_link_addr), // Input
     .MEM_link_we   (D_link_we),      // Input
     // To Writeback stage (WB)
@@ -591,7 +516,6 @@ unified_mem #(
     .WB_we       (WB_we),
     .WB_link_addr (WB_link_addr), // Output
     .WB_link_we   (WB_link_we)    // Output
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
   );
   
 

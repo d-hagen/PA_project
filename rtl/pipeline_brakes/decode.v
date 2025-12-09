@@ -20,14 +20,9 @@ module d_to_ex_reg #(
     input  wire                 D_mul,      // Multiply instruction
     input  wire                 D_jmp,      // Jump instruction
     input  wire                 D_BP_taken, // BP: Was branch taken?
-<<<<<<< HEAD
-    input  wire [PC_BITS-1:0]   D_BP_target_pc, // BP: Target PC to be flopped
-          
-=======
     input  wire [PC_BITS-1:0]   D_BP_target_pc,      // BP: Target PC to be flopped
     input wire                  D_link_we,     // JALX instruction
     input wire [XLEN-1:0]      D_link_addr,   // JALX Link Address
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     // Stall/Flush/Taken Signals
     input wire                  stall_D,
     input wire                  MEM_stall,
@@ -51,13 +46,9 @@ module d_to_ex_reg #(
     output wire                 EX_brn,     // branch mode
     output wire                 EX_BP_taken,    // BP: Was branch taken?
     output wire [PC_BITS-1:0]   EX_BP_target_pc, // BP: Flopped target PC
-<<<<<<< HEAD
-
-=======
     output wire                 EX_jmp,
     output wire [XLEN-1:0]      EX_link_addr, 
     output wire                 EX_link_we,
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     output wire                 EX_mul
 );
 
@@ -66,11 +57,7 @@ module d_to_ex_reg #(
     reg [3:0]       ex_alu_op_r;
     reg             ex_brn_r,  ex_bp_taken_r;
     reg [4:0]       ex_rd_r;
-<<<<<<< HEAD
-    reg             ex_ld_r, ex_str_r,ex_byt_r, ex_we_r, ex_mul_r, ex_jmp_r;
-=======
     reg             ex_ld_r, ex_str_r,ex_byt_r, ex_we_r, ex_mul_r, ex_jmp_r, ex_link_we_r, ex_link_addr_r;
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     // New register for the BP Target PC
     reg [PC_BITS-1:0] ex_bp_target_pc_r; 
 
@@ -92,11 +79,8 @@ module d_to_ex_reg #(
             ex_we_r         <= 1'b0;
             ex_mul_r        <= 1'b0;
             ex_jmp_r        <= 1'b0;
-<<<<<<< HEAD
-=======
             ex_link_we_r    <= 1'b0;
             ex_link_addr_r  <= {XLEN{1'b0}};
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
             // Reset the BP Target PC
             ex_bp_target_pc_r <= {PC_BITS{1'b0}};
             
@@ -117,11 +101,8 @@ module d_to_ex_reg #(
             ex_we_r         <= D_we;
             ex_mul_r        <= D_mul;
             ex_jmp_r        <= D_jmp;
-<<<<<<< HEAD
-=======
             ex_link_we_r    <= D_link_we;
             ex_link_addr_r  <= D_link_addr; 
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
             // Pipeline the BP Target PC
             ex_bp_target_pc_r <= D_BP_target_pc;
             
@@ -143,11 +124,8 @@ module d_to_ex_reg #(
     assign EX_we            = ex_we_r;
     assign EX_mul           = ex_mul_r;
     assign EX_jmp           = ex_jmp_r;
-<<<<<<< HEAD
-=======
     assign EX_link_we      = ex_link_we_r;
     assign EX_link_addr    = ex_link_addr_r;    
->>>>>>> 0a5a1c4 (JALX with wrong Opcode instruction)
     // Assign the new output
     assign EX_BP_target_pc  = ex_bp_target_pc_r;
 
