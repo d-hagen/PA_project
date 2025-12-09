@@ -14,6 +14,7 @@ module cpu #(
   // ===== Program Counter wires =====
   wire [PC_BITS-1:0] F_pc;            // current PC (Fetch stage)
   wire [PC_BITS-1:0] pc_plus_1 = F_pc + {{(PC_BITS-1){1'b0}}, 1'b1};
+
     // NEW: Extend PC+1 to XLEN for writing to the Register File
   wire [XLEN-1:0] pc_plus_1_ext = {{ (XLEN-PC_BITS){1'b0} }, pc_plus_1};
 
@@ -24,16 +25,16 @@ module cpu #(
   wire        stall_D;
 
   // Branch Predictor
-  wire       F_BP_taken;        
-  wire [PC_BITS-1:0] F_BP_target_pc; 
-
-
+  wire                   F_BP_taken;        
+  wire [PC_BITS-1:0]     F_BP_target_pc; 
+  wire [XLEN-1:0]        F_link_addr; 
 
 
 
   // ===== ALU output wires =====
   wire [XLEN-1:0]  EX_alu_out;
   wire             EX_taken;
+
 
   // ===== PC Register =====
   pc #(

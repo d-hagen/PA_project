@@ -26,7 +26,7 @@ module f_to_d_reg #(
     reg [XLEN-1:0]    d_inst;
     reg               d_bp_taken;
     reg [PC_BITS-1:0] d_bp_target_pc; 
-    reg [XLEN-1:0] d_link_addr; 
+    reg [XLEN-1:0]    d_link_addr; 
 
     localparam [XLEN-1:0] NOP = 32'b00100000000000000000000000000000;  // or addi r0 r0 r0 0
 
