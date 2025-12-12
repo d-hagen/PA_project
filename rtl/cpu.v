@@ -48,6 +48,14 @@ module cpu #(
   // Decode stage / F→D reg
   wire [XLEN-1:0]    D_inst;
   wire [VPC_BITS-1:0] D_pc;
+  wire [VPC_BITS-1:0] EX_pc;
+  wire [VPC_BITS-1:0] MEM_pc;
+  wire [VPC_BITS-1:0] WB_pc;
+
+  wire D_jlx;
+  wire EX_jlx;
+  wire MEM_jlx;
+
   wire               D_BP_taken;
   wire [VPC_BITS-1:0] D_BP_target_pc;
 
@@ -280,6 +288,7 @@ module cpu #(
     .D_str    (D_str),
     .D_byt    (D_byt),
     .D_jmp    (D_jmp),
+    .D_jlx    (D_jlx),
     .D_brn    (D_brn),
     .D_addi   (D_addi),
     .D_mul    (D_mul)
@@ -306,14 +315,19 @@ module cpu #(
     .EX_we      (EX_we),
     .EX_ld      (EX_ld),
     .EX_mul     (EX_mul),
+    .EX_jlx     (EX_jlx),
 
     // MEM stage
     .MEM_rd     (MEM_rd),
     .MEM_we     (MEM_we),
+    .MEM_jlx     (MEM_jlx),
+
 
     // WB stage
     .WB_rd      (WB_rd),
     .WB_we      (WB_we),
+    .WB_jlx     (WB_jlx),
+
 
     // Outputs
     .stall_D    (stall_D),
@@ -356,6 +370,8 @@ module cpu #(
     .WB_we        (WB_we),
     .WB_rd        (WB_rd),
     .WB_data_mem  (WB_data_mem),
+    .WB_pc        (WB_pc),
+    .WB_jlx       (WB_jlx),
 
     // Outputs to Execute
     .D_a          (D_a),
@@ -367,50 +383,56 @@ module cpu #(
   // =======================
   // D → EX pipeline register
   // =======================
-  d_to_ex_reg #(
-    .XLEN   (XLEN),
-    .PC_BITS(PC_BITS),
-    .VPC_BITS (VPC_BITS)
-  ) u_d_to_ex_reg (
-    .clk            (clk),
-    .rst            (rst),
+d_to_ex_reg #(
+  .XLEN     (XLEN),
+  .PC_BITS  (PC_BITS),
+  .VPC_BITS (VPC_BITS)
+) 
+u_d_to_ex_reg (
+  .clk            (clk),
+  .rst            (rst),
 
-    // From Decode/Regfile (D stage)
-    .D_a            (D_a),
-    .D_a2           (D_a2),
-    .D_b            (D_b),
-    .D_b2           (D_b2),
-    .D_alu_op       (D_alu_op),
-    .D_brn          (D_brn),
-    .D_rd           (D_rd),
-    .D_ld           (D_ld),
-    .D_str          (D_str),
-    .D_byt          (D_byt),
-    .D_we           (D_we),
-    .D_mul          (D_mul),
-    .D_BP_taken     (D_BP_taken),
-    .D_BP_target_pc (D_BP_target_pc),
+  // From Decode/Regfile (D stage)
+  .D_a            (D_a),
+  .D_a2           (D_a2),
+  .D_b            (D_b),
+  .D_b2           (D_b2),
+  .D_alu_op       (D_alu_op),
+  .D_brn          (D_brn),
+  .D_rd           (D_rd),
+  .D_ld           (D_ld),
+  .D_str          (D_str),
+  .D_byt          (D_byt),
+  .D_we           (D_we),
+  .D_mul          (D_mul),
+  .D_jlx          (D_jlx),
+  .D_pc           (D_pc),
+  .D_BP_taken     (D_BP_taken),
+  .D_BP_target_pc (D_BP_target_pc),
 
-    .stall_D        (stall_D),
-    .MEM_stall      (MEM_stall),
-    .EX_taken       (EX_taken),
+  .stall_D        (stall_D),
+  .MEM_stall      (MEM_stall),
+  .EX_taken       (EX_taken),
 
-    // To Execute stage (EX)
-    .EX_a           (EX_a),
-    .EX_a2          (EX_a2),
-    .EX_b           (EX_b),
-    .EX_b2          (EX_b2),
-    .EX_alu_op      (EX_alu_op),
-    .EX_rd          (EX_rd),
-    .EX_ld          (EX_ld),
-    .EX_str         (EX_str),
-    .EX_byt         (EX_byt),
-    .EX_we          (EX_we),
-    .EX_brn         (EX_brn),
-    .EX_mul         (EX_mul),
-    .EX_BP_taken    (EX_BP_taken),
-    .EX_BP_target_pc(EX_BP_target_pc)
-  );
+  // To Execute stage (EX)
+  .EX_a           (EX_a),
+  .EX_a2          (EX_a2),
+  .EX_b           (EX_b),
+  .EX_b2          (EX_b2),
+  .EX_alu_op      (EX_alu_op),
+  .EX_rd          (EX_rd),
+  .EX_ld          (EX_ld),
+  .EX_str         (EX_str),
+  .EX_byt         (EX_byt),
+  .EX_we          (EX_we),
+  .EX_brn         (EX_brn),
+  .EX_mul         (EX_mul),
+  .EX_jlx         (EX_jlx),
+  .EX_pc          (EX_pc),
+  .EX_BP_taken    (EX_BP_taken),
+  .EX_BP_target_pc(EX_BP_target_pc)
+);
+
 
   // =======================
   // ALU
@@ -436,35 +458,42 @@ module cpu #(
   // =======================
   // EX → MEM pipeline register
   // =======================
-  ex_to_mem_reg #(
-    .XLEN(XLEN)
-  ) u_ex_to_mem_reg (
-    .clk         (clk),
-    .rst         (rst),
+ex_to_mem_reg #(
+  .XLEN    (XLEN),
+  .PC_BITS (PC_BITS)
+) 
+u_ex_to_mem_reg (
+  .clk         (clk),
+  .rst         (rst),
 
-    // From Execute stage (EX)
-    .EX_alu_out  (EX_alu_out),
-    .EX_taken    (EX_taken),
-    .EX_b2       (EX_b2),
-    .EX_a2       (EX_a2),
-    .EX_rd       (EX_rd),
-    .EX_we       (EX_we),
-    .EX_ld       (EX_ld),
-    .EX_str      (EX_str),
-    .EX_byt      (EX_byt),
-    .MEM_stall   (MEM_stall),
+  // From Execute stage (EX)
+  .EX_alu_out  (EX_alu_out),
+  .EX_taken    (EX_taken),
+  .EX_b2       (EX_b2),
+  .EX_a2       (EX_a2),
+  .EX_rd       (EX_rd),
+  .EX_we       (EX_we),
+  .EX_ld       (EX_ld),
+  .EX_str      (EX_str),
+  .EX_byt      (EX_byt),
+  .MEM_stall   (MEM_stall),
+  .EX_pc       (EX_pc),
+  .EX_jlx      (EX_jlx),
 
-    // To Memory stage (MEM)
-    .MEM_alu_out (MEM_alu_out),
-    .MEM_taken   (MEM_taken),
-    .MEM_b2      (MEM_b2),
-    .MEM_a2      (MEM_a2),
-    .MEM_rd      (MEM_rd),
-    .MEM_we      (MEM_we),
-    .MEM_ld      (MEM_ld),
-    .MEM_str     (MEM_str),
-    .MEM_byt     (MEM_byt)
-  );
+  // To Memory stage (MEM)
+  .MEM_alu_out (MEM_alu_out),
+  .MEM_taken   (MEM_taken),
+  .MEM_b2      (MEM_b2),
+  .MEM_a2      (MEM_a2),
+  .MEM_rd      (MEM_rd),
+  .MEM_we      (MEM_we),
+  .MEM_ld      (MEM_ld),
+  .MEM_str     (MEM_str),
+  .MEM_byt     (MEM_byt),
+  .MEM_pc      (MEM_pc),
+  .MEM_jlx     (MEM_jlx)
+);
+
 
   // =======================
   // D-Cache
@@ -536,20 +565,26 @@ module cpu #(
   // MEM → WB pipeline register
   // =======================
   mem_to_wb_reg #(
-    .XLEN(XLEN)
-  ) u_mem_to_wb_reg (
-    .clk         (clk),
-    .rst         (rst),
+    .XLEN    (XLEN),
+    .PC_BITS (PC_BITS)
+  ) 
+  u_mem_to_wb_reg (
+    .clk          (clk),
+    .rst          (rst),
 
     // From Memory stage (MEM)
-    .MEM_data_mem(MEM_data_mem),
-    .MEM_rd      (MEM_rd),
-    .MEM_we      (MEM_we),
+    .MEM_data_mem (MEM_data_mem),
+    .MEM_rd       (MEM_rd),
+    .MEM_we       (MEM_we),
+    .MEM_pc       (MEM_pc),
+    .MEM_jlx      (MEM_jlx),
 
     // To Writeback stage (WB)
-    .WB_data_mem (WB_data_mem),
-    .WB_rd       (WB_rd),
-    .WB_we       (WB_we)
+    .WB_data_mem  (WB_data_mem),
+    .WB_rd        (WB_rd),
+    .WB_we        (WB_we),
+    .WB_pc        (WB_pc),
+    .WB_jlx       (WB_jlx)
   );
 
 endmodule

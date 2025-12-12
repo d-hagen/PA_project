@@ -16,8 +16,8 @@ module f_to_d_reg #(
     input wire  [VPC_BITS-1:0]    F_BP_target_pc,  
 
     output wire [VPC_BITS-1:0]     D_pc,
-    output wire [XLEN-1:0]        D_inst,
-    output wire                   D_BP_taken,
+    output wire [XLEN-1:0]         D_inst,
+    output wire                    D_BP_taken,
     output wire [VPC_BITS-1:0]     D_BP_target_pc  // Corrected comma to semicolon
           
 

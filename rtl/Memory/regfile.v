@@ -31,6 +31,8 @@ module regfile #(
   input  wire                 WB_we,
   input  wire [ADDR_SIZE-1:0] WB_rd,
   input  wire [XLEN-1:0]      WB_data_mem, 
+  input  wire [VPC_BITS-1:0]  WB_pc,
+  input  wire                 WB_jlx,
 
   // Outputs after decode
   output wire [XLEN-1:0]      D_a,
@@ -52,6 +54,9 @@ module regfile #(
   always @(posedge clk) begin
     if (WB_we && (WB_rd != {ADDR_SIZE{1'b0}}))
       regs[WB_rd] <= WB_data_mem;
+    else if (WB_jlx) begin
+      regs[31] <= WB_pc + 4;
+    end
     regs[0] <= {XLEN{1'b0}};
   end
 

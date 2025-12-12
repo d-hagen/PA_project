@@ -15,12 +15,16 @@ module Hazard_unit #(
     input wire             EX_we,
     input wire             EX_ld,
     input  wire            EX_mul,
+    input  wire            EX_jlx,
 
     input  wire [4:0]       MEM_rd,
     input  wire             MEM_we,
+    input  wire             MEM_jlx,
+
 
     input wire [4:0]       WB_rd,
     input wire             WB_we,
+    input  wire            WB_jlx,
     
 
     output wire            stall_D,     // stall F/D;
@@ -49,12 +53,12 @@ module Hazard_unit #(
     
 
   // RAW matches
-  wire ex_hit_ra  = EX_we  && (EX_rd  == D_ra);
-  wire ex_hit_rb  = EX_we  && (EX_rd  == D_rb);
-  wire mem_hit_ra = MEM_we && (MEM_rd == D_ra);
-  wire mem_hit_rb = MEM_we && (MEM_rd == D_rb);
-  wire wb_hit_ra  = WB_we  && (WB_rd  == D_ra);
-  wire wb_hit_rb  = WB_we  && (WB_rd  == D_rb);
+  wire ex_hit_ra  = (EX_we  && (EX_rd  == D_ra)) || (EX_jlx && D_ra == 31);
+  wire ex_hit_rb  = (EX_we  && (EX_rd  == D_rb)) || (EX_jlx && D_rb == 31);
+  wire mem_hit_ra = (MEM_we && (MEM_rd == D_ra)) || (MEM_jlx && D_ra == 31);
+  wire mem_hit_rb = (MEM_we && (MEM_rd == D_rb)) || (MEM_jlx && D_rb == 31);
+  wire wb_hit_ra  = (WB_we  && (WB_rd  == D_ra)) || (WB_jlx && D_ra == 31);
+  wire wb_hit_rb  = (WB_we  && (WB_rd  == D_rb)) || (WB_jlx && D_rb == 31);
 
   // Load-use stall (EX load needed by D’s sources)
   assign stall_D = (EX_ld && (ex_hit_ra || ex_hit_rb )) || mul_stall;

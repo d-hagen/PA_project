@@ -24,13 +24,24 @@ OPCODES = {
     "beq":   0b001101,
     "blt":   0b001101,
     "bgt":   0b001101,
+    "jlx":   0b001101,
 }
+
 
 RD_JMP = 0b00000
 RD_BEQ = 0b00001
 RD_BLT = 0b00010
 RD_BGT = 0b00011
-CTRL_RD_FOR = {"jmp": RD_JMP, "beq": RD_BEQ, "blt": RD_BLT, "bgt": RD_BGT}
+RD_JLX = 0b10000
+
+CTRL_RD_FOR = {
+    "jmp": RD_JMP,
+    "beq": RD_BEQ,
+    "blt": RD_BLT,
+    "bgt": RD_BGT,
+    "jlx": RD_JLX,
+}
+
 
 REG_RE = re.compile(r"^r(\d+)$", re.IGNORECASE)
 

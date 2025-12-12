@@ -4,28 +4,28 @@ module unified_mem #(
     parameter LINE_BITS     = 16,                 // upper 16 bits of the 20-bit address
     parameter WORDS_PER_LINE= 4
 )(
-    input  wire                     clk,
-    input  wire                     rst,
+    input  wire                             clk,
+    input  wire                             rst,
 
     // ---------- Instruction side (I-cache) ----------
-    input  wire                     Ic_mem_req,    // start memory fetch
-    input  wire [LINE_BITS-1:0]     Ic_mem_addr,   // line index (upper 16 bits of 20-bit addr)
+    input  wire                             Ic_mem_req,    // start memory fetch
+    input  wire [LINE_BITS-1:0]             Ic_mem_addr,   // line index (upper 16 bits of 20-bit addr)
 
-    output reg  [XLEN*WORDS_PER_LINE-1:0] F_mem_inst,   // full line: 4×32 bits
-    output reg                      F_mem_valid,
+    output reg  [XLEN*WORDS_PER_LINE-1:0]   F_mem_inst,   // full line: 4×32 bits
+    output reg                              F_mem_valid,
 
     // ---------- Data side (D-cache) ----------
     // Line read (for cache misses)
-    input  wire                     Dc_mem_req,    // start line read
-    input  wire [LINE_BITS-1:0]     Dc_mem_addr,   // line index
+    input  wire                             Dc_mem_req,    // start line read
+    input  wire [LINE_BITS-1:0]             Dc_mem_addr,   // line index
 
-    output reg  [XLEN*WORDS_PER_LINE-1:0] MEM_data_line, // full line: 4×32 bits
-    output reg                      MEM_mem_valid,       // line ready
+    output reg  [XLEN*WORDS_PER_LINE-1:0]   MEM_data_line, // full line: 4×32 bits
+    output reg                              MEM_mem_valid,       // line ready
 
     // Line write-back (on eviction)
-    input  wire                     Dc_wb_we,      // 1 = write line
-    input  wire [LINE_BITS-1:0]     Dc_wb_addr,    // line index to write
-    input  wire [XLEN*WORDS_PER_LINE-1:0] Dc_wb_wline // line data from cache
+    input  wire                             Dc_wb_we,      // 1 = write line
+    input  wire [LINE_BITS-1:0]             Dc_wb_addr,    // line index to write
+    input  wire [XLEN*WORDS_PER_LINE-1:0]   Dc_wb_wline // line data from cache
 );
 
     localparam NUM_LINES = (1 << LINE_BITS);
@@ -50,9 +50,6 @@ module unified_mem #(
                 line[i][j] = {XLEN{1'b0}};
             end
         end
-
-        // Initialize program into memory.
-        // This assumes program.hex is formatted to match the 2D array.
         $readmemh("program.hex", line);
     end
 

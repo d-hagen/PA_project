@@ -15,6 +15,7 @@ module decode #(parameter XLEN=32)(
 
   output wire              D_brn,
   output wire              D_jmp,
+  output wire              D_jlx,
   output wire              D_addi,
   output wire              D_mul
 
@@ -66,6 +67,7 @@ module decode #(parameter XLEN=32)(
   wire is_beq  = is_ctrl && (D_rd == RD_BEQ);
   wire is_blt  = is_ctrl && (D_rd == RD_BLT);
   wire is_bgt  = is_ctrl && (D_rd == RD_BGT);
+  wire is_jlx  = is_jmp && D_rd[4];
 
 
 
@@ -74,6 +76,8 @@ module decode #(parameter XLEN=32)(
   assign D_str  = (D_opc[4:0] == OPC_STORE);
   assign D_byt  =  D_opc[5];
   assign D_jmp = is_jmp;
+  assign D_jlx = is_jlx;
+  
 
   assign D_mul  = (D_opc == OPC_MUL);
   assign D_we   = ((D_opc <= OPC_GT) || D_ld || D_mul);
