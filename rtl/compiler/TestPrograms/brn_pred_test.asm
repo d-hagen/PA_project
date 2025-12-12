@@ -7,8 +7,9 @@ addi r1  r1  r1  1     #
 addi r4  r4  r4  1      # r4 + 1
 blt  r1  r3  r0  -8   # 
 addi r2  r2  r2  1     
-beq  r2  r3  r0  8     #
-beq  r0  r0  r0  -24     #PC    
+blt  r2  r3  r0  8     #
+jmp  r0  r0  r0  40
+beq  r0  r0  r0  -28     #PC    
 addi r0  r0  r0  0
 addi r0  r0  r0  0
 addi r0  r0  r0  0

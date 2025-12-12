@@ -62,6 +62,7 @@ module cpu #(
   wire               D_ld;
   wire               D_str;
   wire               D_brn;
+  wire               D_jmp;
   wire               D_addi;
   wire               D_mul;
   wire               D_byt;
@@ -278,6 +279,7 @@ module cpu #(
     .D_ld     (D_ld),
     .D_str    (D_str),
     .D_byt    (D_byt),
+    .D_jmp    (D_jmp),
     .D_brn    (D_brn),
     .D_addi   (D_addi),
     .D_mul    (D_mul)
@@ -339,6 +341,7 @@ module cpu #(
     .D_ld         (D_ld),
     .D_str        (D_str),
     .D_brn        (D_brn),
+    .D_jmp        (D_jmp),
     .D_addi       (D_addi),
 
     // From Hazard_unit

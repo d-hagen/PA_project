@@ -1,13 +1,13 @@
 2063180a    // [step 0] addi r3  r3  r3  10     # r 3= 2
 20421001    // [step 4] addi r2  r2  r2  1
 00000800    // [step 8] add  r0  r0  r1  0     # r1 = 0
-20210801    // [step 12] addi r1  r1  r1  1     # r1 +1   PC= 3
+20210801    // [step 12] addi r1  r1  r1  1     #
 20842001    // [step 16] addi r4  r4  r4  1      # r4 + 1
-342317f8    // [step 20] blt  r1  r3  r0  -8   # PC4+30 = PC34 -> 34 -32 = 2
+342317f8    // [step 20] blt  r1  r3  r0  -8   #
 20421001    // [step 24] addi r2  r2  r2  1
-34430808    // [step 28] beq  r2  r3  r0  8     #PC 6 + 25 = 30
-34000fe8    // [step 32] beq  r0  r0  r0  -24     #PC
-20000000    // [step 36] addi r0  r0  r0  0
+34431008    // [step 28] blt  r2  r3  r0  8     #
+34000028    // [step 32] jmp  r0  r0  r0  40
+34000fe4    // [step 36] beq  r0  r0  r0  -28     #PC
 20000000    // [step 40] addi r0  r0  r0  0
 20000000    // [step 44] addi r0  r0  r0  0
 20000000    // [step 48] addi r0  r0  r0  0

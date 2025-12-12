@@ -12,9 +12,9 @@ module decode #(parameter XLEN=32)(
   output wire              D_ld,
   output wire              D_str,
   output wire              D_byt,
-  output wire              D_jmp,
 
   output wire              D_brn,
+  output wire              D_jmp,
   output wire              D_addi,
   output wire              D_mul
 
@@ -62,16 +62,18 @@ module decode #(parameter XLEN=32)(
   localparam RD_BGT    = 5'b00011;    // branch if greater-than
 
   wire is_ctrl = (D_opc == OPC_CTRL);
-  wire is_jmp  = is_ctrl && (D_rd[4:0] == RD_JMP);
+  wire is_jmp  = is_ctrl && (D_rd[3:0] == RD_JMP);
   wire is_beq  = is_ctrl && (D_rd == RD_BEQ);
   wire is_blt  = is_ctrl && (D_rd == RD_BLT);
   wire is_bgt  = is_ctrl && (D_rd == RD_BGT);
+
 
 
   
   assign D_ld   = (D_opc[4:0] == OPC_LOAD);
   assign D_str  = (D_opc[4:0] == OPC_STORE);
   assign D_byt  =  D_opc[5];
+  assign D_jmp = is_jmp;
 
   assign D_mul  = (D_opc == OPC_MUL);
   assign D_we   = ((D_opc <= OPC_GT) || D_ld || D_mul);
