@@ -12,6 +12,7 @@ module decode #(parameter XLEN=32)(
   output wire              D_ld,
   output wire              D_str,
   output wire              D_byt,
+  output wire              D_jmp,
 
   output wire              D_brn,
   output wire              D_addi,
@@ -55,13 +56,13 @@ module decode #(parameter XLEN=32)(
 
   localparam OPC_MUL   = 6'b001110;
 
-  localparam RD_JMP    = 5'b00000;    // unconditional jump
+  localparam RD_JMP    = 4'b0000;    // unconditional jump
   localparam RD_BEQ    = 5'b00001;    // branch if equal
   localparam RD_BLT    = 5'b00010;    // branch if less-than
   localparam RD_BGT    = 5'b00011;    // branch if greater-than
 
   wire is_ctrl = (D_opc == OPC_CTRL);
-  wire is_jmp  = is_ctrl && (D_rd == RD_JMP);
+  wire is_jmp  = is_ctrl && (D_rd[4:0] == RD_JMP);
   wire is_beq  = is_ctrl && (D_rd == RD_BEQ);
   wire is_blt  = is_ctrl && (D_rd == RD_BLT);
   wire is_bgt  = is_ctrl && (D_rd == RD_BGT);
