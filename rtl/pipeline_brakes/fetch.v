@@ -12,6 +12,8 @@ module f_to_d_reg #(
     input                         stall_D,
     input                         MEM_stall,
     input                         Itlb_stall,
+    input wire                    Dtlb_stall,
+
     input                         EX_taken,
     input wire  [VPC_BITS-1:0]    F_BP_target_pc,  
 
@@ -35,7 +37,7 @@ module f_to_d_reg #(
             d_inst         <= NOP;
             d_bp_taken     <= 0;
             d_bp_target_pc <= {VPC_BITS{1'b0}};
-        end else if (!stall_D & !MEM_stall) begin
+        end else if (!stall_D & !MEM_stall & !Dtlb_stall) begin
             d_pc           <= F_pc;
             d_inst         <= F_inst;
             d_bp_taken     <= F_BP_taken;

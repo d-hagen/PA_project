@@ -29,6 +29,7 @@ module d_to_ex_reg #(
     // Stall/Flush/Taken Signals
     input wire                  stall_D,
     input wire                  MEM_stall,
+    input wire                  Dtlb_stall,
     input                       EX_taken,
 
     // EX stage outputs (Destination)
@@ -79,7 +80,7 @@ module d_to_ex_reg #(
             ex_pc_r           <= {VPC_BITS{1'b0}};
             ex_jlx_r          <= 1'b0;
         end
-        else if (!MEM_stall) begin
+        else if (!MEM_stall && !Dtlb_stall) begin
             ex_a_r            <= D_a;
             ex_a2_r           <= D_a2;
             ex_b_r            <= D_b;

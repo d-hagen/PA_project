@@ -51,16 +51,16 @@ module cpu_run_tb;
 
         // Added EX_mul display here
        if (cycles <= 100) begin
-          $display("C%0d | F_pc_va=%0d F_inst=0x%08h | F_pc=%0d | F_admin=%0b -> Itlb_stall=%0d | F_ptw_pa=%0d | F_ptw_valid=%0b EX_alu_out=%0d",
+          $display("C%0d | F_pc_va=%0d F_inst=0x%08h | F_pc=%0d | F_admin=%0b -> Dtlb_stall=%0d | Ptw_valid=%0d | Ptw_req=%0b MEM_stall=%0d",
                   cycles,
                   dut.F_pc_va,
                   curr_inst,
                   dut.F_pc,
                   dut.F_admin,
-                  dut.Itlb_stall,
-                  dut.F_ptw_pa,
-                  dut.F_ptw_valid,
-                  dut.EX_alu_out);
+                  dut.Dtlb_stall,
+                  dut.Ptw_mem_valid,
+                  dut.Ptw_mem_req,
+                  dut.MEM_stall);
         end
 
 

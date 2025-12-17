@@ -9,10 +9,13 @@ module dcache #(
     input  wire                 MEM_ld,
     input  wire                 MEM_str,
     input  wire                 MEM_byt,         // 1 = byte, 0 = word
-    input  wire [XLEN-1:0]      MEM_alu_out,     // full 32-bit addr, we use low 20 bits
+    input  wire [XLEN-1:0]      MEM_alu_out,     // expects translated addr (low 20 bits used)
     input  wire [XLEN-1:0]      MEM_b2,
     output reg  [XLEN-1:0]      MEM_data_mem,
-    output reg                  MEM_stall,
+    output reg                  MEM_stall,       // ONLY cache stall (line miss fill / store alloc)
+
+    // NEW: from DTLB
+    input  wire                 Dtlb_addr_valid, // 1 when MEM_alu_out is a valid translated PA
 
     // Backing memory read interface (line read)
     output reg                  Dc_mem_req,
@@ -25,6 +28,7 @@ module dcache #(
     output reg  [LINE_BITS-1:0] Dc_wb_addr,      // line index
     output reg  [127:0]         Dc_wb_wline,
 
+    // PTW (word read via line interface)
     input  wire                 Ptw_req,
     input  wire [19:0]          Ptw_addr,
     output reg  [31:0]          Ptw_rdata,
@@ -55,7 +59,7 @@ module dcache #(
     integer i;
 
     // ----------------------------------------------------------------
-    // Address decode for 20-bit scheme:
+    // Address decode (20-bit physical scheme):
     // addr[19:4] = line index (16 bits)
     // addr[3:2]  = word index in line (0..3)
     // addr[1:0]  = byte index in word (0..3)
@@ -66,8 +70,13 @@ module dcache #(
 
     wire [LINE_BITS-1:0] ptw_line  = Ptw_addr[19:4];
 
-    wire op_active = MEM_ld | MEM_str;
+    wire op_active  = MEM_ld | MEM_str;
 
+    // Only touch cache when there is a mem op AND the translated address is valid
+    wire do_cache_access      = op_active && Dtlb_addr_valid;
+    wire mem_needs_translation = op_active && !Dtlb_addr_valid;
+
+    // Dc_busy indicates either cache is stalling a MEM op or PTW transaction in flight
     assign Dc_busy = MEM_stall | ptw_busy;
 
     // ===================== Sequential logic ==========================
@@ -92,16 +101,23 @@ module dcache #(
             Dc_wb_we  <= 1'b0;
             Ptw_valid <= 1'b0;
 
-            if (Dc_mem_req && !hit && op_active)
+            // latch miss line only for real cache access misses (not during translation wait)
+            if (Dc_mem_req && !hit && do_cache_access)
                 miss_line <= addr_line;
 
-            if (!ptw_busy && !op_active && !MEM_mem_valid && Ptw_req) begin
+            // Accept PTW request whenever not already busy and no response is arriving.
+            // IMPORTANT: allow PTW even if a MEM op is active but translation isn't ready,
+            // and do NOT require MEM_stall to be low here (MEM_stall is cache-only).
+            if (!ptw_busy && !MEM_mem_valid && Ptw_req &&
+                ( !op_active || mem_needs_translation )) begin
                 ptw_busy   <= 1'b1;
                 ptw_addr_q <= Ptw_addr;
             end
 
+            // Handle incoming memory line
             if (MEM_mem_valid) begin
                 if (ptw_busy) begin
+                    // PTW word read from the returned line
                     case (ptw_addr_q[3:2])
                         2'b00: Ptw_rdata <= MEM_data_line[31:0];
                         2'b01: Ptw_rdata <= MEM_data_line[63:32];
@@ -111,6 +127,7 @@ module dcache #(
                     Ptw_valid <= 1'b1;
                     ptw_busy  <= 1'b0;
                 end else begin
+                    // Cache line refill path
                     if (valid[fifo_ptr] && dirty[fifo_ptr]) begin
                         Dc_wb_we            <= 1'b1;
                         Dc_wb_addr          <= tag[fifo_ptr];  // full line index
@@ -133,7 +150,8 @@ module dcache #(
                 end
             end
 
-            if (MEM_str && hit) begin
+            // Stores update cache ONLY when address is valid and hit
+            if (MEM_str && hit && Dtlb_addr_valid) begin
                 if (MEM_byt) begin
                     tmp_store_word = data[hit_idx][addr_word];
                     case (addr_byte)
@@ -156,13 +174,16 @@ module dcache #(
     always @(*) begin
         hit          = 1'b0;
         hit_idx      = 2'd0;
-        MEM_stall    = 1'b0;
-        MEM_data_mem = MEM_alu_out;   // default passthrough on non-loads
+
+        // Default outputs
+        MEM_stall    = 1'b0;            // cache stall only
+        MEM_data_mem = MEM_alu_out;     // default passthrough
 
         Dc_mem_req   = 1'b0;
         Dc_mem_addr  = addr_line;
 
-        if (op_active && !MEM_mem_valid) begin
+        // Cache lookup only if we're doing a real cache access and no line is returning this cycle
+        if (do_cache_access && !MEM_mem_valid) begin
             for (i = 0; i < 4; i = i + 1) begin
                 if (valid[i] && (tag[i] == addr_line)) begin
                     hit     = 1'b1;
@@ -171,43 +192,59 @@ module dcache #(
             end
         end
 
-        // ---------------- Loads ----------------
-        if (MEM_ld) begin
-            if (hit) begin
-                tmp_load_word = data[hit_idx][addr_word];
-                if (MEM_byt) begin
-                    // Byte load, zero-extend
-                    case (addr_byte)
-                        2'b00: MEM_data_mem = {24'b0, tmp_load_word[7:0]};
-                        2'b01: MEM_data_mem = {24'b0, tmp_load_word[15:8]};
-                        2'b10: MEM_data_mem = {24'b0, tmp_load_word[23:16]};
-                        2'b11: MEM_data_mem = {24'b0, tmp_load_word[31:24]};
-                    endcase
+        // ----------------------------------------------------------------
+        // PRIORITY #1: PTW service when:
+        // - translation is needed (Dtlb_addr_valid=0) and PTW has a request
+        //   (pipeline is stalled by DTLB, NOT by this cache)
+        // - OR no MEM op active and PTW request exists
+        // ----------------------------------------------------------------
+        if (mem_needs_translation) begin
+            // IMPORTANT: do NOT assert MEM_stall here (prevents PTW deadlock)
+            MEM_stall = 1'b0;
+
+            if (!MEM_mem_valid && !ptw_busy && Ptw_req) begin
+                Dc_mem_req  = 1'b1;
+                Dc_mem_addr = ptw_line;
+            end
+
+        end else begin
+            // ---------------- Loads ----------------
+            if (MEM_ld && Dtlb_addr_valid) begin
+                if (hit) begin
+                    tmp_load_word = data[hit_idx][addr_word];
+                    if (MEM_byt) begin
+                        case (addr_byte)
+                            2'b00: MEM_data_mem = {24'b0, tmp_load_word[7:0]};
+                            2'b01: MEM_data_mem = {24'b0, tmp_load_word[15:8]};
+                            2'b10: MEM_data_mem = {24'b0, tmp_load_word[23:16]};
+                            2'b11: MEM_data_mem = {24'b0, tmp_load_word[31:24]};
+                        endcase
+                    end else begin
+                        MEM_data_mem = tmp_load_word;
+                    end
                 end else begin
-                    // Word load (assumed aligned)
-                    MEM_data_mem = tmp_load_word;
+                    // Miss: stall and request line from memory
+                    MEM_stall   = 1'b1;
+                    Dc_mem_req  = MEM_mem_valid ? 1'b0 : 1'b1;
+                    Dc_mem_addr = addr_line;
                 end
-            end else begin
-                // Miss: stall and request line from memory
-                MEM_stall   = 1'b1;
-                Dc_mem_req  = MEM_mem_valid ? 1'b0 : 1'b1;
-                Dc_mem_addr = addr_line;
             end
-        end
 
-        // ---------------- Stores ----------------
-        if (MEM_str) begin
-            if (!hit) begin
-                // Miss on store: fetch line first (write-allocate)
-                MEM_stall   = 1'b1;
-                Dc_mem_req  = MEM_mem_valid ? 1'b0 : 1'b1;
-                Dc_mem_addr = addr_line;
+            // ---------------- Stores ----------------
+            if (MEM_str && Dtlb_addr_valid) begin
+                if (!hit) begin
+                    // Miss on store: fetch line first (write-allocate)
+                    MEM_stall   = 1'b1;
+                    Dc_mem_req  = MEM_mem_valid ? 1'b0 : 1'b1;
+                    Dc_mem_addr = addr_line;
+                end
             end
-        end
 
-        if (!op_active && !MEM_mem_valid && !ptw_busy && Ptw_req) begin
-            Dc_mem_req  = 1'b1;
-            Dc_mem_addr = ptw_line;
+            // PTW background only when MEM op not active
+            if (!op_active && !MEM_mem_valid && !ptw_busy && Ptw_req) begin
+                Dc_mem_req  = 1'b1;
+                Dc_mem_addr = ptw_line;
+            end
         end
     end
 

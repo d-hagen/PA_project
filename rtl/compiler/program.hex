@@ -1,34 +1,34 @@
-2063180a    // [step 0] addi r3  r3  r3  10     # r 3= 2
-20421001    // [step 4] addi r2  r2  r2  1
-00000800    // [step 8] add  r0  r0  r1  0     # r1 = 0
-20210801    // [step 12] addi r1  r1  r1  1     #
-20842001    // [step 16] addi r4  r4  r4  1      # r4 + 1
-342317f8    // [step 20] blt  r1  r3  r0  -8   #
-20421001    // [step 24] addi r2  r2  r2  1
-34431008    // [step 28] blt  r2  r3  r0  8     #
-3460801e    // [step 32] JLx  r3 r0  r0  30
-34000fe4    // [step 36] beq  r0  r0  r0  -28     #PC
-20000000    // [step 40] addi r0  r0  r0  0
-20000000    // [step 44] addi r0  r0  r0  0
-20000000    // [step 48] addi r0  r0  r0  0
-20000000    // [step 52] addi r0  r0  r0  0
-20000000    // [step 56] addi r0  r0  r0  0
-20000000    // [step 60] addi r0  r0  r0  0
-20000000    // [step 64] addi r0  r0  r0  0
-20000000    // [step 68] addi r0  r0  r0  0
-20000000    // [step 72] addi r0  r0  r0  0
-20000000    // [step 76] addi r0  r0  r0  0
-20000000    // [step 80] addi r0  r0  r0  0
-20000000    // [step 84] addi r0  r0  r0  0
-20000000    // [step 88] addi r0  r0  r0  0
-20000000    // [step 92] addi r0  r0  r0  0
-20000000    // [step 96] addi r0  r0  r0  0
-20000000    // [step 100] addi r0  r0  r0  0
-20000000    // [step 104] addi r0  r0  r0  0
-20000000    // [step 108] addi r0  r0  r0  0
-20000000    // [step 112] addi r0  r0  r0  0
-20000000    // [step 116] addi r0  r0  r0  0
-20000000    // [step 120] addi r0  r0  r0  0
+20210805    // [step 0] addi r1  r1  r1  5      # r1 = 5
+20421007    // [step 4] addi r2  r2  r2  7      # r2 = 7
+20842003    // [step 8] addi r4  r4  r4  3      # r4 = 3
+20000000    // [step 12] addi r0  r0  r0  0      # nop / bubble style you use
+00221800    // [step 16] add  r1  r2  r3  0      # r3 = 5 + 7 = 12  (producer in EX)
+00632800    // [step 20] add  r3  r3  r5  0      # needs EX->EX forward of r3; r5 = 12 + 3 = 15
+00223000    // [step 24] add  r1  r2  r6  0      # r6 = 12          (producer in EX)
+00c63800    // [step 28] add  r6  r6  r7  0      # both operands need EX->EX forward; r7 = 24
+00224000    // [step 32] add  r1  r2  r8  0      # r8 = 12          (producer)
+20000000    // [step 36] addi r0  r0  r0  0      # bubble
+01044800    // [step 40] add  r8  r4  r9  0      # needs MEM->EX forward of r8; r9 = 12 + 3 = 15
+00225000    // [step 44] add  r1  r2  r10 0      # r10 = 12         (producer)
+20000000    // [step 48] addi r0  r0  r0  0      # bubble
+20000000    // [step 52] addi r0  r0  r0  0      # bubble
+01445800    // [step 56] add  r10 r4  r11 0      # needs WB->EX forward of r10; r11 = 12 + 3 = 15
+00e96000    // [step 60] add  r7  r9  r12 0      # depends on earlier results, should forward as needed
+20000000    // [step 64] addi r0  r0  r0  0      # final bubble / NOP
+20000000    // [step 68] NOP (addi r0 r0 r0 0)
+20000000    // [step 72] NOP (addi r0 r0 r0 0)
+20000000    // [step 76] NOP (addi r0 r0 r0 0)
+20000000    // [step 80] NOP (addi r0 r0 r0 0)
+20000000    // [step 84] NOP (addi r0 r0 r0 0)
+20000000    // [step 88] NOP (addi r0 r0 r0 0)
+20000000    // [step 92] NOP (addi r0 r0 r0 0)
+20000000    // [step 96] NOP (addi r0 r0 r0 0)
+20000000    // [step 100] NOP (addi r0 r0 r0 0)
+20000000    // [step 104] NOP (addi r0 r0 r0 0)
+20000000    // [step 108] NOP (addi r0 r0 r0 0)
+20000000    // [step 112] NOP (addi r0 r0 r0 0)
+20000000    // [step 116] NOP (addi r0 r0 r0 0)
+20000000    // [step 120] NOP (addi r0 r0 r0 0)
 00000000    // [step 124] [31] NOP (end of program)
 @2400
 0000A001

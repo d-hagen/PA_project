@@ -19,13 +19,18 @@ module regfile #(
   input  wire                 D_addi,
 
   // Bypass enables (encoding: {forward_ra, forward_rb})
-  input  wire [1:0]           EX_D_bp,
-  input  wire [1:0]           MEM_D_bp,
-  input  wire [1:0]           WB_D_bp,
+  input  wire [2:0]           EX_D_bp,
+  input  wire [2:0]           MEM_D_bp,
+  input  wire [2:0]           WB_D_bp,
 
   // Bypass data sources
   input  wire [XLEN-1:0]      EX_alu_out,   // EX result (valid when EX_D_bp used and not a load-use)
   input  wire [XLEN-1:0]      MEM_data_mem, // data available at MEM stage (ALU result or load data, per your design)
+  input  wire [XLEN-1:0]      EX_pc,
+  input  wire [XLEN-1:0]      MEM_pc,
+
+
+
 
   // Writeback
   input  wire                 WB_we,
@@ -66,25 +71,28 @@ module regfile #(
 
   // Forwarding priority: EX > MEM > WB
   // Bit mapping for each bus: {ra, rb} = {MSB, LSB}
+  wire [XLEN-1:0] EX_fwd_val  = EX_D_bp[0]  ? (EX_pc  + 4) : EX_alu_out;
+  wire [XLEN-1:0] MEM_fwd_val = MEM_D_bp[0] ? (MEM_pc + 4) : MEM_data_mem;
+  wire [XLEN-1:0] WB_fwd_val  = WB_D_bp[0]  ? (WB_pc  + 4) : WB_data_mem;
+
   wire [XLEN-1:0] ra_fwd =
-      EX_D_bp[1]  ? EX_alu_out   :
-      MEM_D_bp[1] ? MEM_data_mem :
-      WB_D_bp[1]  ? WB_data_mem  :
+      EX_D_bp[2]  ? EX_fwd_val  :
+      MEM_D_bp[2] ? MEM_fwd_val :
+      WB_D_bp[2]  ? WB_fwd_val  :
                     ra_raw;
 
   wire [XLEN-1:0] rb_fwd =
-      EX_D_bp[0]  ? EX_alu_out   :
-      MEM_D_bp[0] ? MEM_data_mem :
-      WB_D_bp[0]  ? WB_data_mem  :
+      EX_D_bp[1]  ? EX_fwd_val  :
+      MEM_D_bp[1] ? MEM_fwd_val :
+      WB_D_bp[1]  ? WB_fwd_val  :
                     rb_raw;
 
-  // Outputs
   assign D_a2 = ra_fwd;
   assign D_b2 = rb_fwd;
 
-  assign D_a  = (D_brn & ! D_jmp) ? D_pc : ra_fwd;
+  assign D_a  = (D_brn & !D_jmp) ? D_pc : ra_fwd;
   assign D_b  = (D_str || D_ld || D_addi || D_brn)
-                ? {{(XLEN-11){D_imd[10]}}, D_imd}  //{{(XLEN-11){D_imd[10]}}
+                ? {{(XLEN-11){D_imd[10]}}, D_imd}
                 : rb_fwd;
 
 endmodule

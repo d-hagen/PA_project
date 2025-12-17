@@ -14,8 +14,8 @@ module itlb #(
     input                       F_admin,
 
     // Page table walker interface
-    input                       F_ptw_valid,          // like F_mem_valid
-    input  [PPN_WIDTH-1:0]      F_ptw_pa,             // translated PPN from PTW
+    input                       Itlb_ptw_valid,          // like F_mem_valid
+    input  [PPN_WIDTH-1:0]      Itlb_ptw_pa,             // translated PPN from PTW
 
     output [PC_BITS-1:0]        F_pc,                 // PPN (or PA-high) out
     output                      Itlb_stall,           // stall pipeline on miss
@@ -57,7 +57,7 @@ module itlb #(
 
         // Normal mode lookup (skip lookup while PTW is returning,
         // similar to icache skipping tag lookup when F_mem_valid is high)
-        if (!F_admin && !F_ptw_valid) begin
+        if (!F_admin && !Itlb_ptw_valid) begin
             for (i = 0; i < NUM_ENTRIES; i = i + 1) begin
                 if (!hit && valid[i] && (vpn_buf[i] == va_vpn)) begin
                     hit     = 1'b1;
@@ -83,7 +83,7 @@ module itlb #(
     //  - in normal mode
     //  - we don't hit
     //  - PTW is not currently returning a result
-    assign Itlb_pa_request = (!F_admin) && (!hit) && (!F_ptw_valid);
+    assign Itlb_pa_request = (!F_admin) && (!hit) && (!Itlb_ptw_valid);
 
     // VA sent to PTW (analogous to Ic_mem_addr = pc_line; here we send full VA)
     assign Itlb_va = va_in[VA_WIDTH-1:PAGE_OFFSET_WIDTH]; // VA[31:12]
@@ -110,10 +110,10 @@ module itlb #(
             end
 
             // refill one TLB entry when PTW returns a translation
-            if (F_ptw_valid) begin
+            if (Itlb_ptw_valid) begin
                 // simple FIFO replacement policy
                 vpn_buf[fifo_ptr] <= miss_vpn;
-                ppn_buf[fifo_ptr] <= F_ptw_pa;
+                ppn_buf[fifo_ptr] <= Itlb_ptw_pa;
                 valid[fifo_ptr]   <= 1'b1;
 
                 fifo_ptr          <= fifo_ptr + 1'b1;

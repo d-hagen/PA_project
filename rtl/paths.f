@@ -31,6 +31,7 @@ Extras/Branch_Predictor.v
 # ==== VM====
 
 Extras/tlbs/itlb.v
+Extras/tlbs/dtlb.v
 Extras/tlbs/ptw_new.v
 
 

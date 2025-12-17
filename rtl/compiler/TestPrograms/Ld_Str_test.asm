@@ -8,7 +8,7 @@ addi  r5  r5  r5   400
 
 addi  r6  r6  r6   500
 
-store  r2  r2  r0   1000
+store  r2  r2  r0   100
 store  r0  r3  r0   48
 store  r0  r4  r0   52
 store  r0  r5  r0   56
@@ -22,7 +22,7 @@ addi  r0  r0  r0   0
 addi  r0  r0  r0   0
 addi  r0  r0  r0   0
 
-load   r0  r0  r20  40
+load   r2  r0  r20  100
 load   r0  r0  r21  48
 load   r0  r0  r22  52
 load   r0  r0  r23  56
