@@ -1,20 +1,20 @@
-20210805    // [step 0] addi r1  r1  r1  5      # r1 = 5
-20421007    // [step 4] addi r2  r2  r2  7      # r2 = 7
-20842003    // [step 8] addi r4  r4  r4  3      # r4 = 3
-20000000    // [step 12] addi r0  r0  r0  0      # nop / bubble style you use
-00221800    // [step 16] add  r1  r2  r3  0      # r3 = 5 + 7 = 12  (producer in EX)
-00632800    // [step 20] add  r3  r3  r5  0      # needs EX->EX forward of r3; r5 = 12 + 3 = 15
-00223000    // [step 24] add  r1  r2  r6  0      # r6 = 12          (producer in EX)
-00c63800    // [step 28] add  r6  r6  r7  0      # both operands need EX->EX forward; r7 = 24
-00224000    // [step 32] add  r1  r2  r8  0      # r8 = 12          (producer)
-20000000    // [step 36] addi r0  r0  r0  0      # bubble
-01044800    // [step 40] add  r8  r4  r9  0      # needs MEM->EX forward of r8; r9 = 12 + 3 = 15
-00225000    // [step 44] add  r1  r2  r10 0      # r10 = 12         (producer)
-20000000    // [step 48] addi r0  r0  r0  0      # bubble
-20000000    // [step 52] addi r0  r0  r0  0      # bubble
-01445800    // [step 56] add  r10 r4  r11 0      # needs WB->EX forward of r10; r11 = 12 + 3 = 15
-00e96000    // [step 60] add  r7  r9  r12 0      # depends on earlier results, should forward as needed
-20000000    // [step 64] addi r0  r0  r0  0      # final bubble / NOP
+20000805    // [step 0] addi  r0  r0  r1   5      # r1 = 5
+20201007    // [step 4] addi  r1  r0  r2   7      # r2 = r1 + 7          (EX->D forward r1)
+00221800    // [step 8] add   r1  r2  r3   0      # r3 = r1 + r2         (MEM->D r1, EX->D r2)
+20002001    // [step 12] addi  r0  r0  r4   1      # r4 = 1
+00442800    // [step 16] add   r2  r4  r5   0      # r5 = r2 + r4         (WB->D r2, EX->D r4)
+2000601c    // [step 20] addi  r0  r0  r12  28     # r12 = 28 (address of next instr after jlx)
+35808000    // [step 24] jlx   r12 r0  r0   0      # jump to r12+0; also r31 = PC+4
+23e03001    // [step 28] addi  r31 r0  r6   1      # r6 = r31 + 1         (EX jlx-type forward)
+20003802    // [step 32] addi  r0  r0  r7   2      # r7 = 2
+03e74000    // [step 36] add   r31 r7  r8   0      # r8 = r31 + r7        (MEM jlx-type forward)
+20004803    // [step 40] addi  r0  r0  r9   3      # r9 = 3
+20005004    // [step 44] addi  r0  r0  r10  4      # r10 = 4
+03ea5800    // [step 48] add   r31 r10 r11  0      # r11 = r31 + r10      (WB jlx-type forward)
+20000000    // [step 52] NOP (addi r0 r0 r0 0)
+20000000    // [step 56] NOP (addi r0 r0 r0 0)
+20000000    // [step 60] NOP (addi r0 r0 r0 0)
+20000000    // [step 64] NOP (addi r0 r0 r0 0)
 20000000    // [step 68] NOP (addi r0 r0 r0 0)
 20000000    // [step 72] NOP (addi r0 r0 r0 0)
 20000000    // [step 76] NOP (addi r0 r0 r0 0)

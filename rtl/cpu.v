@@ -189,7 +189,7 @@ module cpu #(
 
     .Dtlb_stall     (Dtlb_stall),   // NEW per your requirement
 
-    .EX_pc          (EX_a),
+    .EX_pc          (EX_pc),
     .EX_alu_out     (EX_alu_out),
     .EX_true_taken  (EX_true_taken),
     .F_BP_target_pc (F_BP_target_pc),
