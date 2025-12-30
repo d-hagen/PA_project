@@ -31,7 +31,7 @@ module ptw_2level #(
     input                       Ptw_mem_valid,
 
     // ---------- Busy from dcache ----------
-    input                       MEM_stall
+    input                       dcache_stall
 );
 
     // ============================================================
@@ -111,7 +111,7 @@ module ptw_2level #(
                     Itlb_ptw_valid <= 1'b0;
                     Dtlb_ptw_valid <= 1'b0;
 
-                    if (!MEM_stall) begin
+                    if (!dcache_stall) begin
                         Ptw_mem_req  <= 1'b1;
                         Ptw_mem_addr <= {ROOT_PPN, vpn1, 2'b00};
                     end else begin
@@ -134,7 +134,7 @@ module ptw_2level #(
                     Itlb_ptw_valid <= 1'b0;
                     Dtlb_ptw_valid <= 1'b0;
 
-                    if (!MEM_stall) begin
+                    if (!dcache_stall) begin
                         Ptw_mem_req  <= 1'b1;
                         Ptw_mem_addr <= {l1_ppn_q, vpn0, 2'b00};
                     end else begin
@@ -176,9 +176,9 @@ module ptw_2level #(
         next_state = state;
         case (state)
             S_IDLE:    if (Itlb_pa_request || Dtlb_pa_request) next_state = S_L1_REQ;
-            S_L1_REQ:  if (!MEM_stall)                         next_state = S_L1_WAIT;
+            S_L1_REQ:  if (!dcache_stall)                         next_state = S_L1_WAIT;
             S_L1_WAIT: if (Ptw_mem_valid)                      next_state = S_L2_REQ;
-            S_L2_REQ:  if (!MEM_stall)                         next_state = S_L2_WAIT;
+            S_L2_REQ:  if (!dcache_stall)                         next_state = S_L2_WAIT;
             S_L2_WAIT: if (Ptw_mem_valid)                      next_state = S_RESP;
             S_RESP:                                             next_state = S_IDLE;
         endcase

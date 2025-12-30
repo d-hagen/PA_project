@@ -39,6 +39,7 @@ module regfile #(
   input  wire [VPC_BITS-1:0]  WB_pc,
   input  wire                 WB_jlx,
 
+
   // Outputs after decode
   output wire [XLEN-1:0]      D_a,
   output wire [XLEN-1:0]      D_b,

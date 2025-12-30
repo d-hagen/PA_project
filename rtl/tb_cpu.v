@@ -51,16 +51,16 @@ module cpu_run_tb;
 
         // Added EX_mul display here
        if (cycles <= 100) begin
-          $display("C%0d | F_pc_va=%0d F_inst=0x%08h | F_pc=%0d | F_stall=%0b -> Dtlb_stall=%0d | F_BP_taken=%0d | F_BP_target_pc=%0b MEM_stall=%0d",
+          $display("C%0d | F_pc_va=%0d F_inst=0x%08h | F_pc=%0d | Dtlb_addr_out=%0d -> sb_hit=%0d | sb_data=%0d | MEM_ld=%0d sb_data=%0d",
                   cycles,
                   dut.F_pc_va,
                   curr_inst,
                   dut.F_pc,
-                  dut.F_stall,
-                  dut.Dtlb_stall,
-                  dut.F_BP_taken,
-                  dut.F_BP_target_pc,
-                  dut.MEM_stall);
+                  dut.Dtlb_addr_out,
+                  dut.sb_hit,
+                  dut.sb_data,
+                  dut.MEM_ld,
+                  dut.sb_data);
         end
 
 
@@ -125,6 +125,31 @@ module cpu_run_tb;
                 dut.u_dcache.data[i][2],
                 dut.u_dcache.data[i][3]);
     end
+
+
+      // =====================================================
+    // STORE BUFFER CONTENTS
+    // (updated for new SB: addr_q is full PA[19:0])
+    // =====================================================
+    $display("\n==== STORE BUFFER CONTENT ====");
+    $display("count=%0d head=%0d tail=%0d",
+            dut.u_store_buffer.count,
+            dut.u_store_buffer.head,
+            dut.u_store_buffer.tail);
+
+    for (i = 0; i < dut.u_store_buffer.DEPTH; i = i + 1) begin
+      $display("SB[%0d] | addr20=0x%05h (line=%0d word=%0d byte=%0d) data=0x%0d byt=%0d",
+              i,
+              dut.u_store_buffer.addr_q[i],
+              dut.u_store_buffer.addr_q[i][19:4],
+              dut.u_store_buffer.addr_q[i][3:2],
+              dut.u_store_buffer.addr_q[i][1:0],
+              dut.u_store_buffer.data_q[i],
+              dut.u_store_buffer.byt_q[i]);
+    end
+    $display("==========================================");
+
+
 
     $display("==========================================");
     $display("               END OF TEST");

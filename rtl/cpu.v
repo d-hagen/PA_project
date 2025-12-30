@@ -128,7 +128,7 @@ module cpu #(
   wire               MEM_byt;
 
   // Global stall from D-cache (IMPORTANT: cache-only stall)
-  wire               MEM_stall;
+  wire               dcache_stall;
 
   // I-Cache <-> Instruction Memory
   wire               Ic_mem_req;
@@ -152,6 +152,25 @@ module cpu #(
   wire [4:0]         WB_rd;
   wire               WB_we;
 
+    // =======================
+  // Store Buffer <-> D$ wires
+  // =======================
+  wire                 sb_load_miss;
+
+  wire                 store_request;
+  wire [19:0] store_request_address;
+  wire [XLEN-1:0]      store_request_value;
+  wire                 store_byte;
+  wire                 store_valid;
+
+  // Store-buffer load forwarding -> WB mux
+  wire                 sb_hit;
+  wire [XLEN-1:0]      sb_data;
+
+  // Store buffer stall (only when MEM_str && SB full)
+  wire                 sb_stall;
+
+
   // ============================================================
   // PC Register
   // NOTE: PC must also stop advancing on MEM stalls (D$) and DTLB stalls
@@ -167,7 +186,7 @@ module cpu #(
     .F_BP_target_pc (F_BP_target_pc),
 
     // UPDATED: include all reasons fetch must freeze
-    .stall_D        (stall_D | MEM_stall | Dtlb_stall | Itlb_stall | F_stall),
+    .stall_D        (stall_D | dcache_stall | Dtlb_stall | Itlb_stall | F_stall | sb_stall),
 
     .F_pc_va        (F_pc_va)
   );
@@ -184,8 +203,9 @@ module cpu #(
     .F_pc_va        (F_pc_va),
     .EX_brn         (EX_brn),
     .F_stall        (F_stall),
-    .MEM_stall      (MEM_stall),
+    .dcache_stall   (dcache_stall),
     .Itlb_stall     (Itlb_stall),
+    .sb_stall       (sb_stall),
 
     .Dtlb_stall     (Dtlb_stall),   // NEW per your requirement
 
@@ -247,7 +267,7 @@ module cpu #(
 
   // =======================
   // PTW (2-port)  -- UPDATED names + DTLB port + priority ITLB
-  // IMPORTANT: PTW.MEM_stall must be cache-only stall (MEM_stall from dcache)
+  // IMPORTANT: PTW.dcache_stall must be cache-only stall (dcache_stall from dcache)
   // =======================
   ptw_2level #(
     .VA_WIDTH          (32),
@@ -280,7 +300,7 @@ module cpu #(
     .Ptw_mem_valid   (Ptw_mem_valid),
 
     // Cache busy indicator (cache-only)
-    .MEM_stall       (MEM_stall)
+    .dcache_stall       (dcache_stall)
   );
 
   // =======================
@@ -318,7 +338,8 @@ module cpu #(
     .F_BP_target_pc (F_BP_target_pc),
 
     .stall_D        (stall_D),
-    .MEM_stall      (MEM_stall),
+    .dcache_stall    (dcache_stall),
+    .sb_stall       (sb_stall),
     .Itlb_stall     (Itlb_stall),
 
     .Dtlb_stall     (Dtlb_stall),   // NEW per your requirement
@@ -460,7 +481,8 @@ module cpu #(
     .D_BP_target_pc (D_BP_target_pc),
 
     .stall_D        (stall_D),
-    .MEM_stall      (MEM_stall),
+    .dcache_stall   (dcache_stall),
+    .sb_stall       (sb_stall),
     .Dtlb_stall     (Dtlb_stall),   // NEW per your requirement
     .EX_taken       (EX_taken),
 
@@ -524,7 +546,8 @@ module cpu #(
     .EX_str      (EX_str),
     .EX_byt      (EX_byt),
 
-    .MEM_stall   (MEM_stall),
+    .dcache_stall   (dcache_stall),
+    .sb_stall    (sb_stall),
     .Dtlb_stall  (Dtlb_stall),  // NEW per your requirement
 
     .EX_pc       (EX_pc),
@@ -543,6 +566,43 @@ module cpu #(
     .MEM_jlx     (MEM_jlx)
   );
 
+  store_buffer #(    
+    .XLEN(XLEN)
+  ) u_store_buffer (
+    .clk            (clk),
+    .rst            (rst),
+
+    .Dtlb_addr   (Dtlb_addr_out),
+    .Dtlb_addr_valid  (Dtlb_addr_valid),
+    .MEM_b2         (MEM_b2),
+    .MEM_ld         (MEM_ld),
+    .MEM_str        (MEM_str),
+    .MEM_byt        (MEM_byt),
+
+    //dcache interface
+    .store_valid    (store_valid),
+    .sb_load_miss   (sb_load_miss),
+    .store_request  (store_request),
+    .store_request_address (store_request_address),
+    .store_request_value (store_request_value),
+    .store_byte     (store_byte),
+
+
+    //load forawrding
+    .sb_hit (sb_hit),
+    .sb_data (sb_data),
+
+
+    //full buffer stall +
+    .Dtlb_stall (Dtlb_stall),
+    .dcache_stall (dcache_stall),
+    .sb_stall (sb_stall)
+
+  );
+
+
+
+
   // =======================
   // D-Cache
   // UPDATED: uses translated addr + Dtlb_addr_valid input
@@ -554,17 +614,21 @@ module cpu #(
     .rst            (rst),
 
     .MEM_ld         (MEM_ld),
-    .MEM_str        (MEM_str),
     .MEM_byt        (MEM_byt),
 
-    // UPDATED: translated PA from DTLB
-    .MEM_alu_out    (Dtlb_addr_out),
+
+    //translated PA from DTLB
+    .MEM_alu_out   (Dtlb_addr_out),
     .MEM_b2         (MEM_b2),
-
     .MEM_data_mem   (MEM_data_mem),
+    .dcache_stall   (dcache_stall),
 
-    // IMPORTANT: this stall is cache-only (no translation-wait deadlock)
-    .MEM_stall      (MEM_stall),
+    .sb_load_miss    (sb_load_miss),
+    .store_request   (store_request),
+    .store_request_address (store_request_address),
+    .store_request_value (store_request_value),
+    .store_byte      (store_byte),
+    .store_valid     (store_valid),
 
     // NEW input from DTLB
     .Dtlb_addr_valid(Dtlb_addr_valid),
@@ -616,7 +680,7 @@ module cpu #(
   // =======================
   // MEM → WB pipeline register
   // (left unchanged; if your mem_to_wb_reg has a stall input,
-  // you should also freeze it on MEM_stall|Dtlb_stall)
+  // you should also freeze it on dcache_stall|Dtlb_stall)
   // =======================
   mem_to_wb_reg #(
     .XLEN    (XLEN),
@@ -630,6 +694,8 @@ module cpu #(
     .MEM_we       (MEM_we),
     .MEM_pc       (MEM_pc),
     .MEM_jlx      (MEM_jlx),
+    .sb_hit       (sb_hit),
+    .sb_data      (sb_data),
 
     .WB_data_mem  (WB_data_mem),
     .WB_rd        (WB_rd),

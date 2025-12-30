@@ -27,6 +27,8 @@ pipeline_brakes/decode.v
 # ==== Add ons====
 Extras/Hazard_unit.v
 Extras/Branch_Predictor.v
+Extras/storeBuffer.v
+
 
 # ==== VM====
 

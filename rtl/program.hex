@@ -1,27 +1,27 @@
-20000805    // [step 0] addi  r0  r0  r1   5      # r1 = 5
-20201007    // [step 4] addi  r1  r0  r2   7      # r2 = r1 + 7          (EX->D forward r1)
-00221800    // [step 8] add   r1  r2  r3   0      # r3 = r1 + r2         (MEM->D r1, EX->D r2)
-20002001    // [step 12] addi  r0  r0  r4   1      # r4 = 1
-00442800    // [step 16] add   r2  r4  r5   0      # r5 = r2 + r4         (WB->D r2, EX->D r4)
-2000601c    // [step 20] addi  r0  r0  r12  28     # r12 = 28 (address of next instr after jlx)
-35808000    // [step 24] jlx   r12 r0  r0   0      # jump to r12+0; also r31 = PC+4
-23e03001    // [step 28] addi  r31 r0  r6   1      # r6 = r31 + 1         (EX jlx-type forward)
-20003802    // [step 32] addi  r0  r0  r7   2      # r7 = 2
-03e74000    // [step 36] add   r31 r7  r8   0      # r8 = r31 + r7        (MEM jlx-type forward)
-20004803    // [step 40] addi  r0  r0  r9   3      # r9 = 3
-20005004    // [step 44] addi  r0  r0  r10  4      # r10 = 4
-03ea5800    // [step 48] add   r31 r10 r11  0      # r11 = r31 + r10      (WB jlx-type forward)
-20000000    // [step 52] NOP (addi r0 r0 r0 0)
-20000000    // [step 56] NOP (addi r0 r0 r0 0)
-20000000    // [step 60] NOP (addi r0 r0 r0 0)
-20000000    // [step 64] NOP (addi r0 r0 r0 0)
-20000000    // [step 68] NOP (addi r0 r0 r0 0)
-20000000    // [step 72] NOP (addi r0 r0 r0 0)
-20000000    // [step 76] NOP (addi r0 r0 r0 0)
-20000000    // [step 80] NOP (addi r0 r0 r0 0)
-20000000    // [step 84] NOP (addi r0 r0 r0 0)
-20000000    // [step 88] NOP (addi r0 r0 r0 0)
-20000000    // [step 92] NOP (addi r0 r0 r0 0)
+204213e8    // [step 0] addi  r2  r2  r2   1000
+206318c8    // [step 4] addi  r3  r3  r3   200
+2084212c    // [step 8] addi  r4  r4  r4   300
+20a52990    // [step 12] addi  r5  r5  r5   400
+20c631f4    // [step 16] addi  r6  r6  r6   500
+30420064    // [step 20] store  r2  r2  r0   100
+30030030    // [step 24] store  r0  r3  r0   48
+30040034    // [step 28] store  r0  r4  r0   52
+30050038    // [step 32] store  r0  r5  r0   56
+3006003c    // [step 36] store  r0  r6  r0   60
+20000000    // [step 40] addi  r0  r0  r0   0
+20000000    // [step 44] addi  r0  r0  r0   0
+20000000    // [step 48] addi  r0  r0  r0   0
+20000000    // [step 52] addi  r0  r0  r0   0
+20000000    // [step 56] addi  r0  r0  r0   0
+20000000    // [step 60] addi  r0  r0  r0   0
+2c40a064    // [step 64] load   r2  r0  r20  100
+2c00a830    // [step 68] load   r0  r0  r21  48
+2c00b034    // [step 72] load   r0  r0  r22  52
+2c00b838    // [step 76] load   r0  r0  r23  56
+2c00c03c    // [step 80] load   r0  r0  r24  60
+21084007    // [step 84] addi   r8  r8  r8   7
+20000000    // [step 88] addi  r0  r0  r0   0
+20000000    // [step 92] addi  r0  r0  r0   0
 20000000    // [step 96] NOP (addi r0 r0 r0 0)
 20000000    // [step 100] NOP (addi r0 r0 r0 0)
 20000000    // [step 104] NOP (addi r0 r0 r0 0)

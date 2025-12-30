@@ -15,8 +15,9 @@ module ex_to_mem_reg #(
     input  wire                 EX_ld,
     input  wire                 EX_str,
     input  wire                 EX_byt,
-    input  wire                 MEM_stall,
-    input wire                  Dtlb_stall,
+    input  wire                 dcache_stall,
+    input  wire                 sb_stall,
+    input  wire                 Dtlb_stall,
 
     input  wire [XLEN-1:0]      EX_pc,
     input  wire                 EX_jlx,
@@ -42,7 +43,7 @@ module ex_to_mem_reg #(
     reg                   mem_jlx_r;
 
     always @(posedge clk) begin
-        if (rst) begin
+        if (rst  ) begin
             mem_alu_out_r <= {XLEN{1'b0}};
             mem_taken_r   <= 1'b0;
             mem_b2_r      <= {XLEN{1'b0}};
@@ -55,7 +56,7 @@ module ex_to_mem_reg #(
             mem_pc_r      <= {PC_BITS{1'b0}};
             mem_jlx_r     <= 1'b0;
         end
-        else if (!MEM_stall && !Dtlb_stall) begin
+        else if (!dcache_stall && !Dtlb_stall && !sb_stall) begin
             mem_alu_out_r <= EX_alu_out;
             mem_taken_r   <= EX_taken;
             mem_b2_r      <= EX_b2;
