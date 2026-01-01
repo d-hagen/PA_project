@@ -13,8 +13,13 @@ module mem_to_wb_reg #(
     input  wire                 MEM_jlx,
 
     // From Store Buffer forwarding
-    input  wire                 sb_hit,     // 1 -> use sb_data
+    input  wire                 sb_hit,
     input  wire [XLEN-1:0]      sb_data,
+
+    // ---- MUL completion inputs (from M5) ----
+    input  wire                 mul_done,       // aka mul_result_valid (M5 valid)
+    input  wire [XLEN-1:0]      mul_result,
+    input  wire [4:0]           mul_rd,          // latched rd for the single in-flight mul
 
     // WB stage outputs
     output wire [XLEN-1:0]      WB_data_mem,
@@ -38,13 +43,23 @@ module mem_to_wb_reg #(
             wb_pc_r       <= {PC_BITS{1'b0}};
             wb_jlx_r      <= 1'b0;
         end else begin
-            // Choose forwarded SB data if available, else cache/mem data
-            wb_data_mem_r <= sb_hit ? sb_data : MEM_data_mem;
+            if (mul_done) begin
+                // MUL overrides MEM->WB this cycle
+                wb_data_mem_r <= mul_result;
+                wb_rd_r       <= mul_rd;
+                wb_we_r       <= 1'b1;
 
-            wb_rd_r       <= MEM_rd;
-            wb_we_r       <= MEM_we;
-            wb_pc_r       <= MEM_pc;
-            wb_jlx_r      <= MEM_jlx;
+                // Not meaningful for MUL; clear (bubble-like)
+                wb_pc_r       <= {PC_BITS{1'b0}};
+                wb_jlx_r      <= 1'b0;
+            end else begin
+                // Normal MEM->WB
+                wb_data_mem_r <= sb_hit ? sb_data : MEM_data_mem;
+                wb_rd_r       <= MEM_rd;
+                wb_we_r       <= MEM_we;
+                wb_pc_r       <= MEM_pc;
+                wb_jlx_r      <= MEM_jlx;
+            end
         end
     end
 

@@ -9,6 +9,7 @@ pc.v
 # ==== Stages====
 Stages/alu.v
 Stages/decode.v
+Stages/mul.v
 
 # ==== Reg and Mem====
 Memory/regfile.v

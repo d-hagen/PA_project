@@ -5,45 +5,50 @@ module f_to_d_reg #(
 )(
     input  wire                   clk,
     input  wire                   rst,
-    input  wire [VPC_BITS-1:0]     F_pc,
+    input  wire [VPC_BITS-1:0]    F_pc,
     input  wire [XLEN-1:0]        F_inst,
-    input  wire                   F_BP_taken,          
+    input  wire                   F_BP_taken,
 
-    input                         stall_D,
-    input                         dcache_stall,
-    input                         sb_stall,
-    input                         Itlb_stall,
-    input wire                    Dtlb_stall,
+    input  wire                   stall_D,
+    input  wire                   dcache_stall,
+    input  wire                   sb_stall,
+    input  wire                   Itlb_stall,
+    input  wire                   Dtlb_stall,
 
-    input                         EX_taken,
-    input wire  [VPC_BITS-1:0]    F_BP_target_pc,  
+    input  wire                   EX_taken,
+    input  wire [VPC_BITS-1:0]    F_BP_target_pc,
 
-    output wire [VPC_BITS-1:0]     D_pc,
-    output wire [XLEN-1:0]         D_inst,
-    output wire                    D_BP_taken,
-    output wire [VPC_BITS-1:0]     D_BP_target_pc  // Corrected comma to semicolon
-          
+    input  wire                   mul_wb_conflict_stall,
+    input  wire                   mul_issue_stall,          // NEW
 
+    output wire [VPC_BITS-1:0]    D_pc,
+    output wire [XLEN-1:0]        D_inst,
+    output wire                   D_BP_taken,
+    output wire [VPC_BITS-1:0]    D_BP_target_pc
 );
-    reg [VPC_BITS-1:0] d_pc;
-    reg [XLEN-1:0]    d_inst;
-    reg               d_bp_taken;
-    reg [VPC_BITS-1:0] d_bp_target_pc; 
 
-    localparam [XLEN-1:0] NOP = 32'b00100000000000000000000000000000;  // or addi r0 r0 r0 0
+    reg [VPC_BITS-1:0]  d_pc;
+    reg [XLEN-1:0]      d_inst;
+    reg                 d_bp_taken;
+    reg [VPC_BITS-1:0]  d_bp_target_pc;
+
+    localparam [XLEN-1:0] NOP = 32'b00100000000000000000000000000000;
 
     always @(posedge clk) begin
         if (rst || Itlb_stall) begin
             d_pc           <= {VPC_BITS{1'b0}};
             d_inst         <= NOP;
-            d_bp_taken     <= 0;
+            d_bp_taken     <= 1'b0;
             d_bp_target_pc <= {VPC_BITS{1'b0}};
-        end else if (!stall_D & !dcache_stall & !Dtlb_stall & !sb_stall) begin
+        end
+        else if (!stall_D && !dcache_stall && !Dtlb_stall && !sb_stall &&
+                 !mul_wb_conflict_stall && !mul_issue_stall) begin
             d_pc           <= F_pc;
             d_inst         <= F_inst;
             d_bp_taken     <= F_BP_taken;
             d_bp_target_pc <= F_BP_target_pc;
         end
+        // else: hold current D regs (stall)
     end
 
     assign D_pc           = d_pc;

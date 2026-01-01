@@ -15,9 +15,13 @@ module ex_to_mem_reg #(
     input  wire                 EX_ld,
     input  wire                 EX_str,
     input  wire                 EX_byt,
+    input  wire                 EX_mul,
+
     input  wire                 dcache_stall,
     input  wire                 sb_stall,
     input  wire                 Dtlb_stall,
+
+    input  wire                 mul_wb_conflict_stall, // NEW
 
     input  wire [XLEN-1:0]      EX_pc,
     input  wire                 EX_jlx,
@@ -32,18 +36,19 @@ module ex_to_mem_reg #(
     output wire                 MEM_ld,
     output wire                 MEM_str,
     output wire                 MEM_byt,
-    output wire [XLEN-1:0]   MEM_pc,
+    output wire [XLEN-1:0]      MEM_pc,
     output wire                 MEM_jlx
 );
 
-    reg [XLEN-1:0]        mem_alu_out_r, mem_b2_r, mem_a2_r;
-    reg                   mem_taken_r, mem_we_r, mem_ld_r, mem_str_r, mem_byt_r;
-    reg [4:0]             mem_rd_r;
-    reg [XLEN-1:0]     mem_pc_r;
-    reg                   mem_jlx_r;
+    reg [XLEN-1:0] mem_alu_out_r, mem_b2_r, mem_a2_r;
+    reg            mem_taken_r, mem_we_r, mem_ld_r, mem_str_r, mem_byt_r;
+    reg [4:0]      mem_rd_r;
+    reg [XLEN-1:0] mem_pc_r;
+    reg            mem_jlx_r;
 
     always @(posedge clk) begin
-        if (rst  ) begin
+        if (rst || EX_mul) begin
+            // NOOP / bubble
             mem_alu_out_r <= {XLEN{1'b0}};
             mem_taken_r   <= 1'b0;
             mem_b2_r      <= {XLEN{1'b0}};
@@ -56,7 +61,8 @@ module ex_to_mem_reg #(
             mem_pc_r      <= {PC_BITS{1'b0}};
             mem_jlx_r     <= 1'b0;
         end
-        else if (!dcache_stall && !Dtlb_stall && !sb_stall) begin
+        else if (!dcache_stall && !Dtlb_stall && !sb_stall && !mul_wb_conflict_stall) begin
+            // Normal EX → MEM
             mem_alu_out_r <= EX_alu_out;
             mem_taken_r   <= EX_taken;
             mem_b2_r      <= EX_b2;
@@ -69,6 +75,7 @@ module ex_to_mem_reg #(
             mem_pc_r      <= EX_pc;
             mem_jlx_r     <= EX_jlx;
         end
+        // else: hold (stall)
     end
 
     assign MEM_alu_out = mem_alu_out_r;

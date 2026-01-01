@@ -3,8 +3,8 @@ module d_to_ex_reg #(
     parameter PC_BITS = 20,
     parameter integer VPC_BITS = 32
 )(
-    input  wire             clk,
-    input  wire             rst,
+    input  wire                 clk,
+    input  wire                 rst,
 
     // D stage inputs (Source)
     input  wire [XLEN-1:0]      D_a,
@@ -27,11 +27,15 @@ module d_to_ex_reg #(
     input  wire [VPC_BITS-1:0]  D_BP_target_pc,
 
     // Stall/Flush/Taken Signals
-    input wire                  stall_D,
-    input wire                  dcache_stall,
-    input                       sb_stall,
-    input wire                  Dtlb_stall,
-    input                       EX_taken,
+    input  wire                 stall_D,
+    input  wire                 dcache_stall,
+    input  wire                 sb_stall,
+    input  wire                 Dtlb_stall,
+    input  wire                 EX_taken,
+
+    // MUL-related stalls
+    input  wire                 mul_wb_conflict_stall, // hold/stall (freeze pipeline)
+    input  wire                 mul_issue_stall,       // bubble into EX to avoid re-issuing same MUL
 
     // EX stage outputs (Destination)
     output wire [XLEN-1:0]      EX_a,
@@ -63,7 +67,8 @@ module d_to_ex_reg #(
     reg                 ex_jlx_r;
 
     always @(posedge clk) begin
-        if (rst || stall_D || EX_taken) begin
+        // Bubble conditions: reset, generic decode stall/flush, branch flush, or mul-issue-stall bubble
+        if (rst || stall_D || EX_taken ) begin
             ex_a_r            <= {XLEN{1'b0}};
             ex_a2_r           <= {XLEN{1'b0}};
             ex_b_r            <= {XLEN{1'b0}};
@@ -81,7 +86,8 @@ module d_to_ex_reg #(
             ex_pc_r           <= {VPC_BITS{1'b0}};
             ex_jlx_r          <= 1'b0;
         end
-        else if (!dcache_stall && !Dtlb_stall && !sb_stall) begin
+        // Normal latch only when backend isn't stalling and we are not doing the 1-cycle WB-conflict freeze
+        else if (!dcache_stall && !Dtlb_stall && !sb_stall && !mul_wb_conflict_stall && !mul_issue_stall) begin
             ex_a_r            <= D_a;
             ex_a2_r           <= D_a2;
             ex_b_r            <= D_b;
@@ -99,6 +105,7 @@ module d_to_ex_reg #(
             ex_pc_r           <= D_pc;
             ex_jlx_r          <= D_jlx;
         end
+        // else: hold current EX regs (stall/freeze) - includes mul_wb_conflict_stall
     end
 
     assign EX_a            = ex_a_r;

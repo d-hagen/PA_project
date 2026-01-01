@@ -51,16 +51,22 @@ module cpu_run_tb;
 
         // Added EX_mul display here
        if (cycles <= 100) begin
-          $display("C%0d | F_pc_va=%0d F_inst=0x%08h | F_pc=%0d | Dtlb_addr_out=%0d -> sb_hit=%0d | sb_data=%0d | MEM_ld=%0d sb_data=%0d",
-                  cycles,
-                  dut.F_pc_va,
-                  curr_inst,
-                  dut.F_pc,
-                  dut.Dtlb_addr_out,
-                  dut.sb_hit,
-                  dut.sb_data,
-                  dut.MEM_ld,
-                  dut.sb_data);
+          $display(
+            "C%0d | F_pc_va=%0d F_inst=0x%08h | F_pc=%0d | WB_data_mem=%0d -> mul_issue_stall=%0d | MEM_we=%0d | EX_mul=%0d mul_busy=%0d mul_v5=%0d mul_wb_conflict=%0d",
+            cycles,
+            dut.F_pc_va,
+            curr_inst,
+            dut.F_pc,
+            dut.D_mul,
+            dut.mul_issue_stall,
+            dut.MEM_we,
+
+            // replace MEM_ld + duplicate sb_data
+            dut.EX_mul,
+            dut.mul_busy,
+            dut.mul_result_valid,
+            dut.mul_wb_conflict_stall
+          );
         end
 
 

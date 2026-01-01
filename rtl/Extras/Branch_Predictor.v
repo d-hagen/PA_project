@@ -19,6 +19,8 @@ module branch_buffer #(
     input  wire                  Itlb_stall,
     input  wire                  Dtlb_stall,
     input wire                   sb_stall,
+    input  wire                   mul_wb_conflict_stall,
+    input  wire                   mul_issue_stall,          // NEW
 
     // Predicted outputs to IF
     output wire [PC_BITS-1:0]    F_BP_target_pc, // predicted next PC
@@ -52,7 +54,7 @@ module branch_buffer #(
 
     // PC + 4 for sequential fall-through (PC is byte address, word-aligned)
     wire [PC_BITS-1:0] seq_pc =
-        F_pc_va + ( (!F_stall && !dcache_stall && !Itlb_stall && !Dtlb_stall && !sb_stall)  ? {{(PC_BITS-3){1'b0}}, 3'd4} : {PC_BITS{1'b0}} );
+        F_pc_va + ( (!F_stall && !dcache_stall && !Itlb_stall && !Dtlb_stall && !sb_stall && !mul_wb_conflict_stall && !mul_issue_stall)  ? {{(PC_BITS-3){1'b0}}, 3'd4} : {PC_BITS{1'b0}} );
         // For PC_BITS = 32 this is effectively: F_pc_va + 32'd4 when not stalled
 
     assign F_BP_taken     = taken_on_hit;

@@ -25,7 +25,9 @@ OPCODES = {
     "blt":   0b001101,
     "bgt":   0b001101,
     "jlx":   0b001101,
+    "mul":   0b001110,   # NEW
 }
+
 
 
 RD_JMP = 0b00000
