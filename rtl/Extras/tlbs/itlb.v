@@ -104,7 +104,6 @@ module itlb #(
         end else begin
             // latch VPN at time of miss request
             // (assumes va_in is held constant while Itlb_stall=1,
-            // just like F_pc is held while F_stall=1 in the icache)
             if (Itlb_pa_request && !hit) begin
                 miss_vpn <= va_vpn;
             end

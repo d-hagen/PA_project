@@ -32,6 +32,26 @@ module cpu_run_tb;
   integer cycles;
   reg [31:0] curr_inst;
 
+  task print_rob;
+    integer j;
+    begin
+      $display("---- ROB ---- full=%0b empty=%0b head=%0d count=%0d",
+               dut.rob_full, dut.rob_empty, dut.u_rob.head, dut.u_rob.count);
+
+      for (j = 0; j < dut.u_rob.ROB_DEPTH; j = j + 1) begin
+        $display("ROB[%0d] v=%0b rdy=%0b we=%0b rd=%0d val=0x%0d",
+                 j,
+                 dut.u_rob.valid[j],
+                 dut.u_rob.ready[j],
+                 dut.u_rob.we[j],
+                 dut.u_rob.rd[j],
+                 dut.u_rob.value[j]);
+      end
+      $display("------------");
+    end
+  endtask
+
+
   initial begin
     $display("===========================================");
     $display("CPU RUN TB (Verilog-2005): start @ PC=0, stop at first NOP");
@@ -52,17 +72,17 @@ module cpu_run_tb;
         // Added EX_mul display here
        if (cycles <= 100) begin
           $display(
-            "C%0d | F_pc_va=%0d F_inst=0x%08h | F_pc=%0d | WB_data_mem=%0d -> mul_issue_stall=%0d | MEM_we=%0d | EX_mul=%0d mul_busy=%0d mul_v5=%0d mul_wb_conflict=%0d",
+            "C%0d | F_pc_va=%0d F_inst=0x%08h | F_pc=%0d | D_mul=%0d -> mul_issue_stall=%0d | EX_mul=%0d | RF_stall=%0d mul_busy=%0d mul_v5=%0d mul_wb_conflict=%0d",
             cycles,
             dut.F_pc_va,
             curr_inst,
             dut.F_pc,
             dut.D_mul,
             dut.mul_issue_stall,
-            dut.MEM_we,
+            dut.EX_mul,
 
             // replace MEM_ld + duplicate sb_data
-            dut.EX_mul,
+            dut.RF_stall,
             dut.mul_busy,
             dut.mul_result_valid,
             dut.mul_wb_conflict_stall
@@ -83,6 +103,7 @@ module cpu_run_tb;
         end
       end
     end
+    print_rob();
 
     $display("\n==== REGISTER FILE DUMP ====");
     for (i = 0; i < REG_NUM; i = i + 1) begin

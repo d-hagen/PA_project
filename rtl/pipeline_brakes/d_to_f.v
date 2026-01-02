@@ -1,7 +1,8 @@
 module d_to_ex_reg #(
     parameter XLEN    = 32,
     parameter PC_BITS = 20,
-    parameter integer VPC_BITS = 32
+    parameter integer VPC_BITS = 32,
+    parameter integer TAG_W    = 4   // NEW: ROB tag width
 )(
     input  wire                 clk,
     input  wire                 rst,
@@ -22,9 +23,11 @@ module d_to_ex_reg #(
     input  wire                 D_jlx,
 
     input  wire [VPC_BITS-1:0]  D_pc,
-
     input  wire                 D_BP_taken,
     input  wire [VPC_BITS-1:0]  D_BP_target_pc,
+
+    // NEW: ROB tag for this instruction in D
+    input  wire [TAG_W-1:0]     D_tag,
 
     // Stall/Flush/Taken Signals
     input  wire                 stall_D,
@@ -53,7 +56,10 @@ module d_to_ex_reg #(
     output wire [VPC_BITS-1:0]  EX_BP_target_pc,
     output wire                 EX_mul,
     output wire [VPC_BITS-1:0]  EX_pc,
-    output wire                 EX_jlx
+    output wire                 EX_jlx,
+
+    // NEW: forwarded ROB tag into EX
+    output wire [TAG_W-1:0]     EX_tag
 );
 
     reg [XLEN-1:0]      ex_a_r, ex_a2_r, ex_b_r, ex_b2_r;
@@ -66,9 +72,12 @@ module d_to_ex_reg #(
     reg [VPC_BITS-1:0]  ex_pc_r;
     reg                 ex_jlx_r;
 
+    // NEW
+    reg [TAG_W-1:0]     ex_tag_r;
+
     always @(posedge clk) begin
-        // Bubble conditions: reset, generic decode stall/flush, branch flush, or mul-issue-stall bubble
-        if (rst || stall_D || EX_taken ) begin
+        // Bubble conditions: reset, generic decode stall/flush, branch flush
+        if (rst || EX_taken) begin
             ex_a_r            <= {XLEN{1'b0}};
             ex_a2_r           <= {XLEN{1'b0}};
             ex_b_r            <= {XLEN{1'b0}};
@@ -85,9 +94,11 @@ module d_to_ex_reg #(
             ex_bp_target_pc_r <= {VPC_BITS{1'b0}};
             ex_pc_r           <= {VPC_BITS{1'b0}};
             ex_jlx_r          <= 1'b0;
+
+            ex_tag_r          <= {TAG_W{1'b0}};
         end
-        // Normal latch only when backend isn't stalling and we are not doing the 1-cycle WB-conflict freeze
-        else if (!dcache_stall && !Dtlb_stall && !sb_stall && !mul_wb_conflict_stall && !mul_issue_stall) begin
+        // Normal latch only when backend isn't stalling and no 1-cycle WB-conflict freeze
+        else if (!stall_D) begin
             ex_a_r            <= D_a;
             ex_a2_r           <= D_a2;
             ex_b_r            <= D_b;
@@ -104,8 +115,10 @@ module d_to_ex_reg #(
             ex_bp_target_pc_r <= D_BP_target_pc;
             ex_pc_r           <= D_pc;
             ex_jlx_r          <= D_jlx;
+
+            ex_tag_r          <= D_tag;
         end
-        // else: hold current EX regs (stall/freeze) - includes mul_wb_conflict_stall
+        // else: hold current EX regs (stall/freeze)
     end
 
     assign EX_a            = ex_a_r;
@@ -124,5 +137,7 @@ module d_to_ex_reg #(
     assign EX_BP_target_pc = ex_bp_target_pc_r;
     assign EX_pc           = ex_pc_r;
     assign EX_jlx          = ex_jlx_r;
+
+    assign EX_tag          = ex_tag_r;
 
 endmodule

@@ -35,14 +35,13 @@ module f_to_d_reg #(
     localparam [XLEN-1:0] NOP = 32'b00100000000000000000000000000000;
 
     always @(posedge clk) begin
-        if (rst || Itlb_stall) begin
+        if (rst || Itlb_stall || EX_taken) begin
             d_pc           <= {VPC_BITS{1'b0}};
             d_inst         <= NOP;
             d_bp_taken     <= 1'b0;
             d_bp_target_pc <= {VPC_BITS{1'b0}};
         end
-        else if (!stall_D && !dcache_stall && !Dtlb_stall && !sb_stall &&
-                 !mul_wb_conflict_stall && !mul_issue_stall) begin
+        else if (!stall_D) begin
             d_pc           <= F_pc;
             d_inst         <= F_inst;
             d_bp_taken     <= F_BP_taken;

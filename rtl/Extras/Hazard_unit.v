@@ -1,7 +1,6 @@
 module Hazard_unit #(
     parameter XLEN = 32,
-    parameter ADDR_SIZE = 5,
-    parameter MUL_STALLS = 4
+    parameter ADDR_SIZE = 5
 )(
     input  wire                 clk,
     input  wire                 rst,

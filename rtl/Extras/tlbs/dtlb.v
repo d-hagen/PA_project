@@ -108,7 +108,7 @@ module dtlb #(
             fifo_ptr <= 4'd0;
             miss_vpn <= {VPN_WIDTH{1'b0}};
         end else begin
-            // latch VPN at time of miss request (assumes va_in held stable while stalled)
+            // latch VPN at time of miss request 
             if (Dtlb_pa_request && !hit) begin
                 miss_vpn <= va_vpn;
             end

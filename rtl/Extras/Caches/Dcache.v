@@ -7,6 +7,7 @@ module dcache #(
 
     // MEM stage interface (loads only)
     input  wire                 MEM_ld,
+
     input  wire                 MEM_byt,
     input  wire [XLEN-1:0]      MEM_alu_out,
     input  wire [XLEN-1:0]      MEM_b2,
@@ -71,7 +72,7 @@ module dcache #(
     wire [LINE_BITS-1:0]  ptw_line  = Ptw_addr[19:4];
 
     // Only do cache load when SB says miss
-    wire op_active_load        = MEM_ld && sb_load_miss;
+    wire op_active_load        = MEM_ld && sb_load_miss && Dtlb_addr_valid;
     wire do_cache_access_load  = op_active_load && Dtlb_addr_valid;
     wire mem_needs_translation = op_active_load && !Dtlb_addr_valid;
 

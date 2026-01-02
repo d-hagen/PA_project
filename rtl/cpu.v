@@ -172,17 +172,67 @@ module cpu #(
   wire                 sb_stall;
 
   // =======================
-  // MUL pipe wires (NEW)
+  // MUL pipe wires
   // =======================
-  wire                 mul_result_valid;        // M5 valid
-  wire [XLEN-1:0]       mul_result;
+  wire                 mul_result_valid;
+  wire [XLEN-1:0]      mul_result;
   wire                 mul_busy;
-  wire [ADDR_SIZE-1:0]  mul_busy_rd;
+  wire [ADDR_SIZE-1:0] mul_busy_rd;
 
-  wire                 mul_wb_conflict_stall;   // M5 wants WB but MEM wants WB too
-  wire                 mul_issue_stall;         // D_mul while mul_busy
+  wire                 mul_wb_conflict_stall;
+  wire                 mul_issue_stall;
 
+  // ============================================================
+  // ROB + Rename wires
+  // ============================================================
+  localparam integer ROB_DEPTH = 16;
 
+  wire                  RN_ra_is_rob, RN_rb_is_rob;
+  wire [4-1:0]          RN_ra_tag, RN_rb_tag;
+  wire [4-1:0]          RN_dst_tag;
+  wire                  RN_alloc;
+  wire [4-1:0]          RN_alloc_tag;
+
+  wire                  ROB_ra_ready, ROB_rb_ready;
+  wire [XLEN-1:0]       ROB_ra_value, ROB_rb_value;
+
+  wire                  rob_full, rob_empty;
+
+  wire                  C_valid;
+  wire                  C_we;
+  wire [ADDR_SIZE-1:0]  C_rd_arch;
+  wire [XLEN-1:0]       C_value;
+  wire [4-1:0]          C_tag;
+
+  wire                  RF_stall;
+
+  // Tag wires through pipeline regs
+  wire [4-1:0]          D_tag = RN_dst_tag;
+  wire [4-1:0]          EX_tag;
+  wire [4-1:0]          MEM_tag;
+  wire [4-1:0]          WB_tag;
+
+  // MUL tag at completion
+  wire [4-1:0]          mul_result_tag;
+  wire [4:0]            mul_rd_done;
+
+  // ============================================================
+  // Global stall with ROB/RF
+  // ============================================================
+  wire stall_rob = rob_full | RF_stall;
+
+  wire stall_allD = stall_D
+                  | dcache_stall
+                  | Dtlb_stall
+                  | Itlb_stall
+                  | F_stall
+                  | sb_stall
+                  | mul_wb_conflict_stall
+                  | mul_issue_stall
+                  | stall_rob;
+
+  // Decode accept: only when D truly advances
+  wire D_fire = (~stall_allD) & (~EX_taken);
 
   // ============================================================
   // PC Register
@@ -196,17 +246,7 @@ module cpu #(
     .EX_taken       (EX_taken),
     .EX_alt_pc      (EX_alu_out),
     .F_BP_target_pc (F_BP_target_pc),
-
-    .stall_D ( stall_D
-             | dcache_stall
-             | Dtlb_stall
-             | Itlb_stall
-             | F_stall
-             | sb_stall
-             |mul_wb_conflict_stall
-             |mul_issue_stall
-             ),
-
+    .stall_D        (stall_allD),
     .F_pc_va        (F_pc_va)
   );
 
@@ -330,7 +370,7 @@ module cpu #(
   );
 
   // =======================
-  // F → D pipeline register (UPDATED)
+  // F → D pipeline register
   // =======================
   f_to_d_reg #(
     .XLEN     (XLEN),
@@ -344,7 +384,7 @@ module cpu #(
     .F_BP_taken     (F_BP_taken),
     .F_BP_target_pc (F_BP_target_pc),
 
-    .stall_D        (stall_D),
+    .stall_D        (stall_allD),
     .dcache_stall   (dcache_stall),
     .sb_stall       (sb_stall),
     .Itlb_stall     (Itlb_stall),
@@ -387,7 +427,7 @@ module cpu #(
   );
 
   // =======================
-  // Hazard Unit (UPDATED with mul_busy)
+  // Hazard Unit
   // =======================
   Hazard_unit #(
     .XLEN     (XLEN),
@@ -425,16 +465,55 @@ module cpu #(
   );
 
   // =======================
-  // Regfile
+  // Rename (UPDATED for combinational outputs + D_fire)
   // =======================
-  regfile #(
-    .XLEN     (XLEN),
-    .REG_NUM  (REG_NUM),
-    .ADDR_SIZE(ADDR_SIZE),
-    .PC_BITS  (PC_BITS),
-    .VPC_BITS (VPC_BITS)
+  rename #(
+    .REG_NUM   (REG_NUM),
+    .ADDR_SIZE (ADDR_SIZE),
+    .ROB_DEPTH (ROB_DEPTH),
+    .TAG_W     (4)
+  ) u_rename (
+    .clk          (clk),
+    .rst          (rst),
+
+    .D_ra         (D_ra),
+    .D_rb         (D_rb),
+    .D_rd         (D_rd),
+    .D_we         (D_we),
+    .D_jlx        (D_jlx),
+
+    .D_fire       (D_fire),
+
+    .ra_is_rob    (RN_ra_is_rob),
+    .rb_is_rob    (RN_rb_is_rob),
+    .ra_tag       (RN_ra_tag),
+    .rb_tag       (RN_rb_tag),
+
+    .dst_tag      (RN_dst_tag),
+    .rob_alloc    (RN_alloc),
+    .rob_alloc_tag(RN_alloc_tag),
+
+    .rob_full_in  (rob_full),
+
+    .C_valid      (C_valid),
+    .C_we         (C_we),
+    .C_rd_arch    (C_rd_arch),
+    .C_tag        (C_tag)
+  );
+
+  // =======================
+  // Regfile with ROB
+  // =======================
+  regfile_rob #(
+    .XLEN      (XLEN),
+    .REG_NUM   (REG_NUM),
+    .ADDR_SIZE (ADDR_SIZE),
+    .VPC_BITS  (VPC_BITS),
+    .ROB_DEPTH (ROB_DEPTH),
+    .TAG_W     (4)
   ) u_regfile (
     .clk          (clk),
+
     .D_ra         (D_ra),
     .D_rb         (D_rb),
     .D_imd        (D_imd),
@@ -445,32 +524,49 @@ module cpu #(
     .D_jmp        (D_jmp),
     .D_addi       (D_addi),
 
+    .RN_ra_is_rob (RN_ra_is_rob),
+    .RN_rb_is_rob (RN_rb_is_rob),
+    .RN_ra_tag    (RN_ra_tag),
+    .RN_rb_tag    (RN_rb_tag),
+
+    .ROB_ra_ready (ROB_ra_ready),
+    .ROB_ra_value (ROB_ra_value),
+    .ROB_rb_ready (ROB_rb_ready),
+    .ROB_rb_value (ROB_rb_value),
+
     .EX_D_bp      (EX_D_bp),
     .MEM_D_bp     (MEM_D_bp),
     .WB_D_bp      (WB_D_bp),
 
     .EX_alu_out   (EX_alu_out),
     .MEM_data_mem (MEM_data_mem),
+    .EX_pc        (EX_pc),
+    .MEM_pc       (MEM_pc),
 
-    .WB_we        (WB_we),
-    .WB_rd        (WB_rd),
     .WB_data_mem  (WB_data_mem),
     .WB_pc        (WB_pc),
     .WB_jlx       (WB_jlx),
 
+    .C_we         (C_valid & C_we),
+    .C_rd         (C_rd_arch),
+    .C_value      (C_value),
+
     .D_a          (D_a),
     .D_b          (D_b),
     .D_a2         (D_a2),
-    .D_b2         (D_b2)
+    .D_b2         (D_b2),
+
+    .RF_stall     (RF_stall)
   );
 
   // =======================
-  // D → EX pipeline register (UPDATED)
+  // D → EX pipeline register (tag)
   // =======================
   d_to_ex_reg #(
     .XLEN     (XLEN),
     .PC_BITS  (PC_BITS),
-    .VPC_BITS (VPC_BITS)
+    .VPC_BITS (VPC_BITS),
+    .TAG_W    (4)
   ) u_d_to_ex_reg (
     .clk            (clk),
     .rst            (rst),
@@ -488,11 +584,14 @@ module cpu #(
     .D_we           (D_we),
     .D_mul          (D_mul),
     .D_jlx          (D_jlx),
+
     .D_pc           (D_pc),
     .D_BP_taken     (D_BP_taken),
     .D_BP_target_pc (D_BP_target_pc),
 
-    .stall_D        (stall_D),
+    .D_tag          (D_tag),
+
+    .stall_D        (stall_allD),
     .dcache_stall   (dcache_stall),
     .sb_stall       (sb_stall),
     .Dtlb_stall     (Dtlb_stall),
@@ -516,40 +615,46 @@ module cpu #(
     .EX_jlx         (EX_jlx),
     .EX_pc          (EX_pc),
     .EX_BP_taken    (EX_BP_taken),
-    .EX_BP_target_pc(EX_BP_target_pc)
+    .EX_BP_target_pc(EX_BP_target_pc),
+
+    .EX_tag         (EX_tag)
   );
 
   // =======================
-  // MUL pipe (NEW)
+  // MUL pipe (tag)
   // =======================
   mul_pipe_single #(
     .XLEN    (XLEN),
-    .RD_BITS (ADDR_SIZE)
+    .RD_BITS (ADDR_SIZE),
+    .TAG_W   (4)
   ) u_mul_pipe (
     .clk          (clk),
     .rst          (rst),
 
-    .EX_mul_a     (EX_a2),
-    .EX_mul_b     (EX_b2),
-    .EX_mul_rd    (EX_rd),
-
-    .MEM_we       (MEM_we),
-    .MEM_jlx      (MEM_jlx),
-
     .EX_mul        (EX_mul),
+    .EX_mul_a      (EX_a2),
+    .EX_mul_b      (EX_b2),
+    .EX_mul_rd     (EX_rd),
+    .EX_mul_tag    (EX_tag),
 
-    .mul_result_valid       (mul_result_valid),
-    .mul_result             (mul_result),
+    .MEM_we        (MEM_we),
+    .MEM_jlx       (MEM_jlx),
 
-    .mul_busy               (mul_busy),
-    .mul_busy_rd            (mul_busy_rd),
+    .mul_result_valid      (mul_result_valid),
+    .mul_result            (mul_result),
+    .mul_rd                (mul_rd_done),
+    .mul_result_tag        (mul_result_tag),
 
-    .mul_wb_conflict_stall  (mul_wb_conflict_stall),
-    .mul_issue_stall        (mul_issue_stall)
+    .mul_busy              (mul_busy),
+    .mul_busy_rd           (mul_busy_rd),
+    .mul_busy_tag          (/* unused */),
+
+    .mul_wb_conflict_stall (mul_wb_conflict_stall),
+    .mul_issue_stall       (mul_issue_stall)
   );
 
   // =======================
-  // ALU (UPDATED: EX_mul input)
+  // ALU
   // =======================
   alu #(
     .XLEN     (XLEN),
@@ -573,11 +678,12 @@ module cpu #(
   );
 
   // =======================
-  // EX → MEM pipeline register (UPDATED)
+  // EX → MEM pipeline register (tag)
   // =======================
   ex_to_mem_reg #(
     .XLEN    (XLEN),
-    .PC_BITS (PC_BITS)
+    .PC_BITS (PC_BITS),
+    .TAG_W   (4)
   ) u_ex_to_mem_reg (
     .clk         (clk),
     .rst         (rst),
@@ -602,6 +708,8 @@ module cpu #(
     .EX_pc       (EX_pc),
     .EX_jlx      (EX_jlx),
 
+    .EX_tag      (EX_tag),
+
     .MEM_alu_out (MEM_alu_out),
     .MEM_taken   (MEM_taken),
     .MEM_b2      (MEM_b2),
@@ -612,7 +720,9 @@ module cpu #(
     .MEM_str     (MEM_str),
     .MEM_byt     (MEM_byt),
     .MEM_pc      (MEM_pc),
-    .MEM_jlx     (MEM_jlx)
+    .MEM_jlx     (MEM_jlx),
+
+    .MEM_tag     (MEM_tag)
   );
 
   // =======================
@@ -713,11 +823,12 @@ module cpu #(
   );
 
   // =======================
-  // MEM → WB pipeline register (UPDATED for MUL override)
+  // MEM → WB pipeline register (tag mux)
   // =======================
   mem_to_wb_reg #(
     .XLEN    (XLEN),
-    .PC_BITS (PC_BITS)
+    .PC_BITS (PC_BITS),
+    .TAG_W   (4)
   ) u_mem_to_wb_reg (
     .clk          (clk),
     .rst          (rst),
@@ -728,18 +839,66 @@ module cpu #(
     .MEM_pc       (MEM_pc),
     .MEM_jlx      (MEM_jlx),
 
+    .MEM_tag      (MEM_tag),
+
     .sb_hit       (sb_hit),
     .sb_data      (sb_data),
 
     .mul_done     (mul_result_valid),
     .mul_result   (mul_result),
-    .mul_rd       (mul_busy_rd),
+    .mul_rd       (mul_rd_done),
+    .mul_tag      (mul_result_tag),
 
     .WB_data_mem  (WB_data_mem),
     .WB_rd        (WB_rd),
     .WB_we        (WB_we),
     .WB_pc        (WB_pc),
-    .WB_jlx       (WB_jlx)
+    .WB_jlx       (WB_jlx),
+
+    .WB_tag       (WB_tag)
+  );
+
+  // ============================================================
+  // ROB instance
+  // ============================================================
+  wire        WB_wb_valid = WB_we | WB_jlx;
+  wire [XLEN-1:0] WB_wb_value = WB_jlx ? (WB_pc + 32'd4) : WB_data_mem;
+
+  rob #(
+    .XLEN(XLEN), .ADDR_SIZE(ADDR_SIZE), .ROB_DEPTH(ROB_DEPTH), .TAG_W(4)
+  ) u_rob (
+    .clk(clk),
+    .rst(rst),
+
+    .alloc_valid   (RN_alloc),
+    .alloc_tag     (RN_alloc_tag),
+    .alloc_we      (D_we),
+    .alloc_rd_arch (D_rd),
+    .alloc_jlx     (D_jlx),
+
+    .wb_valid      (WB_wb_valid),
+    .wb_tag        (WB_tag),
+    .wb_value      (WB_wb_value),
+
+    .flush_valid   (EX_taken),
+    .flush_tag     (EX_tag),
+
+    .ra_tag        (RN_ra_tag),
+    .ra_ready      (ROB_ra_ready),
+    .ra_value      (ROB_ra_value),
+
+    .rb_tag        (RN_rb_tag),
+    .rb_ready      (ROB_rb_ready),
+    .rb_value      (ROB_rb_value),
+
+    .C_valid       (C_valid),
+    .C_we          (C_we),
+    .C_rd_arch     (C_rd_arch),
+    .C_value       (C_value),
+    .C_tag         (C_tag),
+
+    .rob_full      (rob_full),
+    .rob_empty     (rob_empty)
   );
 
 endmodule

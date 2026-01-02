@@ -14,6 +14,8 @@ Stages/mul.v
 # ==== Reg and Mem====
 Memory/regfile.v
 Memory/joined_mem.v
+Memory/ROB.v
+
 
 
 
@@ -22,13 +24,15 @@ Memory/joined_mem.v
 pipeline_brakes/fetch.v
 pipeline_brakes/memory.v
 pipeline_brakes/execute.v
-pipeline_brakes/decode.v
+pipeline_brakes/d_to_f.v
 
 
 # ==== Add ons====
 Extras/Hazard_unit.v
 Extras/Branch_Predictor.v
 Extras/storeBuffer.v
+Extras/rename.v
+
 
 
 # ==== VM====

@@ -16,12 +16,12 @@ module store_buffer #(
     input  wire                 MEM_byt,       // 1=byte, 0=word (for the current op)
 
     // Cache handshake for draining buffered stores
-    input  wire                 store_valid,   // cache says "current store request fulfilled"
+    input  wire                 store_valid,   
 
     // To cache (drain head entry)
     output wire                 sb_load_miss,          // 1 if load line NOT in SB (line-based presence)
     output wire                 store_request,
-    output wire [19:0]          store_request_address, // FULL PA[19:0] (name kept!)
+    output wire [19:0]          store_request_address, 
     output wire [XLEN-1:0]      store_request_value,
     output wire                 store_byte,            // 1=byte, 0=word
 
@@ -67,7 +67,6 @@ module store_buffer #(
     // Pipeline advancing qualifier
     wire no_stall = (!dcache_stall) && (!Dtlb_stall);
 
-    // Stall only when a store tries to enter, we are advancing, addr valid, and SB full
     assign sb_stall = no_stall && Dtlb_addr_valid && MEM_str && sb_full;
 
     // -----------------------------
@@ -107,7 +106,6 @@ module store_buffer #(
         end
     end
 
-    // If addr not valid yet, treat as miss (so cache won't try)
     assign sb_load_miss = MEM_ld && (!Dtlb_addr_valid || !line_present);
 
     // -----------------------------
@@ -125,13 +123,11 @@ module store_buffer #(
         if (MEM_ld && Dtlb_addr_valid) begin
             for (r = 0; r < DEPTH; r = r + 1) begin
                 if (!found && (r < count)) begin
-                    // newest entry is (tail-1), then backwards
                     if (tail == 0)
                         ridx = DEPTH-1;
                     else
                         ridx = tail - 1;
 
-                    // step back r entries with wrap
                     if (ridx >= r[PTR_W-1:0])
                         ridx = ridx - r[PTR_W-1:0];
                     else
@@ -167,12 +163,9 @@ module store_buffer #(
         end
     end
 
-    // -----------------------------
-    // Drive cache request from HEAD entry
-    // (name kept: store_request_address)
-    // -----------------------------
+
     assign store_request         = !sb_empty;
-    assign store_request_address = addr_q[head];   // FULL PA[19:0]
+    assign store_request_address = addr_q[head];   
     assign store_request_value   = data_q[head];
     assign store_byte            = byt_q[head];
 
