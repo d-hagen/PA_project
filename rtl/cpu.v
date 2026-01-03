@@ -12,6 +12,12 @@ module cpu #(
   input  wire rst
 );
 
+  // ============================================================
+  // Parameters
+  // ============================================================
+  localparam integer ROB_DEPTH = 16;
+  localparam integer TAG_W     = 4; // since ROB_DEPTH=16
+
   // =======================
   // Wire declarations
   // =======================
@@ -127,6 +133,7 @@ module cpu #(
   wire               MEM_ld;
   wire               MEM_str;
   wire               MEM_byt;
+  wire               MEM_mul;
 
   // Global stall from D-cache
   wire               dcache_stall;
@@ -185,13 +192,11 @@ module cpu #(
   // ============================================================
   // ROB + Rename wires
   // ============================================================
-  localparam integer ROB_DEPTH = 16;
-
   wire                  RN_ra_is_rob, RN_rb_is_rob;
-  wire [4-1:0]          RN_ra_tag, RN_rb_tag;
-  wire [4-1:0]          RN_dst_tag;
+  wire [TAG_W-1:0]      RN_ra_tag, RN_rb_tag;
+  wire [TAG_W-1:0]      RN_dst_tag;
   wire                  RN_alloc;
-  wire [4-1:0]          RN_alloc_tag;
+  wire [TAG_W-1:0]      RN_alloc_tag;
 
   wire                  ROB_ra_ready, ROB_rb_ready;
   wire [XLEN-1:0]       ROB_ra_value, ROB_rb_value;
@@ -202,19 +207,42 @@ module cpu #(
   wire                  C_we;
   wire [ADDR_SIZE-1:0]  C_rd_arch;
   wire [XLEN-1:0]       C_value;
-  wire [4-1:0]          C_tag;
+  wire [TAG_W-1:0]      C_tag;
 
   wire                  RF_stall;
 
   // Tag wires through pipeline regs
-  wire [4-1:0]          D_tag = RN_dst_tag;
-  wire [4-1:0]          EX_tag;
-  wire [4-1:0]          MEM_tag;
-  wire [4-1:0]          WB_tag;
+  wire [TAG_W-1:0]      D_tag = RN_dst_tag;
+  wire [TAG_W-1:0]      EX_tag;
+  wire [TAG_W-1:0]      MEM_tag;
+  wire [TAG_W-1:0]      WB_tag;
 
-  // MUL tag at completion
-  wire [4-1:0]          mul_result_tag;
+  // MUL tag at completion (you already have these in your cpu)
+  wire [TAG_W-1:0]      mul_result_tag;
   wire [4:0]            mul_rd_done;
+
+  // ============================================================
+  // NEW: Tag-bypass wires from Hazard_unit -> regfile
+  // ============================================================
+  wire                  RA_tag_bp_valid;
+  wire [XLEN-1:0]       RA_tag_bp_value;
+  wire                  RB_tag_bp_valid;
+  wire [XLEN-1:0]       RB_tag_bp_value;
+
+  // ============================================================
+  // NEW: Producer tag/value wires (EX/MEM/WB)
+  // ============================================================
+  // EX produces values for non-load, non-mul instructions that write rd/jlx
+  wire EX_tag_we;
+  wire [XLEN-1:0] EX_tag_value;
+
+  // MEM produces values for loads (if your dcache returns MEM_data_mem in MEM stage)
+  wire MEM_tag_we;
+  wire [XLEN-1:0] MEM_tag_value;
+
+  // WB produces final values (same as ROB writeback)
+  wire WB_tag_we;
+  wire [XLEN-1:0] WB_tag_value;
 
   // ============================================================
   // Global stall with ROB/RF
@@ -232,7 +260,7 @@ module cpu #(
                   | stall_rob;
 
   // Decode accept: only when D truly advances
-  wire D_fire = (~stall_allD) & (~EX_taken);
+  wire D_fire = (~stall_allD) & (~EX_taken) ;
 
   // ============================================================
   // PC Register
@@ -426,12 +454,45 @@ module cpu #(
     .D_mul    (D_mul)
   );
 
+  // ============================================================
+  // NEW: Define producer tag/value signals
+  // ============================================================
+  // EX stage produces a value only when:
+  // - it writes a dest (EX_we or EX_jlx)
+  // - and it's not a load (value not ready yet)
+  // - and it's not mul (mul result comes later out-of-band)
+  assign EX_tag_we    = (EX_we | EX_jlx) && !EX_ld && !EX_mul;
+  assign EX_tag_value = EX_jlx ? (EX_pc + 32'd4) : EX_alu_out;
+
+  // MEM stage produces value for loads (when MEM_data_mem is valid in MEM stage)
+  wire MEM_writes = (MEM_we | MEM_jlx);
+  wire MEM_is_load = MEM_ld;
+
+  // MEM can produce either:
+  //  - load data (when not stalled)
+  //  - ALU/JLX result (always available from pipeline reg)
+  assign MEM_tag_we =
+      MEM_writes &&
+      ( MEM_is_load ? (!dcache_stall && !Dtlb_stall) : 1'b1 );
+
+  assign MEM_tag_value =
+      MEM_jlx    ? (MEM_pc + 32'd4) :
+      MEM_is_load ? MEM_data_mem :
+                    MEM_alu_out;     // <-- key change
+
+
+  // WB stage produces final value (same as ROB writeback)
+  assign WB_tag_we    = (WB_we | WB_jlx);
+  assign WB_tag_value = WB_jlx ? (WB_pc + 32'd4) : WB_data_mem;
+
   // =======================
-  // Hazard Unit
+  // Hazard Unit (UPDATED Option B)
   // =======================
   Hazard_unit #(
     .XLEN     (XLEN),
-    .ADDR_SIZE(ADDR_SIZE)
+    .ADDR_SIZE(ADDR_SIZE),
+    .ROB_DEPTH(ROB_DEPTH),
+    .TAG_W    (TAG_W)
   ) u_Hazard_unit (
     .clk        (clk),
     .rst        (rst),
@@ -455,23 +516,51 @@ module cpu #(
     .WB_we      (WB_we),
     .WB_jlx     (WB_jlx),
 
-    .mul_busy   (mul_busy),
-    .mul_busy_rd(mul_busy_rd),
+    // rename info for tag matches
+    .RN_ra_is_rob (RN_ra_is_rob),
+    .RN_rb_is_rob (RN_rb_is_rob),
+    .RN_ra_tag    (RN_ra_tag),
+    .RN_rb_tag    (RN_rb_tag),
+
+    // producer tags/values
+    .EX_tag_we     (EX_tag_we),
+    .EX_dst_tag    (EX_tag),
+    .EX_tag_value  (EX_tag_value),
+
+    .MEM_tag_we    (MEM_tag_we),
+    .MEM_dst_tag   (MEM_tag),
+    .MEM_tag_value (MEM_tag_value),
+
+    .WB_tag_we     (WB_tag_we),
+    .WB_dst_tag    (WB_tag),
+    .WB_tag_value  (WB_tag_value),
+
+    // mul completion
+    .mul_result_valid (mul_result_valid),
+    .mul_result_tag   (mul_result_tag),
+    .mul_result_value (mul_result),
 
     .stall_D    (stall_D),
     .EX_D_bp    (EX_D_bp),
     .MEM_D_bp   (MEM_D_bp),
-    .WB_D_bp    (WB_D_bp)
+    .WB_D_bp    (WB_D_bp),
+
+    // bypass outputs to regfile
+    .RA_tag_bp_valid (RA_tag_bp_valid),
+    .RA_tag_bp_value (RA_tag_bp_value),
+    .RB_tag_bp_valid (RB_tag_bp_valid),
+    .RB_tag_bp_value (RB_tag_bp_value)
   );
 
+
   // =======================
-  // Rename (UPDATED for combinational outputs + D_fire)
+  // Rename
   // =======================
   rename #(
     .REG_NUM   (REG_NUM),
     .ADDR_SIZE (ADDR_SIZE),
     .ROB_DEPTH (ROB_DEPTH),
-    .TAG_W     (4)
+    .TAG_W     (TAG_W)
   ) u_rename (
     .clk          (clk),
     .rst          (rst),
@@ -494,6 +583,8 @@ module cpu #(
     .rob_alloc_tag(RN_alloc_tag),
 
     .rob_full_in  (rob_full),
+    .flush_valid  (EX_taken),
+    .flush_tag    (EX_tag),
 
     .C_valid      (C_valid),
     .C_we         (C_we),
@@ -502,7 +593,7 @@ module cpu #(
   );
 
   // =======================
-  // Regfile with ROB
+  // Regfile with ROB (UPDATED)
   // =======================
   regfile_rob #(
     .XLEN      (XLEN),
@@ -510,7 +601,7 @@ module cpu #(
     .ADDR_SIZE (ADDR_SIZE),
     .VPC_BITS  (VPC_BITS),
     .ROB_DEPTH (ROB_DEPTH),
-    .TAG_W     (4)
+    .TAG_W     (TAG_W)
   ) u_regfile (
     .clk          (clk),
 
@@ -551,6 +642,12 @@ module cpu #(
     .C_rd         (C_rd_arch),
     .C_value      (C_value),
 
+    // NEW: tag-bypass from hazard unit
+    .RA_tag_bp_valid (RA_tag_bp_valid),
+    .RA_tag_bp_value (RA_tag_bp_value),
+    .RB_tag_bp_valid (RB_tag_bp_valid),
+    .RB_tag_bp_value (RB_tag_bp_value),
+
     .D_a          (D_a),
     .D_b          (D_b),
     .D_a2         (D_a2),
@@ -566,7 +663,7 @@ module cpu #(
     .XLEN     (XLEN),
     .PC_BITS  (PC_BITS),
     .VPC_BITS (VPC_BITS),
-    .TAG_W    (4)
+    .TAG_W    (TAG_W)
   ) u_d_to_ex_reg (
     .clk            (clk),
     .rst            (rst),
@@ -626,7 +723,7 @@ module cpu #(
   mul_pipe_single #(
     .XLEN    (XLEN),
     .RD_BITS (ADDR_SIZE),
-    .TAG_W   (4)
+    .TAG_W   (TAG_W)
   ) u_mul_pipe (
     .clk          (clk),
     .rst          (rst),
@@ -683,7 +780,7 @@ module cpu #(
   ex_to_mem_reg #(
     .XLEN    (XLEN),
     .PC_BITS (PC_BITS),
-    .TAG_W   (4)
+    .TAG_W   (TAG_W)
   ) u_ex_to_mem_reg (
     .clk         (clk),
     .rst         (rst),
@@ -825,10 +922,11 @@ module cpu #(
   // =======================
   // MEM → WB pipeline register (tag mux)
   // =======================
+  
   mem_to_wb_reg #(
     .XLEN    (XLEN),
     .PC_BITS (PC_BITS),
-    .TAG_W   (4)
+    .TAG_W   (TAG_W)
   ) u_mem_to_wb_reg (
     .clk          (clk),
     .rst          (rst),
@@ -863,18 +961,22 @@ module cpu #(
   // ============================================================
   wire        WB_wb_valid = WB_we | WB_jlx;
   wire [XLEN-1:0] WB_wb_value = WB_jlx ? (WB_pc + 32'd4) : WB_data_mem;
+  wire       rec_active;
+  wire rob_do_alloc = RN_alloc & D_fire & ~stall_rob; // or just RN_alloc, but belt+suspenders
+
+
 
   rob #(
-    .XLEN(XLEN), .ADDR_SIZE(ADDR_SIZE), .ROB_DEPTH(ROB_DEPTH), .TAG_W(4)
+    .XLEN(XLEN), .ADDR_SIZE(ADDR_SIZE), .ROB_DEPTH(ROB_DEPTH), .TAG_W(TAG_W)
   ) u_rob (
     .clk(clk),
     .rst(rst),
 
-    .alloc_valid   (RN_alloc),
+    .alloc_valid   (rob_do_alloc),
     .alloc_tag     (RN_alloc_tag),
-    .alloc_we      (D_we),
+    .alloc_we      (D_we  & D_fire),
     .alloc_rd_arch (D_rd),
-    .alloc_jlx     (D_jlx),
+    .alloc_jlx     (D_jlx & D_fire),
 
     .wb_valid      (WB_wb_valid),
     .wb_tag        (WB_tag),
@@ -898,7 +1000,8 @@ module cpu #(
     .C_tag         (C_tag),
 
     .rob_full      (rob_full),
-    .rob_empty     (rob_empty)
+    .rob_empty     (rob_empty),
+    .recovering    (rec_active)
   );
 
 endmodule

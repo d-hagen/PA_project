@@ -110,6 +110,9 @@ def assemble_file(in_path: pathlib.Path) -> List[Tuple[int, str]]:
     lines = in_path.read_text().splitlines()
     assembled: List[Tuple[int, str]] = []
 
+    for _ in range(1):
+        assembled.append((NOP_BUBBLE, NOP_BUBBLE_COMMENT))
+
     for i, line in enumerate(lines, start=1):
         try:
             w = assemble_line(line, i)
@@ -120,8 +123,7 @@ def assemble_file(in_path: pathlib.Path) -> List[Tuple[int, str]]:
             sys.exit(1)
 
     # Append 10 NOP bubbles
-    for _ in range(10):
-        assembled.append((NOP_BUBBLE, NOP_BUBBLE_COMMENT))
+    
 
     # Final hard NOP end
     assembled.append((NOP_END, NOP_END_COMMENT))

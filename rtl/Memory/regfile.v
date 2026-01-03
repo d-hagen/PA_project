@@ -30,6 +30,7 @@ module regfile_rob #(
   input  wire                   ROB_rb_ready,
   input  wire [XLEN-1:0]        ROB_rb_value,
 
+  // Existing arch-reg forwarding bits (keep)
   input  wire [2:0]             EX_D_bp,
   input  wire [2:0]             MEM_D_bp,
   input  wire [2:0]             WB_D_bp,
@@ -43,9 +44,16 @@ module regfile_rob #(
   input  wire [VPC_BITS-1:0]    WB_pc,
   input  wire                   WB_jlx,
 
+  // Commit write to architectural regfile
   input  wire                   C_we,
   input  wire [ADDR_SIZE-1:0]   C_rd,
   input  wire [XLEN-1:0]        C_value,
+
+  // NEW: tag-bypass from Hazard_unit (Option B)
+  input  wire                   RA_tag_bp_valid,
+  input  wire [XLEN-1:0]        RA_tag_bp_value,
+  input  wire                   RB_tag_bp_valid,
+  input  wire [XLEN-1:0]        RB_tag_bp_value,
 
   output wire [XLEN-1:0]        D_a,
   output wire [XLEN-1:0]        D_b,
@@ -55,6 +63,9 @@ module regfile_rob #(
   output wire                   RF_stall
 );
 
+  // ------------------------------------
+  // Architectural register file
+  // ------------------------------------
   reg [XLEN-1:0] regs [0:REG_NUM-1];
   integer i;
   initial begin
@@ -71,6 +82,9 @@ module regfile_rob #(
   wire [XLEN-1:0] ra_raw = regs[D_ra];
   wire [XLEN-1:0] rb_raw = regs[D_rb];
 
+  // ------------------------------------
+  // Existing arch forwarding network
+  // ------------------------------------
   wire [XLEN-1:0] EX_fwd_val  = EX_D_bp[0]  ? (EX_pc  + 32'd4) : EX_alu_out;
   wire [XLEN-1:0] MEM_fwd_val = MEM_D_bp[0] ? (MEM_pc + 32'd4) : MEM_data_mem;
   wire [XLEN-1:0] WB_fwd_val  = WB_jlx      ? (WB_pc  + 32'd4) : WB_data_mem;
@@ -87,19 +101,30 @@ module regfile_rob #(
       WB_D_bp[1]  ? WB_fwd_val  :
                     rb_raw;
 
-  wire [XLEN-1:0] ra_final = RN_ra_is_rob ? ROB_ra_value : ra_arch_fwd;
-  wire [XLEN-1:0] rb_final = RN_rb_is_rob ? ROB_rb_value : rb_arch_fwd;
+  // ------------------------------------
+  // NEW: Renamed operand satisfaction
+  // If renamed operand can be satisfied by tag-bypass OR ROB-ready -> do not stall
+  // ------------------------------------
+  wire ra_satisfied = !RN_ra_is_rob ? 1'b1 : (RA_tag_bp_valid | ROB_ra_ready);
+  wire rb_satisfied = !RN_rb_is_rob ? 1'b1 : (RB_tag_bp_valid | ROB_rb_ready);
+
+  wire [XLEN-1:0] ra_rob_or_bp = RA_tag_bp_valid ? RA_tag_bp_value : ROB_ra_value;
+  wire [XLEN-1:0] rb_rob_or_bp = RB_tag_bp_valid ? RB_tag_bp_value : ROB_rb_value;
+
+  wire [XLEN-1:0] ra_final = RN_ra_is_rob ? ra_rob_or_bp : ra_arch_fwd;
+  wire [XLEN-1:0] rb_final = RN_rb_is_rob ? rb_rob_or_bp : rb_arch_fwd;
 
   assign D_a2 = ra_final;
   assign D_b2 = rb_final;
 
+  // Your operand formatting rules
   assign D_a  = (D_brn & !D_jmp) ? D_pc : ra_final;
+
   assign D_b  = (D_str || D_ld || D_addi || D_brn)
                 ? {{(XLEN-11){D_imd[10]}}, D_imd}
                 : rb_final;
 
-  assign RF_stall =
-      (RN_ra_is_rob && !ROB_ra_ready) ||
-      (RN_rb_is_rob && !ROB_rb_ready);
+  // Stall only when a renamed operand has neither bypass nor ROB-ready
+  assign RF_stall = !ra_satisfied || !rb_satisfied;
 
 endmodule
