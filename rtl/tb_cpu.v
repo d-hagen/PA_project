@@ -112,7 +112,7 @@ module cpu_run_tb;
         // ------------------------------------------------------------
         if (cycles <= 450) begin
           $display(
-            "C%0d | F_pc_va=%0d F_inst=0x%08h | F_pc=%0d | sb_hit=%0d -> Dtlb_addr_out=%0d | sb_data=%0d | MEM_ld=%0b store_valid=%0b sb_load_miss=%0b mul_wb_conflict=%0b",
+            "C%0d | F_pc_va=%0d F_inst=0x%08h | F_pc=%0d | sb_hit=%0d -> Dtlb_addr_out=%0d | sb_data=%0d | store_valid=%0b store_request_value=%0d MEM_mem_valid=%0b MEM_data_mem=%0d",
             cycles,
             dut.F_pc_va,
             curr_inst,
@@ -120,10 +120,10 @@ module cpu_run_tb;
             dut.sb_hit,
             dut.Dtlb_addr_out,
             dut.sb_data,
-            dut.MEM_ld,
             dut.store_valid,
-            dut.sb_load_miss,
-            dut.mul_wb_conflict_stall,
+            dut.store_request_value,
+            dut.MEM_mem_valid,
+            dut.MEM_data_mem,
           );
         end
 
@@ -194,7 +194,7 @@ module cpu_run_tb;
                 dut.u_dcache.dirty[i],
                 dut.u_dcache.tag[i]);
 
-      $display("    DATA: %08h %08h %08h %08h",
+      $display("    DATA: %0d %0d %0d %0d",
                 dut.u_dcache.data[i][0],
                 dut.u_dcache.data[i][1],
                 dut.u_dcache.data[i][2],

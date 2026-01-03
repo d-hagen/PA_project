@@ -1,7 +1,7 @@
 module mem_to_wb_reg #(
     parameter XLEN    = 32,
     parameter PC_BITS = 32,
-    parameter TAG_W   = 4   // NEW: ROB tag width
+    parameter TAG_W   = 4
 )(
     input  wire                 clk,
     input  wire                 rst,
@@ -13,18 +13,21 @@ module mem_to_wb_reg #(
     input  wire [XLEN-1:0]      MEM_pc,
     input  wire                 MEM_jlx,
 
-    // NEW: ROB tag for this MEM-stage instruction
+    // NEW: load-valid from MEM stage
+    input  wire                 MEM_ld_valid,
+
+    // ROB tag
     input  wire [TAG_W-1:0]     MEM_tag,
 
-    // From Store Buffer forwarding
+    // Store Buffer forwarding
     input  wire                 sb_hit,
     input  wire [XLEN-1:0]      sb_data,
 
-    // ---- MUL completion inputs (from M5) ----
+    // MUL completion inputs
     input  wire                 mul_done,
     input  wire [XLEN-1:0]      mul_result,
     input  wire [4:0]           mul_rd,
-    input  wire [TAG_W-1:0]     mul_tag,     // NEW: ROB tag of the completed MUL
+    input  wire [TAG_W-1:0]     mul_tag,
 
     // WB stage outputs
     output wire [XLEN-1:0]      WB_data_mem,
@@ -33,7 +36,10 @@ module mem_to_wb_reg #(
     output wire [XLEN-1:0]      WB_pc,
     output wire                 WB_jlx,
 
-    // NEW: ROB tag at WB (must match WB_data_mem/WB_we producer)
+    // NEW: flopped load-valid to WB
+    output wire                 WB_ld_valid,
+
+    // ROB tag at WB
     output wire [TAG_W-1:0]     WB_tag
 );
 
@@ -43,6 +49,7 @@ module mem_to_wb_reg #(
     reg [XLEN-1:0]      wb_pc_r;
     reg                 wb_jlx_r;
     reg [TAG_W-1:0]     wb_tag_r;
+    reg                 wb_ld_valid_r;
 
     always @(posedge clk) begin
         if (rst) begin
@@ -52,9 +59,10 @@ module mem_to_wb_reg #(
             wb_pc_r       <= {PC_BITS{1'b0}};
             wb_jlx_r      <= 1'b0;
             wb_tag_r      <= {TAG_W{1'b0}};
+            wb_ld_valid_r <= 1'b0;
         end else begin
             if (mul_done) begin
-                // MUL overrides MEM->WB this cycle
+                // MUL overrides MEM->WB
                 wb_data_mem_r <= mul_result;
                 wb_rd_r       <= mul_rd;
                 wb_we_r       <= 1'b1;
@@ -62,7 +70,10 @@ module mem_to_wb_reg #(
                 wb_pc_r       <= {PC_BITS{1'b0}};
                 wb_jlx_r      <= 1'b0;
 
-                wb_tag_r      <= mul_tag;     // IMPORTANT
+                wb_tag_r      <= mul_tag;
+
+                // MUL is NOT a load
+                wb_ld_valid_r <= 1'b0;
             end else begin
                 // Normal MEM->WB
                 wb_data_mem_r <= sb_hit ? sb_data : MEM_data_mem;
@@ -71,7 +82,8 @@ module mem_to_wb_reg #(
                 wb_pc_r       <= MEM_pc;
                 wb_jlx_r      <= MEM_jlx;
 
-                wb_tag_r      <= MEM_tag;     // IMPORTANT
+                wb_tag_r      <= MEM_tag;
+                wb_ld_valid_r <= MEM_ld_valid;
             end
         end
     end
@@ -82,5 +94,6 @@ module mem_to_wb_reg #(
     assign WB_pc       = wb_pc_r;
     assign WB_jlx      = wb_jlx_r;
     assign WB_tag      = wb_tag_r;
+    assign WB_ld_valid = wb_ld_valid_r;
 
 endmodule

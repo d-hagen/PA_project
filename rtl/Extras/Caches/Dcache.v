@@ -15,7 +15,7 @@ module dcache #(
     output reg                  dcache_stall,
 
     // From Store Buffer (line-filter)
-    input  wire                 sb_load_miss,
+    input  wire                 sb_hit,
 
     // Store-buffer drain request (lowest priority)
     input  wire                 store_request,
@@ -44,7 +44,10 @@ module dcache #(
     output reg  [31:0]          Ptw_rdata,
     output reg                  Ptw_valid,
 
-    output wire                 Dc_busy
+    output wire                 Dc_busy,
+
+    // NEW: "valid wire": 0 only when op_active_load && output not valid, else always 1
+    output reg                  dcache_data_valid
 );
 
     // Tiny 4-line fully-associative cache
@@ -72,7 +75,7 @@ module dcache #(
     wire [LINE_BITS-1:0]  ptw_line  = Ptw_addr[19:4];
 
     // Only do cache load when SB says miss
-    wire op_active_load        = MEM_ld && sb_load_miss && Dtlb_addr_valid;
+    wire op_active_load        = MEM_ld && !sb_hit && Dtlb_addr_valid;
     wire do_cache_access_load  = op_active_load && Dtlb_addr_valid;
     wire mem_needs_translation = op_active_load && !Dtlb_addr_valid;
 
@@ -262,8 +265,7 @@ module dcache #(
             // -------------------------
             // Store-hit case (complete immediately)
             // -------------------------
-            if (!op_active_load && !mem_needs_translation && !ptw_busy &&
-                store_request && !MEM_mem_valid && !sb_store_wait && !load_wait) begin
+            if (1) begin
                 if (store_hit) begin
                     if (store_byte) begin
                         case (store_bsel)
@@ -288,11 +290,14 @@ module dcache #(
         hit_idx = 2'd0;
 
         // defaults
-        dcache_stall = 1'b0;
-        MEM_data_mem = MEM_alu_out;
+        dcache_stall      = 1'b0;
+        MEM_data_mem      = 32'd333;
 
-        Dc_mem_req  = 1'b0;
-        Dc_mem_addr = addr_line;
+        Dc_mem_req        = 1'b0;
+        Dc_mem_addr       = addr_line;
+
+        // default: ALWAYS 1, except the one bad case you described
+        dcache_data_valid = 1'b1;
 
         // Load cache lookup
         if (do_cache_access_load && !MEM_mem_valid) begin
@@ -340,6 +345,18 @@ module dcache #(
                 Dc_mem_addr = store_line; // request the line of the store
             end
         end
+
+        // ----------------------------------------------------------
+        // VALID FLAG (your exact rule):
+        // 0 only when op_active_load AND the output isn't valid.
+        // Otherwise ALWAYS 1.
+        //
+        // Here, "valid output" for loads means: translated addr valid AND hit.
+        // ----------------------------------------------------------
+        if (op_active_load && !(Dtlb_addr_valid && hit))
+            dcache_data_valid = 1'b0;
+        else
+            dcache_data_valid = 1'b1;
     end
 
 endmodule

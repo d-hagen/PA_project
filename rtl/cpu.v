@@ -159,6 +159,8 @@ module cpu #(
   wire [XLEN-1:0]    WB_data_mem;
   wire [4:0]         WB_rd;
   wire               WB_we;
+  wire               dcache_data_valid;
+
 
   // =======================
   // Store Buffer <-> D$ wires
@@ -249,6 +251,7 @@ module cpu #(
   // ============================================================
   wire stall_rob = rob_full | RF_stall;
 
+
   wire stall_allD = stall_D
                   | dcache_stall
                   | Dtlb_stall
@@ -261,6 +264,9 @@ module cpu #(
 
   // Decode accept: only when D truly advances
   wire D_fire = (~stall_allD) & (~EX_taken) ;
+
+    wire WB_ld_valid;
+
 
   // ============================================================
   // PC Register
@@ -476,9 +482,10 @@ module cpu #(
       ( MEM_is_load ? (!dcache_stall && !Dtlb_stall) : 1'b1 );
 
   assign MEM_tag_value =
-      MEM_jlx    ? (MEM_pc + 32'd4) :
-      MEM_is_load ? MEM_data_mem :
-                    MEM_alu_out;     // <-- key change
+    MEM_jlx ? (MEM_pc + 32'd4) :
+    MEM_is_load ? (sb_hit ? sb_data : MEM_data_mem) :
+    MEM_alu_out;
+
 
 
   // WB stage produces final value (same as ROB writeback)
@@ -870,7 +877,7 @@ module cpu #(
     .MEM_data_mem   (MEM_data_mem),
     .dcache_stall   (dcache_stall),
 
-    .sb_load_miss    (sb_load_miss),
+    .sb_hit    (sb_hit),
     .store_request   (store_request),
     .store_request_address (store_request_address),
     .store_request_value (store_request_value),
@@ -891,7 +898,10 @@ module cpu #(
     .Ptw_req        (Ptw_mem_req),
     .Ptw_addr       (Ptw_mem_addr),
     .Ptw_rdata      (Ptw_mem_rdata),
-    .Ptw_valid      (Ptw_mem_valid)
+    .Ptw_valid      (Ptw_mem_valid),
+
+    .dcache_data_valid (dcache_data_valid)
+
   );
 
   // =======================
@@ -931,13 +941,15 @@ module cpu #(
     .clk          (clk),
     .rst          (rst),
 
-    .MEM_data_mem (MEM_data_mem),
+    .MEM_data_mem (MEM_ld ? MEM_data_mem : MEM_alu_out),
     .MEM_rd       (MEM_rd),
     .MEM_we       (MEM_we),
     .MEM_pc       (MEM_pc),
     .MEM_jlx      (MEM_jlx),
 
     .MEM_tag      (MEM_tag),
+
+    .MEM_ld_valid (dcache_data_valid),
 
     .sb_hit       (sb_hit),
     .sb_data      (sb_data),
@@ -953,13 +965,16 @@ module cpu #(
     .WB_pc        (WB_pc),
     .WB_jlx       (WB_jlx),
 
-    .WB_tag       (WB_tag)
+    .WB_tag       (WB_tag),
+    .WB_ld_valid (WB_ld_valid)
+
+
   );
 
   // ============================================================
   // ROB instance
   // ============================================================
-  wire        WB_wb_valid = WB_we | WB_jlx;
+  wire        WB_wb_valid = (WB_we | WB_jlx ) && WB_ld_valid;
   wire [XLEN-1:0] WB_wb_value = WB_jlx ? (WB_pc + 32'd4) : WB_data_mem;
   wire       rec_active;
   wire rob_do_alloc = RN_alloc & D_fire & ~stall_rob; // or just RN_alloc, but belt+suspenders
