@@ -110,20 +110,20 @@ module cpu_run_tb;
         // ------------------------------------------------------------
         // Trace (first N cycles)
         // ------------------------------------------------------------
-        if (cycles <= 450) begin
+        if (cycles <= 80) begin
           $display(
-            "C%0d | F_pc_va=%0d F_inst=0x%08h | F_pc=%0d | sb_hit=%0d -> Dtlb_addr_out=%0d | sb_data=%0d | store_valid=%0b store_request_value=%0d MEM_mem_valid=%0b MEM_data_mem=%0d",
+            "C%0d | F_pc_va=%0d F_inst=0x%08h | D_tag=%0d | redir_valid=%0d -> redir_pc=%0d | EXC_we=%0d | EX_exc=%0b D_exc=%0d EX_tag=%0d WB_pc=%0d",
             cycles,
             dut.F_pc_va,
             curr_inst,
-            dut.F_pc,
-            dut.sb_hit,
-            dut.Dtlb_addr_out,
-            dut.sb_data,
-            dut.store_valid,
-            dut.store_request_value,
-            dut.MEM_mem_valid,
-            dut.MEM_data_mem,
+            dut.D_tag,
+            dut.redir_valid,
+            dut.redir_pc,
+            dut.EXC_we,
+            dut.EX_exc,
+            dut.D_exc,
+            dut.EX_tag,
+            dut.WB_pc,
           );
         end
 

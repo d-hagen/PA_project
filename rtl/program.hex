@@ -1,15 +1,14 @@
 20000000    // [step 0] NOP (addi r0 r0 r0 0)
-2063180a    // [step 4] addi r3  r3  r3  10     # r 3= 2
-20421000    // [step 8] addi r2  r2  r2  0
-00000800    // [step 12] add  r0  r0  r1  0     # r1 = 0
-20210801    // [step 16] addi r1  r1  r1  1     #
-20842001    // [step 20] addi r4  r4  r4  1      # r4 + 1
-342317f8    // [step 24] blt  r1  r3  r1  -8   #
-20421001    // [step 28] addi r2  r2  r2  1
-34431008    // [step 32] blt  r2  r3  r0  8     #
-34608022    // [step 36] JLx  r3 r0  r0  34
-34000fe4    // [step 40] beq  r0  r0  r0  -28     #PC
-00000000    // [step 44] NOP (end of program)
+20200801    // [step 4] addi r1 r0 r1 1
+20401002    // [step 8] addi r2 r0 r2 2
+20601803    // [step 12] addi r3 r0 r3 3
+fc000000    // [step 16] iret r0 r0 r0 0
+20802004    // [step 20] addi r4 r0 r4 4
+20a02805    // [step 24] addi r5 r0 r5 5
+fc000000    // [step 28] iret r0 r0 r0 0
+20c03006    // [step 32] addi r6 r0 r6 6
+20e03807    // [step 36] addi r7 r0 r7 7
+00000000    // [step 40] NOP (end of program)
 @2400
 0000A001
 @2800
@@ -45,3 +44,7 @@
 0001D001
 0001E001
 0001F001
+@3E8
+fc000000    // [step 16] iret r0 r0 r0 0
+0x2000500A
+

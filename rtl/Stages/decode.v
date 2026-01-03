@@ -1,6 +1,12 @@
-module decode #(parameter XLEN=32)(
+`timescale 1ns/1ps
+
+module decode #(
+  parameter XLEN = 32
+)(
   input  wire              clk,
+  input  wire              admin,     // NEW: privilege bit
   input  wire [XLEN-1:0]   D_inst,
+
   output wire [5:0]        D_opc,
   output wire [4:0]        D_ra,
   output wire [4:0]        D_rb,
@@ -16,8 +22,11 @@ module decode #(parameter XLEN=32)(
   output wire              D_brn,
   output wire              D_jmp,
   output wire              D_jlx,
+  output wire              D_iret,   // separate iret opcode
   output wire              D_addi,
-  output wire              D_mul
+  output wire              D_mul,
+
+  output wire              D_exc     // NEW: decode-time exception (illegal iret)
 );
 
   assign D_opc    = D_inst[31:26];
@@ -44,6 +53,9 @@ module decode #(parameter XLEN=32)(
   localparam OPC_CTRL  = 6'b001101;
   localparam OPC_MUL   = 6'b001110;
 
+  // IRET opcode
+  localparam OPC_IRET  = 6'b111111;
+
   localparam RD_JMP    = 4'b0000;
   localparam RD_BEQ    = 5'b00001;
   localparam RD_BLT    = 5'b00010;
@@ -56,21 +68,32 @@ module decode #(parameter XLEN=32)(
   wire is_bgt  = is_ctrl && (D_rd == RD_BGT);
   wire is_jlx  = is_jmp && D_rd[4];
 
+  wire is_iret = (D_opc == OPC_IRET);
+
+  // memory
   assign D_ld   = (D_opc[4:0] == OPC_LOAD);
   assign D_str  = (D_opc[4:0] == OPC_STORE);
   assign D_byt  =  D_opc[5];
+
+  // control
   assign D_jmp  = is_jmp;
   assign D_jlx  = is_jlx;
+  assign D_iret = is_iret;
 
   assign D_mul  = (D_opc == OPC_MUL);
 
-  // write-enable: normal ALU ops, loads, and MUL (MUL writes a reg)
+  // write-enable: normal ALU ops, loads, MUL (iret does not write)
   assign D_we   = ((D_opc <= OPC_GT) || D_ld || D_mul);
 
+  // D_brn true for CTRL-family only (branches/jmp/jlx), NOT iret
   assign D_brn  = is_ctrl;
+
   assign D_addi = (D_opc == OPC_ADDI);
 
-  // IMPORTANT: MUL is NOT an ALU op anymore
+  // NEW: illegal iret in user mode
+  assign D_exc  = is_iret && !admin;
+
+  // ALU op decode
   assign D_alu_op =
          (D_opc == OPC_ADD)                 ? 4'b0000 :
          (D_opc == OPC_SUB)                 ? 4'b0001 :

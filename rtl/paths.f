@@ -32,6 +32,8 @@ Extras/Hazard_unit.v
 Extras/Branch_Predictor.v
 Extras/storeBuffer.v
 Extras/rename.v
+Extras/exceptionHandler.v
+
 
 
 

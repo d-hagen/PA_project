@@ -1,32 +1,42 @@
 `timescale 1ns/1ps
-// `default_nettype none
 
 module pc #(
-    parameter integer PCLEN = 32,
-    parameter [PCLEN-1:0] RESET_PC = {PCLEN{1'b0}}
+  parameter integer PCLEN = 32,
+  parameter [PCLEN-1:0] RESET_PC = {PCLEN{1'b0}}
 )(
-    input  wire                 clk,
-    input  wire                 rst,         // async reset, active high
-    input  wire                 EX_taken,    // branch/jump taken
-    input  wire [PCLEN-1:0]     EX_alt_pc,   // alternate PC when taken
+  input  wire                clk,
+  input  wire                rst,
 
-    input                           stall_D,
+  // NEW: highest-priority redirect (exception vector or iret target)
+  input  wire                redir_valid,
+  input  wire [PCLEN-1:0]    redir_pc,
 
-    input    wire [PCLEN-1:0]      F_BP_target_pc, 
-    output reg    [PCLEN-1:0]      F_pc_va         // current/fetch PC
+  // existing branch redirect
+  input  wire                EX_taken,
+  input  wire [PCLEN-1:0]    EX_alt_pc,
+
+  // predictor / sequential next
+  input  wire [PCLEN-1:0]    F_BP_target_pc,
+
+  // global stall
+  input  wire                stall_D,
+
+  output reg  [PCLEN-1:0]    F_pc_va
 );
 
-    always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            F_pc_va <= RESET_PC;
-        end else if (EX_taken) begin
-            F_pc_va <= EX_alt_pc;
-        end else if (stall_D) begin
-            F_pc_va <= F_pc_va;   // hold
-        end else begin
-            F_pc_va <= F_BP_target_pc;     // sequential
-        end
+  always @(posedge clk) begin
+    if (rst) begin
+      F_pc_va <= RESET_PC;
+    end else if (!stall_D) begin
+      // Priority: explicit redirect > branch redirect > predictor
+      if (redir_valid) begin
+        F_pc_va <= redir_pc;
+      end else if (EX_taken) begin
+        F_pc_va <= EX_alt_pc;
+      end else begin
+        F_pc_va <= F_BP_target_pc;
+      end
     end
-
+  end
 
 endmodule

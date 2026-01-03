@@ -1,13 +1,15 @@
+`timescale 1ns/1ps
+
 module d_to_ex_reg #(
     parameter XLEN    = 32,
     parameter PC_BITS = 20,
     parameter integer VPC_BITS = 32,
-    parameter integer TAG_W    = 4   // NEW: ROB tag width
+    parameter integer TAG_W    = 4
 )(
     input  wire                 clk,
     input  wire                 rst,
 
-    // D stage inputs (Source)
+    // D stage inputs
     input  wire [XLEN-1:0]      D_a,
     input  wire [XLEN-1:0]      D_a2,
     input  wire [XLEN-1:0]      D_b,
@@ -29,7 +31,10 @@ module d_to_ex_reg #(
     // NEW: ROB tag for this instruction in D
     input  wire [TAG_W-1:0]     D_tag,
 
-    // Stall/Flush/Taken Signals
+    // NEW: decode exception (to be handled at EX age)
+    input  wire                 D_exc,
+
+    // Stall/Flush
     input  wire                 stall_D,
     input  wire                 dcache_stall,
     input  wire                 sb_stall,
@@ -37,10 +42,10 @@ module d_to_ex_reg #(
     input  wire                 EX_taken,
 
     // MUL-related stalls
-    input  wire                 mul_wb_conflict_stall, // hold/stall (freeze pipeline)
-    input  wire                 mul_issue_stall,       // bubble into EX to avoid re-issuing same MUL
+    input  wire                 mul_wb_conflict_stall,
+    input  wire                 mul_issue_stall,
 
-    // EX stage outputs (Destination)
+    // EX stage outputs
     output wire [XLEN-1:0]      EX_a,
     output wire [XLEN-1:0]      EX_a2,
     output wire [XLEN-1:0]      EX_b,
@@ -59,7 +64,10 @@ module d_to_ex_reg #(
     output wire                 EX_jlx,
 
     // NEW: forwarded ROB tag into EX
-    output wire [TAG_W-1:0]     EX_tag
+    output wire [TAG_W-1:0]     EX_tag,
+
+    // NEW: exception at EX age (flopped from D)
+    output wire                 EX_exc
 );
 
     reg [XLEN-1:0]      ex_a_r, ex_a2_r, ex_b_r, ex_b2_r;
@@ -72,11 +80,13 @@ module d_to_ex_reg #(
     reg [VPC_BITS-1:0]  ex_pc_r;
     reg                 ex_jlx_r;
 
-    // NEW
     reg [TAG_W-1:0]     ex_tag_r;
 
+    // NEW
+    reg                 ex_exc_r;
+
     always @(posedge clk) begin
-        // Bubble conditions: reset, generic decode stall/flush, branch flush
+        // Bubble on reset or redirect/flush
         if (rst || EX_taken) begin
             ex_a_r            <= {XLEN{1'b0}};
             ex_a2_r           <= {XLEN{1'b0}};
@@ -96,8 +106,9 @@ module d_to_ex_reg #(
             ex_jlx_r          <= 1'b0;
 
             ex_tag_r          <= {TAG_W{1'b0}};
+            ex_exc_r          <= 1'b0;
         end
-        // Normal latch only when backend isn't stalling and no 1-cycle WB-conflict freeze
+        // Latch when D advances
         else if (!stall_D) begin
             ex_a_r            <= D_a;
             ex_a2_r           <= D_a2;
@@ -117,8 +128,9 @@ module d_to_ex_reg #(
             ex_jlx_r          <= D_jlx;
 
             ex_tag_r          <= D_tag;
+            ex_exc_r          <= D_exc;
         end
-        // else: hold current EX regs (stall/freeze)
+        // else: hold regs
     end
 
     assign EX_a            = ex_a_r;
@@ -139,5 +151,6 @@ module d_to_ex_reg #(
     assign EX_jlx          = ex_jlx_r;
 
     assign EX_tag          = ex_tag_r;
+    assign EX_exc          = ex_exc_r;
 
 endmodule

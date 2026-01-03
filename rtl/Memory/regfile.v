@@ -18,6 +18,7 @@ module regfile_rob #(
   input  wire                   D_str,
   input  wire                   D_brn,
   input  wire                   D_jmp,
+  input  wire                   D_iret,   // NEW
   input  wire                   D_addi,
 
   input  wire                   RN_ra_is_rob,
@@ -30,7 +31,6 @@ module regfile_rob #(
   input  wire                   ROB_rb_ready,
   input  wire [XLEN-1:0]        ROB_rb_value,
 
-  // Existing arch-reg forwarding bits (keep)
   input  wire [2:0]             EX_D_bp,
   input  wire [2:0]             MEM_D_bp,
   input  wire [2:0]             WB_D_bp,
@@ -49,11 +49,20 @@ module regfile_rob #(
   input  wire [ADDR_SIZE-1:0]   C_rd,
   input  wire [XLEN-1:0]        C_value,
 
-  // NEW: tag-bypass from Hazard_unit (Option B)
+  // Tag-bypass from Hazard_unit
   input  wire                   RA_tag_bp_valid,
   input  wire [XLEN-1:0]        RA_tag_bp_value,
   input  wire                   RB_tag_bp_valid,
   input  wire [XLEN-1:0]        RB_tag_bp_value,
+
+  // Exception commit inputs
+  input  wire                   EXC_we,
+  input  wire [XLEN-1:0]        EXC_pc,
+  input  wire [3:0]             EXC_type,
+
+  // Exception registers
+  output wire [XLEN-1:0]        rm1,
+  output wire [31:0]            rm2,
 
   output wire [XLEN-1:0]        D_a,
   output wire [XLEN-1:0]        D_b,
@@ -73,17 +82,32 @@ module regfile_rob #(
       regs[i] = {XLEN{1'b0}};
   end
 
+  // ------------------------------------
+  // Exception registers (rm1 / rm2)
+  // ------------------------------------
+  reg [XLEN-1:0] rm1_r;
+  reg [31:0]     rm2_r;
+
+  assign rm1 = rm1_r;
+  assign rm2 = rm2_r;
+
   always @(posedge clk) begin
     if (C_we && (C_rd != {ADDR_SIZE{1'b0}}))
       regs[C_rd] <= C_value;
+
     regs[0] <= {XLEN{1'b0}};
+
+    if (EXC_we) begin
+      rm1_r <= EXC_pc;
+      rm2_r <= {28'd0, EXC_type};
+    end
   end
 
   wire [XLEN-1:0] ra_raw = regs[D_ra];
   wire [XLEN-1:0] rb_raw = regs[D_rb];
 
   // ------------------------------------
-  // Existing arch forwarding network
+  // Forwarding network
   // ------------------------------------
   wire [XLEN-1:0] EX_fwd_val  = EX_D_bp[0]  ? (EX_pc  + 32'd4) : EX_alu_out;
   wire [XLEN-1:0] MEM_fwd_val = MEM_D_bp[0] ? (MEM_pc + 32'd4) : MEM_data_mem;
@@ -102,8 +126,7 @@ module regfile_rob #(
                     rb_raw;
 
   // ------------------------------------
-  // NEW: Renamed operand satisfaction
-  // If renamed operand can be satisfied by tag-bypass OR ROB-ready -> do not stall
+  // Rename / ROB resolution
   // ------------------------------------
   wire ra_satisfied = !RN_ra_is_rob ? 1'b1 : (RA_tag_bp_valid | ROB_ra_ready);
   wire rb_satisfied = !RN_rb_is_rob ? 1'b1 : (RB_tag_bp_valid | ROB_rb_ready);
@@ -117,14 +140,18 @@ module regfile_rob #(
   assign D_a2 = ra_final;
   assign D_b2 = rb_final;
 
-  // Your operand formatting rules
-  assign D_a  = (D_brn & !D_jmp) ? D_pc : ra_final;
+  // ------------------------------------
+  // FINAL OPERAND SELECTION
+  // ------------------------------------
+  // iret uses rm1 (exception return PC = "r33")
+  assign D_a =   (D_brn & !D_jmp)    ? D_pc :
+                            ra_final;
 
-  assign D_b  = (D_str || D_ld || D_addi || D_brn)
-                ? {{(XLEN-11){D_imd[10]}}, D_imd}
-                : rb_final;
+  assign D_b =
+      (D_str || D_ld || D_addi || D_brn)
+        ? {{(XLEN-11){D_imd[10]}}, D_imd}
+        : rb_final;
 
-  // Stall only when a renamed operand has neither bypass nor ROB-ready
   assign RF_stall = !ra_satisfied || !rb_satisfied;
 
 endmodule

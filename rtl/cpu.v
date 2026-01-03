@@ -66,10 +66,14 @@ module cpu #(
   wire [VPC_BITS-1:0] MEM_pc;
   wire [VPC_BITS-1:0] WB_pc;
 
+  wire D_exc;
   wire D_jlx;
   wire EX_jlx;
   wire MEM_jlx;
   wire WB_jlx;
+
+  // NEW: iret decoded signal (separate opcode)
+  wire D_iret;
 
   wire               D_BP_taken;
   wire [VPC_BITS-1:0] D_BP_target_pc;
@@ -161,7 +165,6 @@ module cpu #(
   wire               WB_we;
   wire               dcache_data_valid;
 
-
   // =======================
   // Store Buffer <-> D$ wires
   // =======================
@@ -219,12 +222,12 @@ module cpu #(
   wire [TAG_W-1:0]      MEM_tag;
   wire [TAG_W-1:0]      WB_tag;
 
-  // MUL tag at completion (you already have these in your cpu)
+  // MUL tag at completion
   wire [TAG_W-1:0]      mul_result_tag;
   wire [4:0]            mul_rd_done;
 
   // ============================================================
-  // NEW: Tag-bypass wires from Hazard_unit -> regfile
+  // Tag-bypass wires from Hazard_unit -> regfile
   // ============================================================
   wire                  RA_tag_bp_valid;
   wire [XLEN-1:0]       RA_tag_bp_value;
@@ -232,25 +235,75 @@ module cpu #(
   wire [XLEN-1:0]       RB_tag_bp_value;
 
   // ============================================================
-  // NEW: Producer tag/value wires (EX/MEM/WB)
+  // Producer tag/value wires (EX/MEM/WB)
   // ============================================================
-  // EX produces values for non-load, non-mul instructions that write rd/jlx
   wire EX_tag_we;
   wire [XLEN-1:0] EX_tag_value;
 
-  // MEM produces values for loads (if your dcache returns MEM_data_mem in MEM stage)
   wire MEM_tag_we;
   wire [XLEN-1:0] MEM_tag_value;
 
-  // WB produces final values (same as ROB writeback)
   wire WB_tag_we;
   wire [XLEN-1:0] WB_tag_value;
 
   // ============================================================
+  // Exception handler / unified flush wires (branch + exceptions)
+  // ============================================================
+  wire                  eh_flush_valid;
+  wire [TAG_W-1:0]      eh_flush_tag;
+
+  wire                  exc_set_valid;
+  wire [TAG_W-1:0]      exc_set_tag;
+  wire [XLEN-1:0]       exc_set_pc;
+
+  wire                  F_flush, D_flush, EX_flush, MEM_flush, WB_flush;
+
+  // ============================================================
+  // ROB exception outputs + stall + IRET commit
+  // ============================================================
+  wire                  rob_stall;
+
+  wire                  EXC_we;
+  wire [XLEN-1:0]       EXC_pc;
+  wire [3:0]            EXC_type;
+  wire [TAG_W-1:0]      EXC_tag;
+
+  wire                  IRET_we;
+  wire [TAG_W-1:0]      IRET_tag;
+
+  // regfile exception registers (rm1/rm2)
+  wire [XLEN-1:0]       rm1;
+  wire [31:0]           rm2;
+
+  // ============================================================
+  // Global admin (CPU-owned): set on exception commit, clear on iret commit
+  // ============================================================
+  reg admin;
+  always @(posedge clk) begin
+    if (rst) admin <= 1'b0;
+    else if (EXC_we) admin <= 1'b1;
+    else if (IRET_we) admin <= 1'b0;
+  end
+
+  // ============================================================
+  // Unified flush used by rename/ROB/pipeline regs
+  // (iret commit also flushes younger instructions)
+  // ============================================================
+  wire                  unified_flush_valid = eh_flush_valid | IRET_we;
+  wire [TAG_W-1:0]      unified_flush_tag   = IRET_we ? IRET_tag : eh_flush_tag;
+
+  // ============================================================
+  // PC redirect mux:
+  //  - exception commit -> 0x4000
+  //  - iret commit      -> rm1 (r33)
+  // ============================================================
+  wire                  redir_valid = EXC_we | IRET_we;
+  wire [VPC_BITS-1:0]   redir_pc    = EXC_we ? 32'h0000_0FA0 : rm1+4;
+
+  // ============================================================
   // Global stall with ROB/RF
   // ============================================================
-  wire stall_rob = rob_full | RF_stall;
-
+  wire stall_rob = rob_full | RF_stall | rob_stall;
 
   wire stall_allD = stall_D
                   | dcache_stall
@@ -262,14 +315,13 @@ module cpu #(
                   | mul_issue_stall
                   | stall_rob;
 
-  // Decode accept: only when D truly advances
-  wire D_fire = (~stall_allD) & (~EX_taken) ;
+  // Decode accept: only when D truly advances (block on any unified flush)
+  wire D_fire = (~stall_allD) & (~unified_flush_valid);
 
-    wire WB_ld_valid;
-
+  wire WB_ld_valid;
 
   // ============================================================
-  // PC Register
+  // PC Register (UPDATED: redirect interface)
   // ============================================================
   pc #(
     .PCLEN   (VPC_BITS),
@@ -277,10 +329,16 @@ module cpu #(
   ) u_pc (
     .clk            (clk),
     .rst            (rst),
+
+    .redir_valid    (redir_valid),
+    .redir_pc       (redir_pc),
+
     .EX_taken       (EX_taken),
     .EX_alt_pc      (EX_alu_out),
+
     .F_BP_target_pc (F_BP_target_pc),
     .stall_D        (stall_allD),
+
     .F_pc_va        (F_pc_va)
   );
 
@@ -424,7 +482,8 @@ module cpu #(
     .Itlb_stall     (Itlb_stall),
     .Dtlb_stall     (Dtlb_stall),
 
-    .EX_taken       (EX_taken),
+    // unified flush squash
+    .EX_taken       (unified_flush_valid),
 
     .mul_wb_conflict_stall (mul_wb_conflict_stall),
     .mul_issue_stall       (mul_issue_stall),
@@ -436,12 +495,13 @@ module cpu #(
   );
 
   // =======================
-  // Decoder
+  // Decoder (UPDATED: separate D_iret output)
   // =======================
   decode #(
     .XLEN(XLEN)
   ) u_decode (
     .clk      (clk),
+    .admin    (admin),
     .D_inst   (D_inst),
     .D_opc    (D_opc),
     .D_ra     (D_ra),
@@ -455,28 +515,22 @@ module cpu #(
     .D_byt    (D_byt),
     .D_jmp    (D_jmp),
     .D_jlx    (D_jlx),
+    .D_iret   (D_iret),
     .D_brn    (D_brn),
     .D_addi   (D_addi),
-    .D_mul    (D_mul)
+    .D_mul    (D_mul),
+    .D_exc    (D_exc)
   );
 
   // ============================================================
-  // NEW: Define producer tag/value signals
+  // Define producer tag/value signals
   // ============================================================
-  // EX stage produces a value only when:
-  // - it writes a dest (EX_we or EX_jlx)
-  // - and it's not a load (value not ready yet)
-  // - and it's not mul (mul result comes later out-of-band)
   assign EX_tag_we    = (EX_we | EX_jlx) && !EX_ld && !EX_mul;
   assign EX_tag_value = EX_jlx ? (EX_pc + 32'd4) : EX_alu_out;
 
-  // MEM stage produces value for loads (when MEM_data_mem is valid in MEM stage)
-  wire MEM_writes = (MEM_we | MEM_jlx);
+  wire MEM_writes  = (MEM_we | MEM_jlx);
   wire MEM_is_load = MEM_ld;
 
-  // MEM can produce either:
-  //  - load data (when not stalled)
-  //  - ALU/JLX result (always available from pipeline reg)
   assign MEM_tag_we =
       MEM_writes &&
       ( MEM_is_load ? (!dcache_stall && !Dtlb_stall) : 1'b1 );
@@ -486,14 +540,11 @@ module cpu #(
     MEM_is_load ? (sb_hit ? sb_data : MEM_data_mem) :
     MEM_alu_out;
 
-
-
-  // WB stage produces final value (same as ROB writeback)
   assign WB_tag_we    = (WB_we | WB_jlx);
   assign WB_tag_value = WB_jlx ? (WB_pc + 32'd4) : WB_data_mem;
 
   // =======================
-  // Hazard Unit (UPDATED Option B)
+  // Hazard Unit (Option B)
   // =======================
   Hazard_unit #(
     .XLEN     (XLEN),
@@ -523,13 +574,11 @@ module cpu #(
     .WB_we      (WB_we),
     .WB_jlx     (WB_jlx),
 
-    // rename info for tag matches
     .RN_ra_is_rob (RN_ra_is_rob),
     .RN_rb_is_rob (RN_rb_is_rob),
     .RN_ra_tag    (RN_ra_tag),
     .RN_rb_tag    (RN_rb_tag),
 
-    // producer tags/values
     .EX_tag_we     (EX_tag_we),
     .EX_dst_tag    (EX_tag),
     .EX_tag_value  (EX_tag_value),
@@ -542,7 +591,6 @@ module cpu #(
     .WB_dst_tag    (WB_tag),
     .WB_tag_value  (WB_tag_value),
 
-    // mul completion
     .mul_result_valid (mul_result_valid),
     .mul_result_tag   (mul_result_tag),
     .mul_result_value (mul_result),
@@ -552,13 +600,44 @@ module cpu #(
     .MEM_D_bp   (MEM_D_bp),
     .WB_D_bp    (WB_D_bp),
 
-    // bypass outputs to regfile
     .RA_tag_bp_valid (RA_tag_bp_valid),
     .RA_tag_bp_value (RA_tag_bp_value),
     .RB_tag_bp_valid (RB_tag_bp_valid),
     .RB_tag_bp_value (RB_tag_bp_value)
   );
 
+  // =======================
+  // Exception handler (exceptions tied off for now)
+  // Branch flush goes through here
+  // =======================
+  wire [TAG_W-1:0] D_exc_tag = RN_alloc_tag;
+
+// Only assert decode-exception when the instruction is actually being allocated
+  wire D_exc_fire = D_exc & rob_do_alloc; 
+  exc_handler #(
+    .XLEN (XLEN),
+    .TAG_W(TAG_W)
+  ) u_exc_handler (
+    .EX_exc  (EX_exc), .EX_tag  (EX_tag),         .EX_pc  (EX_pc),
+    .MEM_exc (1'b0), .MEM_tag (MEM_tag),        .MEM_pc (MEM_pc),
+    .WB_exc  (1'b0), .WB_tag  (WB_tag),         .WB_pc  (WB_pc),
+
+    .EX_taken  (EX_taken),
+    .EX_br_tag (EX_tag),
+
+    .exc_set_valid(exc_set_valid),
+    .exc_set_tag  (exc_set_tag),
+    .exc_set_pc   (exc_set_pc),
+
+    .flush_valid(eh_flush_valid),
+    .flush_tag  (eh_flush_tag),
+
+    .F_flush  (F_flush),
+    .D_flush  (D_flush),
+    .EX_flush (EX_flush),
+    .MEM_flush(MEM_flush),
+    .WB_flush (WB_flush)
+  );
 
   // =======================
   // Rename
@@ -590,8 +669,10 @@ module cpu #(
     .rob_alloc_tag(RN_alloc_tag),
 
     .rob_full_in  (rob_full),
-    .flush_valid  (EX_taken),
-    .flush_tag    (EX_tag),
+
+    // unified flush
+    .flush_valid  (unified_flush_valid),
+    .flush_tag    (unified_flush_tag),
 
     .C_valid      (C_valid),
     .C_we         (C_we),
@@ -600,7 +681,7 @@ module cpu #(
   );
 
   // =======================
-  // Regfile with ROB (UPDATED)
+  // Regfile with ROB (UPDATED: D_iret + rm1/rm2 + EXC capture)
   // =======================
   regfile_rob #(
     .XLEN      (XLEN),
@@ -621,6 +702,7 @@ module cpu #(
     .D_brn        (D_brn),
     .D_jmp        (D_jmp),
     .D_addi       (D_addi),
+    .D_iret       (D_iret),   // NEW
 
     .RN_ra_is_rob (RN_ra_is_rob),
     .RN_rb_is_rob (RN_rb_is_rob),
@@ -649,11 +731,17 @@ module cpu #(
     .C_rd         (C_rd_arch),
     .C_value      (C_value),
 
-    // NEW: tag-bypass from hazard unit
     .RA_tag_bp_valid (RA_tag_bp_valid),
     .RA_tag_bp_value (RA_tag_bp_value),
     .RB_tag_bp_valid (RB_tag_bp_valid),
     .RB_tag_bp_value (RB_tag_bp_value),
+
+    .EXC_we       (EXC_we),
+    .EXC_pc       (EXC_pc),
+    .EXC_type     (EXC_type),
+
+    .rm1          (rm1),
+    .rm2          (rm2),
 
     .D_a          (D_a),
     .D_b          (D_b),
@@ -694,12 +782,15 @@ module cpu #(
     .D_BP_target_pc (D_BP_target_pc),
 
     .D_tag          (D_tag),
+    .D_exc          (D_exc),
 
     .stall_D        (stall_allD),
     .dcache_stall   (dcache_stall),
     .sb_stall       (sb_stall),
     .Dtlb_stall     (Dtlb_stall),
-    .EX_taken       (EX_taken),
+
+    // unified flush squash
+    .EX_taken       (unified_flush_valid),
 
     .mul_wb_conflict_stall (mul_wb_conflict_stall),
     .mul_issue_stall       (mul_issue_stall),
@@ -721,7 +812,8 @@ module cpu #(
     .EX_BP_taken    (EX_BP_taken),
     .EX_BP_target_pc(EX_BP_target_pc),
 
-    .EX_tag         (EX_tag)
+    .EX_tag         (EX_tag),
+    .EX_exc         (EX_exc)
   );
 
   // =======================
@@ -901,7 +993,6 @@ module cpu #(
     .Ptw_valid      (Ptw_mem_valid),
 
     .dcache_data_valid (dcache_data_valid)
-
   );
 
   // =======================
@@ -932,7 +1023,6 @@ module cpu #(
   // =======================
   // MEM → WB pipeline register (tag mux)
   // =======================
-  
   mem_to_wb_reg #(
     .XLEN    (XLEN),
     .PC_BITS (PC_BITS),
@@ -966,20 +1056,18 @@ module cpu #(
     .WB_jlx       (WB_jlx),
 
     .WB_tag       (WB_tag),
-    .WB_ld_valid (WB_ld_valid)
-
-
+    .WB_ld_valid  (WB_ld_valid)
   );
 
   // ============================================================
-  // ROB instance
+  // ROB instance (UPDATED: alloc_iret + IRET_we/tag)
   // ============================================================
-  wire        WB_wb_valid = (WB_we | WB_jlx ) && WB_ld_valid;
+  wire        WB_wb_valid    = (WB_we | WB_jlx) && WB_ld_valid;
   wire [XLEN-1:0] WB_wb_value = WB_jlx ? (WB_pc + 32'd4) : WB_data_mem;
+
   wire       rec_active;
-  wire rob_do_alloc = RN_alloc & D_fire & ~stall_rob; // or just RN_alloc, but belt+suspenders
 
-
+  wire rob_do_alloc = RN_alloc & D_fire & ~stall_rob;
 
   rob #(
     .XLEN(XLEN), .ADDR_SIZE(ADDR_SIZE), .ROB_DEPTH(ROB_DEPTH), .TAG_W(TAG_W)
@@ -992,13 +1080,15 @@ module cpu #(
     .alloc_we      (D_we  & D_fire),
     .alloc_rd_arch (D_rd),
     .alloc_jlx     (D_jlx & D_fire),
+    .alloc_iret    (D_iret & D_fire),   // NEW
 
     .wb_valid      (WB_wb_valid),
     .wb_tag        (WB_tag),
     .wb_value      (WB_wb_value),
 
-    .flush_valid   (EX_taken),
-    .flush_tag     (EX_tag),
+    // unified flush
+    .flush_valid   (unified_flush_valid),
+    .flush_tag     (unified_flush_tag),
 
     .ra_tag        (RN_ra_tag),
     .ra_ready      (ROB_ra_ready),
@@ -1013,6 +1103,24 @@ module cpu #(
     .C_rd_arch     (C_rd_arch),
     .C_value       (C_value),
     .C_tag         (C_tag),
+
+    // exception mark-in (still driven by exc_handler when you enable real exc signals)
+    .exc_set_valid (exc_set_valid),
+    .exc_set_tag   (exc_set_tag),
+    .exc_set_pc    (exc_set_pc),
+
+    // exception commit out
+    .EXC_we        (EXC_we),
+    .EXC_pc        (EXC_pc),
+    .EXC_type      (EXC_type),
+    .EXC_tag       (EXC_tag),
+
+    // iret commit out
+    .IRET_we       (IRET_we),
+    .IRET_tag      (IRET_tag),
+
+    // stall out
+    .rob_stall     (rob_stall),
 
     .rob_full      (rob_full),
     .rob_empty     (rob_empty),

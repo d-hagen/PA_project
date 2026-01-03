@@ -3,6 +3,7 @@ import argparse, sys, re, pathlib
 from typing import Optional, List, Tuple, Dict, Set
 
 # ===================== OPCODES (match decode.v) =====================
+# NOTE: OPCODES["iret"] MUST match your decode.v choice for the iret opcode.
 OPCODES = {
     "add":   0b000000,
     "sub":   0b000001,
@@ -26,6 +27,10 @@ OPCODES = {
     "bgt":   0b001101,
     "jlx":   0b001101,
     "mul":   0b001110,
+
+    # NEW: separate opcode for iret (placeholder = 0b111111)
+    # Change this to whatever you implement in decode.v
+    "iret":  0b111111,
 }
 
 RD_JMP = 0b00000
@@ -74,16 +79,35 @@ def assemble_line(line: str, lineno: int) -> Optional[int]:
     if op_l not in OPCODES:
         raise ValueError(f"Line {lineno}: unknown opcode '{op}'")
 
-    opc = OPCODES[op_l]
+    # Parse fields (even if some ops ignore them, we keep your 5-token format)
     ra  = parse_reg(ra_t)
     rb  = parse_reg(rb_t)
     rd  = parse_reg(rd_t)
     imm = parse_imm(imm_t)
 
+    # CTRL-family encoding uses OPC_CTRL and overloads rd field
     if op_l in CTRL_RD_FOR:
         opc = OPCODES["ctrl"]
         rd  = CTRL_RD_FOR[op_l]
+        word = ((opc & 0x3F) << 26) \
+             | ((ra  & 0x1F) << 21) \
+             | ((rb  & 0x1F) << 16) \
+             | ((rd  & 0x1F) << 11) \
+             | ( imm & 0x7FF)
+        return word
 
+    # NEW: iret is a standalone opcode; we ignore ra/rb/rd/imm (but still encode them as given)
+    if op_l == "iret":
+        opc = OPCODES["iret"]
+        word = ((opc & 0x3F) << 26) \
+             | ((ra  & 0x1F) << 21) \
+             | ((rb  & 0x1F) << 16) \
+             | ((rd  & 0x1F) << 11) \
+             | ( imm & 0x7FF)
+        return word
+
+    # Normal R/R/I encoding
+    opc = OPCODES[op_l]
     word = ((opc & 0x3F) << 26) \
          | ((ra  & 0x1F) << 21) \
          | ((rb  & 0x1F) << 16) \
@@ -104,7 +128,7 @@ def assemble_file(in_path: pathlib.Path) -> List[Tuple[int, str]]:
     Assemble the input .s file with NO instruction cap.
 
     Always appends:
-      - 10 NOP bubbles
+      - 1 NOP bubble (as you had)
       - 1 final NOP_END
     """
     lines = in_path.read_text().splitlines()
@@ -122,12 +146,7 @@ def assemble_file(in_path: pathlib.Path) -> List[Tuple[int, str]]:
             print(f"ERROR line {i}: {e}", file=sys.stderr)
             sys.exit(1)
 
-    # Append 10 NOP bubbles
-    
-
-    # Final hard NOP end
     assembled.append((NOP_END, NOP_END_COMMENT))
-
     return assembled
 
 # =====================================================================

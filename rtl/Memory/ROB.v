@@ -14,6 +14,7 @@ module rob #(
   input  wire                   alloc_we,
   input  wire [ADDR_SIZE-1:0]   alloc_rd_arch,
   input  wire                   alloc_jlx,
+  input  wire                   alloc_iret,   // NEW: tag iret in ROB
 
   input  wire                   wb_valid,
   input  wire [TAG_W-1:0]       wb_tag,
@@ -36,6 +37,28 @@ module rob #(
   output reg  [XLEN-1:0]        C_value,
   output reg  [TAG_W-1:0]       C_tag,
 
+  // --------------------------
+  // EXC: mark + commit outputs
+  // --------------------------
+  input  wire                   exc_set_valid,
+  input  wire [TAG_W-1:0]       exc_set_tag,
+  input  wire [XLEN-1:0]        exc_set_pc,
+
+  output reg                    EXC_we,
+  output reg  [XLEN-1:0]        EXC_pc,
+  output reg  [3:0]             EXC_type,   // type=0 for now
+  output reg  [TAG_W-1:0]       EXC_tag,
+
+  // --------------------------
+  // NEW: iret commit pulse
+  // (CPU uses this to clear admin and redirect PC to rm1)
+  // --------------------------
+  output reg                    IRET_we,
+  output reg  [TAG_W-1:0]       IRET_tag,
+
+  // NEW: stall while exception pending
+  output wire                   rob_stall,
+
   output wire                   rob_full,
   output wire                   rob_empty,
   output wire                   recovering
@@ -48,6 +71,18 @@ module rob #(
   reg                   we    [0:ROB_DEPTH-1];
   reg [ADDR_SIZE-1:0]   rd    [0:ROB_DEPTH-1];
   reg [XLEN-1:0]        value [0:ROB_DEPTH-1];
+
+  // EXC: per-entry exception state
+  reg                   exc_flag [0:ROB_DEPTH-1];
+  reg [XLEN-1:0]        exc_pc    [0:ROB_DEPTH-1];
+
+  // NEW: per-entry iret marker
+  reg                   iret_flag [0:ROB_DEPTH-1];
+
+  // NEW: sticky "exception pending" (stall) state
+  reg                   exc_pending;
+  reg [TAG_W-1:0]       exc_pending_tag;
+  assign rob_stall = exc_pending;
 
   reg [TAG_W-1:0] head;
   reg [TAG_W-1:0] tail;
@@ -79,8 +114,10 @@ module rob #(
   wire                 alloc_we_eff = alloc_we | alloc_jlx;
   wire [ADDR_SIZE-1:0] alloc_rd_eff = alloc_jlx ? 5'd31 : alloc_rd_arch;
 
-  // commit/alloc enables (note: alloc also blocked when full)
-  wire do_alloc  = alloc_valid && !rob_full && !flush_valid;
+  // NEW: block alloc while exception pending
+  wire do_alloc  = alloc_valid && !rob_full && !flush_valid && !rob_stall;
+
+  // Commit when head ready and not flushing
   wire do_commit = head_can_commit && !flush_valid;
 
   // 1-cycle pulse during flush
@@ -102,19 +139,47 @@ module rob #(
       C_value   <= {XLEN{1'b0}};
       C_tag     <= {TAG_W{1'b0}};
 
+      // EXC: defaults
+      EXC_we   <= 1'b0;
+      EXC_pc   <= {XLEN{1'b0}};
+      EXC_type <= 4'd0;
+      EXC_tag  <= {TAG_W{1'b0}};
+
+      // IRET: defaults
+      IRET_we  <= 1'b0;
+      IRET_tag <= {TAG_W{1'b0}};
+
+      // stall state reset
+      exc_pending     <= 1'b0;
+      exc_pending_tag <= {TAG_W{1'b0}};
+
       recovering_r <= 1'b0;
 
       for (i = 0; i < ROB_DEPTH; i = i + 1) begin
-        valid[i] <= 1'b0;
-        ready[i] <= 1'b0;
-        we[i]    <= 1'b0;
-        rd[i]    <= {ADDR_SIZE{1'b0}};
-        value[i] <= {XLEN{1'b0}};
+        valid[i]     <= 1'b0;
+        ready[i]     <= 1'b0;
+        we[i]        <= 1'b0;
+        rd[i]        <= {ADDR_SIZE{1'b0}};
+        value[i]     <= {XLEN{1'b0}};
+        exc_flag[i]  <= 1'b0;
+        exc_pc[i]    <= {XLEN{1'b0}};
+        iret_flag[i] <= 1'b0;
       end
+
     end else begin
       // defaults
       C_valid      <= 1'b0;
       recovering_r <= 1'b0;
+
+      // EXC: pulse outputs default low
+      EXC_we   <= 1'b0;
+      EXC_pc   <= {XLEN{1'b0}};
+      EXC_type <= 4'd0;
+      EXC_tag  <= {TAG_W{1'b0}};
+
+      // IRET: pulse outputs default low
+      IRET_we  <= 1'b0;
+      IRET_tag <= {TAG_W{1'b0}};
 
       // --------------------------
       // WB (mark ready)
@@ -125,50 +190,51 @@ module rob #(
       end
 
       // --------------------------
+      // EXC: mark exception on the entry + raise stall sticky
+      // --------------------------
+      if (exc_set_valid && valid[exc_set_tag]) begin
+        exc_flag[exc_set_tag] <= 1'b1;
+        exc_pc[exc_set_tag]   <= exc_set_pc;
+
+        // once any exception is written, stall until it reaches head or is flushed
+        if (!exc_pending) begin
+          exc_pending     <= 1'b1;
+          exc_pending_tag <= exc_set_tag;
+        end
+      end
+
+      // --------------------------
       // Flush (invalidate younger than flush_tag)
       // --------------------------
       if (flush_valid) begin
         recovering_r <= 1'b1;
 
-        // invalidate (flush_tag+1) .. (tail-1)
         begin : FLUSH_BLOCK
           reg [TAG_W-1:0] idx;
           reg [CNT_W-1:0] new_count;
 
-          // invalidate younger
           idx = inc_tag(flush_tag);
           while (idx != tail) begin
-            valid[idx] <= 1'b0;
-            ready[idx] <= 1'b0;
-            we[idx]    <= 1'b0;
-            rd[idx]    <= {ADDR_SIZE{1'b0}};
-            value[idx] <= {XLEN{1'b0}};
+            valid[idx]     <= 1'b0;
+            ready[idx]     <= 1'b0;
+            we[idx]        <= 1'b0;
+            rd[idx]        <= {ADDR_SIZE{1'b0}};
+            value[idx]     <= {XLEN{1'b0}};
+            exc_flag[idx]  <= 1'b0;
+            exc_pc[idx]    <= {XLEN{1'b0}};
+            iret_flag[idx] <= 1'b0;
+
+            // if we flushed the pending exception entry, clear stall
+            if (exc_pending && (idx == exc_pending_tag))
+              exc_pending <= 1'b0;
+
             idx = inc_tag(idx);
           end
 
-          // move tail to just after branch
           tail <= inc_tag(flush_tag);
 
-          // IMPORTANT:
-          // Do NOT recount using stale valid[] in the same cycle.
-          // Minimal safe approach: recompute count from current count by
-          // clearing everything younger. We can't know how many were younger
-          // without scanning, so simplest safe solution is:
-          // - set count to 0 and rebuild as program runs (functional but pessimistic)
-          //
-          // Better: scan with a temporary shadow "new_count" using *blocking*
-          // reads of current valid[] AND excluding the invalidated range.
-          // We'll do that here.
           new_count = {CNT_W{1'b0}};
           for (i = 0; i < ROB_DEPTH; i = i + 1) begin
-            // Keep entries that are NOT in the younger range.
-            // Younger range is (flush_tag+1 .. tail-1) in circular sense.
-            // We test membership by walking from inc(flush_tag) to tail.
-            // Since Verilog can't easily do that membership test cheaply,
-            // we just conservatively recount ONLY entries that are currently valid
-            // AND are not going to be invalidated by our loop above.
-            // To avoid stale/nonblocking issues, we simply treat any index in that
-            // range as invalid.
             reg in_flush_range;
             reg [TAG_W-1:0] t;
             in_flush_range = 1'b0;
@@ -181,32 +247,69 @@ module rob #(
           end
           count <= new_count;
         end
-      end
-      else begin
+
+      end else begin
         // --------------------------
         // Allocate (new entry)
         // --------------------------
         if (do_alloc) begin
           valid[alloc_tag] <= 1'b1;
-          ready[alloc_tag] <= (alloc_we_eff == 1'b0); // no-write ops are ready immediately
+          // no-write ops are ready immediately; iret also has no WB, so ready immediately
+          ready[alloc_tag] <= ((alloc_we_eff == 1'b0) || alloc_iret);
           we[alloc_tag]    <= alloc_we_eff;
           rd[alloc_tag]    <= alloc_rd_eff;
+
+          // clear exception state on allocate
+          exc_flag[alloc_tag]  <= 1'b0;
+          exc_pc[alloc_tag]    <= {XLEN{1'b0}};
+
+          // NEW: tag iret
+          iret_flag[alloc_tag] <= alloc_iret;
 
           tail <= inc_tag(alloc_tag);
         end
 
         // --------------------------
         // Commit (head)
+        // Priority at head: EXC > IRET > normal commit
         // --------------------------
         if (do_commit) begin
-          C_valid   <= 1'b1;
-          C_we      <= we[head];
-          C_rd_arch <= rd[head];
-          C_value   <= value[head];
-          C_tag     <= head;
+          if (exc_flag[head]) begin
+            // exception commit
+            EXC_we   <= 1'b1;
+            EXC_pc   <= exc_pc[head];
+            EXC_type <= 4'd0;
+            EXC_tag  <= head;
 
-          valid[head] <= 1'b0;
-          ready[head] <= 1'b0;
+            // clear stall when pending exception reaches head
+            if (exc_pending && (exc_pending_tag == head))
+              exc_pending <= 1'b0;
+
+            C_valid <= 1'b0;
+
+          end else if (iret_flag[head]) begin
+            // iret commit pulse (CPU clears admin + redirects PC to rm1)
+            IRET_we  <= 1'b1;
+            IRET_tag <= head;
+
+            // no architectural writeback
+            C_valid <= 1'b0;
+
+          end else begin
+            // normal commit
+            C_valid   <= 1'b1;
+            C_we      <= we[head];
+            C_rd_arch <= rd[head];
+            C_value   <= value[head];
+            C_tag     <= head;
+          end
+
+          // retire entry either way
+          valid[head]     <= 1'b0;
+          ready[head]     <= 1'b0;
+          exc_flag[head]  <= 1'b0;
+          exc_pc[head]    <= {XLEN{1'b0}};
+          iret_flag[head] <= 1'b0;
 
           head <= inc_tag(head);
         end
