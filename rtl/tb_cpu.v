@@ -58,20 +58,20 @@ module cpu_run_tb;
   endtask
 
   task print_startinst_detected;
-    input [31:0] f_pc;
+    input [31:0] f_pc_va;
     input integer cyc;
     begin
       $display("** Detected START marker fetch: F_inst=0 at F_pc=%0d (cycle %0d) -> begin CPI window **",
-               f_pc, cyc);
+               f_pc_va, cyc);
     end
   endtask
 
   task print_endinst_detected;
-    input [31:0] f_pc;
+    input [31:0] f_pc_va;
     input integer cyc;
     begin
       $display("** Detected END marker fetch (2nd zero): F_inst=0 at F_pc=%0d (cycle %0d) **",
-               f_pc, cyc);
+               f_pc_va, cyc);
     end
   endtask
 
@@ -79,7 +79,7 @@ module cpu_run_tb;
     input integer cyc;
     input [31:0] f_pc_va;
     input [31:0] inst;
-    input [31:0] store_req;
+    input [31:0] F_pc;
     input [31:0] store_req_addr;
     input [31:0] store_valid;
     input [31:0] exc_we;
@@ -89,11 +89,11 @@ module cpu_run_tb;
     input [31:0] wb_pc;
     begin
       $display(
-        "C%0d | F_pc_va=%0d F_inst=0x%08h | store_request=%0d | store_request_address=%0d -> store_valid=%0d | EXC_we=%0d | EX_exc=%0b D_exc=%0d EX_tag=%0d WB_pc=%0d",
+        "C%0d | F_pc_va=%0d F_inst=0x%08h | F_pc=%0d | store_request_address=%0d -> store_valid=%0d | EXC_we=%0d | EX_exc=%0b D_exc=%0d EX_tag=%0d WB_pc=%0d",
         cyc,
         f_pc_va,
         inst,
-        store_req,
+        F_pc,
         store_req_addr,
         store_valid,
         exc_we,
@@ -319,12 +319,12 @@ module cpu_run_tb;
               start_valid         <= 1'b1;
               start_cycle         <= cycles;
               start_finished_snap <= finished_count;
-              print_startinst_detected(dut.F_pc, cycles);
+              print_startinst_detected(dut.F_pc_va, cycles);
             end
             else if (!endpc_valid) begin
-              endpc       <= dut.F_pc;
+              endpc       <= dut.F_pc_va;
               endpc_valid <= 1'b1;
-              print_endinst_detected(dut.F_pc, cycles);
+              print_endinst_detected(dut.F_pc_va, cycles);
             end
           end
         end
@@ -342,12 +342,12 @@ module cpu_run_tb;
         end
 
         // Trace (first N cycles)
-        if (cycles <= 400) begin
+        if (1) begin
           print_trace_line(
             cycles,
             dut.F_pc_va,
             curr_inst,
-            dut.store_request,
+            dut.F_pc,
             dut.store_request_address,
             dut.store_valid,
             dut.EXC_we,
@@ -400,7 +400,7 @@ module cpu_run_tb;
           disable run_loop;
         end
 
-        if (cycles > 2000) begin
+        if (cycles > 2000000) begin
           print_timeout();
           disable run_loop;
         end

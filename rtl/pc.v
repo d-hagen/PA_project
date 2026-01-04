@@ -24,19 +24,26 @@ module pc #(
   output reg  [PCLEN-1:0]    F_pc_va
 );
 
-  always @(posedge clk) begin
-    if (rst) begin
-      F_pc_va <= RESET_PC;
-    end else if (!stall_D) begin
-      // Priority: explicit redirect > branch redirect > predictor
-      if (redir_valid) begin
-        F_pc_va <= redir_pc;
-      end else if (EX_taken) begin
-        F_pc_va <= EX_alt_pc;
-      end else begin
-        F_pc_va <= F_BP_target_pc;
-      end
-    end
+ always @(posedge clk) begin
+  if (rst) begin
+    F_pc_va <= RESET_PC;
+
+  // highest priority: redirects ignore stall
+  end else if (redir_valid) begin
+    F_pc_va <= redir_pc;
+
+  end else if (EX_taken) begin
+    F_pc_va <= EX_alt_pc;
+
+  // stall only applies if no redirect/taken
+  end else if (stall_D) begin
+    F_pc_va <= F_pc_va;   // explicit hold
+
+  // normal sequential / predictor
+  end else begin
+    F_pc_va <= F_BP_target_pc;
   end
+end
 
 endmodule
+

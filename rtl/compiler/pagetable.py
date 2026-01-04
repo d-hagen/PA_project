@@ -26,8 +26,6 @@ OPCODES = {
     "bgt":   0b001101,
     "jlx":   0b001101,
     "mul":   0b001110,
-
-    # Standalone opcode
     "iret":  0b111111,
 }
 
@@ -76,16 +74,13 @@ def assemble_line(line: str, lineno: int) -> Optional[int]:
 
     parts = re.split(r"[,\s]+", clean)
 
-    # -------- Marker (no operands) --------
+    # Marker
     if len(parts) == 1:
         op = parts[0].lower()
         if op in MARKER_MNEMONICS:
             return MARKER_WORD
-        raise ValueError(
-            f"Line {lineno}: unknown single-token instruction '{op}'"
-        )
+        raise ValueError(f"Line {lineno}: unknown single-token instruction '{op}'")
 
-    # -------- Normal 5-token format --------
     if len(parts) != 5:
         raise ValueError(
             f"Line {lineno}: expected 5 tokens (opcode ra rb rd imm); got {parts}"
@@ -93,7 +88,6 @@ def assemble_line(line: str, lineno: int) -> Optional[int]:
 
     op, ra_t, rb_t, rd_t, imm_t = parts
     op_l = op.lower()
-
     if op_l not in OPCODES:
         raise ValueError(f"Line {lineno}: unknown opcode '{op}'")
 
@@ -102,7 +96,6 @@ def assemble_line(line: str, lineno: int) -> Optional[int]:
     rd  = parse_reg(rd_t)
     imm = parse_imm(imm_t)
 
-    # CTRL-family
     if op_l in CTRL_RD_FOR:
         opc = OPCODES["ctrl"]
         rd  = CTRL_RD_FOR[op_l]
@@ -123,12 +116,11 @@ NOP_BUBBLE_COMMENT = "NOP (addi r0 r0 r0 0)"
 NOP_END = 0x00000000
 NOP_END_COMMENT = "NOP / marker (end of program)"
 
-# ===================== ASSEMBLE FILE =====================
 def assemble_file(in_path: pathlib.Path) -> List[Tuple[int, str]]:
     lines = in_path.read_text().splitlines()
     assembled: List[Tuple[int, str]] = []
 
-    # Initial bubble
+    # Your existing initial bubble (this is at VA PC=0 in the *logical* program stream)
     assembled.append((NOP_BUBBLE, NOP_BUBBLE_COMMENT))
 
     for i, line in enumerate(lines, start=1):
@@ -140,7 +132,6 @@ def assemble_file(in_path: pathlib.Path) -> List[Tuple[int, str]]:
             print(f"ERROR line {i}: {e}", file=sys.stderr)
             sys.exit(1)
 
-    # Final marker
     assembled.append((NOP_END, NOP_END_COMMENT))
     return assembled
 
@@ -149,14 +140,24 @@ VA_WIDTH          = 32
 PC_BITS           = 20
 PAGE_OFFSET_WIDTH = 12
 VPN_WIDTH         = VA_WIDTH - PAGE_OFFSET_WIDTH
-PPN_WIDTH         = PC_BITS - PAGE_OFFSET_WIDTH
+PPN_WIDTH         = PC_BITS - PAGE_OFFSET_WIDTH  # 8
 
-ROOT_PPN    = 0x09
-L2_PPN_BASE = 0x0A
+# Put page tables at ~200k (4 KiB aligned-down): 0x30000
+ROOT_PPN    = 0x30
+L2_PPN_BASE = 0x31
 
-START_PC   = 0x00000000
-DATA_BASE  = 0x00000000
-DATA_SIZE  = 0x00020000
+# Demonstration mapping: PA = VA + 0x8000
+VA_TO_PA_BIAS_BYTES = 0x8000
+BIAS_PAGES = VA_TO_PA_BIAS_BYTES >> PAGE_OFFSET_WIDTH  # 8 pages
+
+# Where the program is located physically:
+# VA starts at 0, so PA starts at 0x8000 -> word address 0x2000
+PROGRAM_PA_BASE_BYTES = VA_TO_PA_BIAS_BYTES
+PROGRAM_PA_BASE_WORD  = PROGRAM_PA_BASE_BYTES >> 2
+
+START_PC_VA   = 0x00000000
+DATA_BASE_VA  = 0x00000000
+DATA_SIZE     = 0x00020000
 
 def vpns_for_region(base_va: int, size_bytes: int) -> Set[int]:
     if size_bytes <= 0:
@@ -165,54 +166,75 @@ def vpns_for_region(base_va: int, size_bytes: int) -> Set[int]:
     last  = (base_va + size_bytes - 1) >> PAGE_OFFSET_WIDTH
     return set(range(first, last + 1))
 
-def compute_used_vpns(num_instrs: int) -> Set[int]:
-    used = set()
+def compute_used_vpns(num_instrs: int, max_word: int) -> Set[int]:
+    used: Set[int] = set()
     if num_instrs > 0:
-        used |= vpns_for_region(START_PC, num_instrs * 4)
-    used |= vpns_for_region(DATA_BASE, DATA_SIZE)
+        used |= vpns_for_region(START_PC_VA, num_instrs * 4)
+    used |= vpns_for_region(DATA_BASE_VA, DATA_SIZE)
+    if max_word < 0:
+        raise ValueError("--max-word must be >= 0")
+    used |= vpns_for_region(0x00000000, (max_word + 1) * 4)
     return used
 
 def make_pte(ppn: int) -> int:
     return (ppn << PAGE_OFFSET_WIDTH) | 1
 
 def build_page_tables(used_vpns: Set[int]) -> Dict[int, int]:
-    mem = {}
-    l1_base = (ROOT_PPN << PAGE_OFFSET_WIDTH) >> 2
-    l2_map = {}
+    mem: Dict[int, int] = {}
+    l1_base_word = (ROOT_PPN << PAGE_OFFSET_WIDTH) >> 2
+
+    l2_map: Dict[int, int] = {}
     next_l2 = L2_PPN_BASE
 
-    groups = {}
+    groups: Dict[int, Set[int]] = {}
     for vpn in used_vpns:
         vpn1 = (vpn >> 10) & 0x3FF
         vpn0 = vpn & 0x3FF
         groups.setdefault(vpn1, set()).add(vpn0)
 
-    for vpn1, vpn0s in groups.items():
+    for vpn1, vpn0s in sorted(groups.items()):
         if vpn1 not in l2_map:
             l2_map[vpn1] = next_l2
             next_l2 += 1
-
         l2_ppn = l2_map[vpn1]
-        mem[l1_base + vpn1] = make_pte(l2_ppn)
-        l2_base = (l2_ppn << PAGE_OFFSET_WIDTH) >> 2
+
+        mem[l1_base_word + vpn1] = make_pte(l2_ppn)
+        l2_base_word = (l2_ppn << PAGE_OFFSET_WIDTH) >> 2
 
         for vpn0 in vpn0s:
-            mem[l2_base + vpn0] = make_pte((vpn1 << 10) | vpn0)
+            vpn = (vpn1 << 10) | vpn0
+            ppn = vpn + BIAS_PAGES  # shift mapping: PA = VA + 0x8000
+            if ppn >= (1 << PPN_WIDTH):
+                continue
+            mem[l2_base_word + vpn0] = make_pte(ppn)
 
     return mem
 
-# ===================== WRITE OUTPUT =====================
 def write_program_with_pagetables(
     assembled: List[Tuple[int, str]],
-    out_path: pathlib.Path
+    out_path: pathlib.Path,
+    max_word: int
 ) -> None:
-    used_vpns = compute_used_vpns(len(assembled))
+    used_vpns = compute_used_vpns(len(assembled), max_word)
     mem_words = build_page_tables(used_vpns)
 
     with out_path.open("w") as f:
-        for idx, (w, comment) in enumerate(assembled):
-            f.write(f"{w:08x}    // [PC {idx*4}] {comment}\n")
+        # ------------------------------------------------------------
+        # ALWAYS place a NOP at physical word address 0 (byte addr 0)
+        # ------------------------------------------------------------
+        f.write("@0\n")
+        f.write(f"{NOP_BUBBLE:08x}    // [PA 0x00000] forced NOP at physical address 0\n")
 
+        # ------------------------------------------------------------
+        # Place program at PA base = 0x8000 -> word @2000
+        # ------------------------------------------------------------
+        f.write(f"@{PROGRAM_PA_BASE_WORD:X}\n")
+        for idx, (w, comment) in enumerate(assembled):
+            f.write(f"{w:08x}    // [VA PC {idx*4}] {comment}\n")
+
+        # ------------------------------------------------------------
+        # Emit PTE words with @ markers
+        # ------------------------------------------------------------
         if mem_words:
             cur = None
             for idx in sorted(mem_words):
@@ -221,18 +243,23 @@ def write_program_with_pagetables(
                 f.write(f"{mem_words[idx]:08X}\n")
                 cur = idx
 
-    print(f"Wrote {len(assembled)} instructions + {len(mem_words)} PTE words to {out_path}")
+    print(
+        f"Wrote forced NOP at PA 0x0 (word @0), "
+        f"{len(assembled)} instructions at PA 0x{PROGRAM_PA_BASE_BYTES:X} (word @{PROGRAM_PA_BASE_WORD:X}), "
+        f"+ {len(mem_words)} PTE words to {out_path}\n"
+        f"Mapping: PA = VA + 0x{VA_TO_PA_BIAS_BYTES:X} (PPN = VPN + {BIAS_PAGES})"
+    )
 
-# ===================== MAIN =====================
 def main():
-    ap = argparse.ArgumentParser(
-        description="Assembler with marker instruction + page tables")
+    ap = argparse.ArgumentParser(description="Assembler + 2-level PT, mapping PA=VA+0x8000 demo")
     ap.add_argument("input", help="assembly source")
     ap.add_argument("-o", "--output", default="program.hex")
+    ap.add_argument("--max-word", type=int, default=1000000,
+                    help="Generate PTEs for VA word addresses 0..max-word (default: 1000000)")
     args = ap.parse_args()
 
     assembled = assemble_file(pathlib.Path(args.input))
-    write_program_with_pagetables(assembled, pathlib.Path(args.output))
+    write_program_with_pagetables(assembled, pathlib.Path(args.output), args.max_word)
 
 if __name__ == "__main__":
     main()
