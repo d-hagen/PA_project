@@ -34,11 +34,197 @@ module cpu_run_tb;
   // "instructions finished" counter: increments when WB_pc changes (excluding 0)
   reg [31:0] prev_WB_pc;
   integer finished_count;
-  real cpi;
 
-  // Dynamic end-PC capture: first time we FETCH 0x00000000, remember its PC
+  // Marker capture:
+  //  - First time we FETCH 0x00000000: start measurement window
+  //  - Second time we FETCH 0x00000000: capture endpc; stop when WB_pc == endpc
+  reg        start_valid;
+  integer    start_cycle;
+  integer    start_finished_snap;
+
   reg        endpc_valid;
   reg [31:0] endpc;
+
+  // ------------------------------------------------------------
+  // PRINT TASKS
+  // ------------------------------------------------------------
+
+  task print_banner;
+    begin
+      $display("===========================================");
+      $display("CPU RUN TB (Verilog-2005): start @ PC=0, treat 1st fetched 0x00000000 as START marker, 2nd as END marker (stop at WB_pc==endpc)");
+      $display("===========================================");
+    end
+  endtask
+
+  task print_startinst_detected;
+    input [31:0] f_pc;
+    input integer cyc;
+    begin
+      $display("** Detected START marker fetch: F_inst=0 at F_pc=%0d (cycle %0d) -> begin CPI window **",
+               f_pc, cyc);
+    end
+  endtask
+
+  task print_endinst_detected;
+    input [31:0] f_pc;
+    input integer cyc;
+    begin
+      $display("** Detected END marker fetch (2nd zero): F_inst=0 at F_pc=%0d (cycle %0d) **",
+               f_pc, cyc);
+    end
+  endtask
+
+  task print_trace_line;
+    input integer cyc;
+    input [31:0] f_pc_va;
+    input [31:0] inst;
+    input [31:0] store_req;
+    input [31:0] store_req_addr;
+    input [31:0] store_valid;
+    input [31:0] exc_we;
+    input [31:0] ex_exc;
+    input [31:0] d_exc;
+    input [31:0] ex_tag;
+    input [31:0] wb_pc;
+    begin
+      $display(
+        "C%0d | F_pc_va=%0d F_inst=0x%08h | store_request=%0d | store_request_address=%0d -> store_valid=%0d | EXC_we=%0d | EX_exc=%0b D_exc=%0d EX_tag=%0d WB_pc=%0d",
+        cyc,
+        f_pc_va,
+        inst,
+        store_req,
+        store_req_addr,
+        store_valid,
+        exc_we,
+        ex_exc,
+        d_exc,
+        ex_tag,
+        wb_pc
+      );
+    end
+  endtask
+
+  task print_timeout;
+    begin
+      $display("** TIMEOUT: exceeded cycle limit, stopping.");
+    end
+  endtask
+
+  // NEW PRINT FORMAT YOU REQUESTED
+  task print_summary_totals_and_marker;
+    input integer total_cycles;
+    input integer total_insts;
+    input real    total_cpi;
+
+    input integer marker_cycles;
+    input integer marker_insts;
+    input real    marker_cpi;
+    begin
+      $display("");
+      $display("Total :");
+      $display("%0d cycles", total_cycles);
+      $display("%0d instructions", total_insts);
+      $display("%0f CPI", total_cpi);
+      $display("");
+      $display("Marker :");
+      $display("%0d cycles", marker_cycles);
+      $display("%0d instructions", marker_insts);
+      $display("%0f CPI", marker_cpi);
+      $display("");
+    end
+  endtask
+
+  task dump_regfile;
+    integer k;
+    begin
+      $display("\n==== REGISTER FILE DUMP ====");
+      for (k = 0; k < REG_NUM; k = k + 1) begin
+        $display("x%0d = 0x%08h (%0d)", k, dut.u_regfile.regs[k], dut.u_regfile.regs[k]);
+      end
+      $display("============================\n");
+    end
+  endtask
+
+  task dump_mem_lines_0_7;
+    integer k;
+    begin
+      $display("\n==== MEMORY LINES (0..7) ====");
+      for (k = 0; k < 8; k = k + 1) begin
+        $display("Line %0d: %08h  %08h  %08h  %08h",
+                  k,
+                  dut.u_unified_mem.line[k][0],
+                  dut.u_unified_mem.line[k][1],
+                  dut.u_unified_mem.line[k][2],
+                  dut.u_unified_mem.line[k][3]);
+      end
+    end
+  endtask
+
+  task dump_backing_data_mem;
+    integer k;
+    begin
+      $display("\n==== BACKING DATA MEMORY (u_data_mem) ====");
+      for (k = 8; k < 24; k = k + 1) begin
+        $display("Line %0d: %08d %08d %08d %08d",
+                  k,
+                  dut.u_unified_mem.line[k][0],
+                  dut.u_unified_mem.line[k][1],
+                  dut.u_unified_mem.line[k][2],
+                  dut.u_unified_mem.line[k][3]);
+      end
+    end
+  endtask
+
+  task dump_dcache;
+    integer k;
+    begin
+      $display("\n==== D-CACHE CONTENT ====");
+      for (k = 0; k < 4; k = k + 1) begin
+        $display("Entry %0d | valid=%0b dirty=%0b tag=%0d",
+                  k,
+                  dut.u_dcache.valid[k],
+                  dut.u_dcache.dirty[k],
+                  dut.u_dcache.tag[k]);
+
+        $display("    DATA: %0d %0d %0d %0d",
+                  dut.u_dcache.data[k][0],
+                  dut.u_dcache.data[k][1],
+                  dut.u_dcache.data[k][2],
+                  dut.u_dcache.data[k][3]);
+      end
+    end
+  endtask
+
+  task dump_store_buffer;
+    integer k;
+    begin
+      $display("\n==== STORE BUFFER CONTENT ====");
+      $display("count=%0d head=%0d tail=%0d",
+              dut.u_store_buffer.count,
+              dut.u_store_buffer.head,
+              dut.u_store_buffer.tail);
+
+      for (k = 0; k < dut.u_store_buffer.DEPTH; k = k + 1) begin
+        $display("SB[%0d] | addr20=0x%0d (line=%0d word=%0d byte=%0d) data=0x%0d byt=%0d",
+                k,
+                dut.u_store_buffer.addr_q[k],
+                dut.u_store_buffer.addr_q[k][19:4],
+                dut.u_store_buffer.addr_q[k][3:2],
+                dut.u_store_buffer.addr_q[k][1:0],
+                dut.u_store_buffer.data_q[k],
+                dut.u_store_buffer.byt_q[k]);
+      end
+    end
+  endtask
+
+  task print_end_of_test;
+    begin
+      $display("==========================================");
+      $display("               END OF TEST");
+      $display("==========================================");
+    end
+  endtask
 
   task print_rob;
     integer j;
@@ -59,10 +245,47 @@ module cpu_run_tb;
     end
   endtask
 
+  // ------------------------------------------------------------
+  // Print ONE unified memory line given a DECIMAL byte address
+  // addr_dec : byte address in DECIMAL (e.g. 1540)
+  // fmt      : 1 = HEX output, 0 = DECIMAL output
+  // ------------------------------------------------------------
+  task print_mem_line_by_dec_addr;
+    input integer addr_dec;
+    input         fmt;
+
+    integer line_idx;
+    begin
+      // Each line = 16 bytes = 4 words
+      line_idx = addr_dec / 16;
+
+      if (fmt) begin
+        $display("MEM[addr=%0d] -> line %0d : %08h %08h %08h %08h",
+                  addr_dec,
+                  line_idx,
+                  dut.u_unified_mem.line[line_idx][0],
+                  dut.u_unified_mem.line[line_idx][1],
+                  dut.u_unified_mem.line[line_idx][2],
+                  dut.u_unified_mem.line[line_idx][3]);
+      end
+      else begin
+        $display("MEM[addr=%0d] -> line %0d : %0d %0d %0d %0d",
+                  addr_dec,
+                  line_idx,
+                  dut.u_unified_mem.line[line_idx][0],
+                  dut.u_unified_mem.line[line_idx][1],
+                  dut.u_unified_mem.line[line_idx][2],
+                  dut.u_unified_mem.line[line_idx][3]);
+      end
+    end
+  endtask
+
+  // ------------------------------------------------------------
+  // MAIN
+  // ------------------------------------------------------------
+
   initial begin
-    $display("===========================================");
-    $display("CPU RUN TB (Verilog-2005): start @ PC=0, stop when WB_pc == PC(of fetched 0x00000000)");
-    $display("===========================================");
+    print_banner();
 
     repeat (3) @(posedge clk);
     rst <= 1'b0;
@@ -70,6 +293,10 @@ module cpu_run_tb;
     cycles         = 0;
     prev_WB_pc     = 32'hFFFF_FFFF;
     finished_count = 0;
+
+    start_valid         = 1'b0;
+    start_cycle         = 0;
+    start_finished_snap = 0;
 
     endpc_valid    = 1'b0;
     endpc          = 32'h0;
@@ -82,23 +309,30 @@ module cpu_run_tb;
         curr_inst = dut.F_inst;
 
         // ------------------------------------------------------------
-        // 1) Capture END PC dynamically:
-        //    first time we FETCH 0x00000000 in F stage, remember its F_pc.
+        // Capture START/END markers based on FETCH of 0x00000000
+        //   - 1st time F_inst==0 : START measurement window
+        //   - 2nd time F_inst==0 : END marker PC (stop when reaches WB)
         // ------------------------------------------------------------
-        if (!rst && !endpc_valid) begin
+        if (!rst) begin
           if (dut.F_inst == 32'h00000000) begin
-            endpc       <= dut.F_pc;
-            endpc_valid <= 1'b1;
-            $display("** Detected end-instruction fetch: F_inst=0 at F_pc=%0d (cycle %0d) **",
-                     dut.F_pc, cycles);
+            if (!start_valid) begin
+              start_valid         <= 1'b1;
+              start_cycle         <= cycles;
+              start_finished_snap <= finished_count;
+              print_startinst_detected(dut.F_pc, cycles);
+            end
+            else if (!endpc_valid) begin
+              endpc       <= dut.F_pc;
+              endpc_valid <= 1'b1;
+              print_endinst_detected(dut.F_pc, cycles);
+            end
           end
         end
 
         // ------------------------------------------------------------
-        // 2) Count "finished instructions":
-        //    increments when WB_pc changes AND new WB_pc != 0.
-        //    IMPORTANT: do NOT update prev_WB_pc when WB_pc==0 (bubble),
-        //    otherwise you may double count when WB_pc returns to a real value.
+        // Count "finished instructions":
+        // increments when WB_pc changes AND new WB_pc != 0.
+        // Do NOT update prev_WB_pc when WB_pc==0 (bubble).
         // ------------------------------------------------------------
         if (!rst) begin
           if ((dut.WB_pc !== prev_WB_pc) && (dut.WB_pc !== 0)) begin
@@ -107,120 +341,87 @@ module cpu_run_tb;
           end
         end
 
-        // ------------------------------------------------------------
         // Trace (first N cycles)
-        // ------------------------------------------------------------
-        if (cycles <= 80) begin
-          $display(
-            "C%0d | F_pc_va=%0d F_inst=0x%08h | D_tag=%0d | redir_valid=%0d -> redir_pc=%0d | EXC_we=%0d | EX_exc=%0b D_exc=%0d EX_tag=%0d WB_pc=%0d",
+        if (cycles <= 400) begin
+          print_trace_line(
             cycles,
             dut.F_pc_va,
             curr_inst,
-            dut.D_tag,
-            dut.redir_valid,
-            dut.redir_pc,
+            dut.store_request,
+            dut.store_request_address,
+            dut.store_valid,
             dut.EXC_we,
             dut.EX_exc,
             dut.D_exc,
             dut.EX_tag,
-            dut.WB_pc,
+            dut.WB_pc
           );
         end
 
         // ------------------------------------------------------------
-        // 3) Stop when the end-instruction reaches WB:
-        //    WB_pc == saved endpc (only if we have captured it).
+        // Stop when END marker reaches WB (2nd zero's PC)
         // ------------------------------------------------------------
         if (!rst && endpc_valid && (dut.WB_pc == endpc)) begin
-          // Let a few cycles drain for nicer end-state dumps
+          integer win_cycles;
+          integer win_insts;
+          integer total_cycles;
+          integer total_insts;
+          real    total_cpi;
+          real    win_cpi;
+
           repeat (5) @(posedge clk);
 
-          if (finished_count > 0)
-            cpi = (cycles * 1.0) / finished_count;
+          // TOTAL stats (from cycle 0)
+          total_cycles = cycles;
+          total_insts  = finished_count;
+          if (total_insts > 0)
+            total_cpi = (total_cycles * 1.0) / total_insts;
           else
-            cpi = 0.0;
+            total_cpi = 0.0;
 
+          // MARKER-window stats
+          win_cycles = cycles - start_cycle;
+          win_insts  = finished_count - start_finished_snap;
+          if (win_insts > 0)
+            win_cpi = (win_cycles * 1.0) / win_insts;
+          else
+            win_cpi = 0.0;
+
+          // Keep your original "where we ended" line (optional)
           $display("---- End of program reached when WB_pc == endpc (%0d) after %0d cycles ----",
                    endpc, cycles);
-          $display("---- Instructions finished (WB_pc changes, excluding 0) = %0d ----", finished_count);
-          $display("---- CPI = %0f ----", cpi);
+
+          // Print in the exact format you requested
+          print_summary_totals_and_marker(
+            total_cycles, total_insts, total_cpi,
+            win_cycles,   win_insts,   win_cpi
+          );
 
           disable run_loop;
         end
 
         if (cycles > 2000) begin
-          $display("** TIMEOUT: exceeded cycle limit, stopping.");
+          print_timeout();
           disable run_loop;
         end
       end
     end
 
-    // -----------------------------
     // End-of-test dumps
-    // -----------------------------
+    dump_regfile();
+
+    // Example: print a specific line by DECIMAL byte address (decimal output)
+    print_mem_line_by_dec_addr(1516, 1'b0);
+
+    dump_mem_lines_0_7();
+    dump_backing_data_mem();
+
     print_rob();
 
-    $display("\n==== REGISTER FILE DUMP ====");
-    for (i = 0; i < REG_NUM; i = i + 1) begin
-      $display("x%0d = 0x%08h (%0d)", i, dut.u_regfile.regs[i], dut.u_regfile.regs[i]);
-    end
-    $display("============================\n");
+    dump_dcache();
+    dump_store_buffer();
 
-    $display("\n==== MEMORY LINES (0..7) ====");
-    for (i = 0; i < 8; i = i + 1) begin
-      $display("Line %0d: %08h  %08h  %08h  %08h",
-                i,
-                dut.u_unified_mem.line[i][0],
-                dut.u_unified_mem.line[i][1],
-                dut.u_unified_mem.line[i][2],
-                dut.u_unified_mem.line[i][3]);
-    end
-
-    $display("\n==== BACKING DATA MEMORY (u_data_mem) ====");
-    for (i = 8; i < 24; i = i + 1) begin
-      $display("Line %0d: %08d %08d %08d %08d",
-                i,
-                dut.u_unified_mem.line[i][0],
-                dut.u_unified_mem.line[i][1],
-                dut.u_unified_mem.line[i][2],
-                dut.u_unified_mem.line[i][3]);
-    end
-
-    $display("\n==== D-CACHE CONTENT ====");
-    for (i = 0; i < 4; i = i + 1) begin
-      $display("Entry %0d | valid=%0b dirty=%0b tag=%0d",
-                i,
-                dut.u_dcache.valid[i],
-                dut.u_dcache.dirty[i],
-                dut.u_dcache.tag[i]);
-
-      $display("    DATA: %0d %0d %0d %0d",
-                dut.u_dcache.data[i][0],
-                dut.u_dcache.data[i][1],
-                dut.u_dcache.data[i][2],
-                dut.u_dcache.data[i][3]);
-    end
-
-    $display("\n==== STORE BUFFER CONTENT ====");
-    $display("count=%0d head=%0d tail=%0d",
-            dut.u_store_buffer.count,
-            dut.u_store_buffer.head,
-            dut.u_store_buffer.tail);
-
-    for (i = 0; i < dut.u_store_buffer.DEPTH; i = i + 1) begin
-      $display("SB[%0d] | addr20=0x%0d (line=%0d word=%0d byte=%0d) data=0x%0d byt=%0d",
-              i,
-              dut.u_store_buffer.addr_q[i],
-              dut.u_store_buffer.addr_q[i][19:4],
-              dut.u_store_buffer.addr_q[i][3:2],
-              dut.u_store_buffer.addr_q[i][1:0],
-              dut.u_store_buffer.data_q[i],
-              dut.u_store_buffer.byt_q[i]);
-    end
-
-    $display("==========================================");
-    $display("               END OF TEST");
-    $display("==========================================");
+    print_end_of_test();
 
     $finish;
   end

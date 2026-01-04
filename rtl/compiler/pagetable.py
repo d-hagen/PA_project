@@ -3,7 +3,6 @@ import argparse, sys, re, pathlib
 from typing import Optional, List, Tuple, Dict, Set
 
 # ===================== OPCODES (match decode.v) =====================
-# NOTE: OPCODES["iret"] MUST match your decode.v choice for the iret opcode.
 OPCODES = {
     "add":   0b000000,
     "sub":   0b000001,
@@ -28,8 +27,7 @@ OPCODES = {
     "jlx":   0b001101,
     "mul":   0b001110,
 
-    # NEW: separate opcode for iret (placeholder = 0b111111)
-    # Change this to whatever you implement in decode.v
+    # Standalone opcode
     "iret":  0b111111,
 }
 
@@ -47,6 +45,11 @@ CTRL_RD_FOR = {
     "jlx": RD_JLX,
 }
 
+# ===================== MARKER =====================
+MARKER_WORD = 0x00000000
+MARKER_MNEMONICS = {"marker", "mark", "end"}
+
+# ===================== REGEX =====================
 REG_RE = re.compile(r"^r(\d+)$", re.IGNORECASE)
 
 def parse_reg(tok: str) -> int:
@@ -64,6 +67,7 @@ def parse_imm(tok: str) -> int:
         raise ValueError(f"Immediate out of 11-bit signed range (-1024..1023): {tok}")
     return val & 0x7FF
 
+# ===================== ASSEMBLE LINE =====================
 def assemble_line(line: str, lineno: int) -> Optional[int]:
     raw = line.rstrip("\n")
     clean = re.split(r"//|#|;", raw, maxsplit=1)[0].strip()
@@ -71,71 +75,61 @@ def assemble_line(line: str, lineno: int) -> Optional[int]:
         return None
 
     parts = re.split(r"[,\s]+", clean)
+
+    # -------- Marker (no operands) --------
+    if len(parts) == 1:
+        op = parts[0].lower()
+        if op in MARKER_MNEMONICS:
+            return MARKER_WORD
+        raise ValueError(
+            f"Line {lineno}: unknown single-token instruction '{op}'"
+        )
+
+    # -------- Normal 5-token format --------
     if len(parts) != 5:
-        raise ValueError(f"Line {lineno}: expected 5 tokens (opcode ra rb rd imm); got {parts}")
+        raise ValueError(
+            f"Line {lineno}: expected 5 tokens (opcode ra rb rd imm); got {parts}"
+        )
 
     op, ra_t, rb_t, rd_t, imm_t = parts
     op_l = op.lower()
+
     if op_l not in OPCODES:
         raise ValueError(f"Line {lineno}: unknown opcode '{op}'")
 
-    # Parse fields (even if some ops ignore them, we keep your 5-token format)
     ra  = parse_reg(ra_t)
     rb  = parse_reg(rb_t)
     rd  = parse_reg(rd_t)
     imm = parse_imm(imm_t)
 
-    # CTRL-family encoding uses OPC_CTRL and overloads rd field
+    # CTRL-family
     if op_l in CTRL_RD_FOR:
         opc = OPCODES["ctrl"]
         rd  = CTRL_RD_FOR[op_l]
-        word = ((opc & 0x3F) << 26) \
-             | ((ra  & 0x1F) << 21) \
-             | ((rb  & 0x1F) << 16) \
-             | ((rd  & 0x1F) << 11) \
-             | ( imm & 0x7FF)
-        return word
+    else:
+        opc = OPCODES[op_l]
 
-    # NEW: iret is a standalone opcode; we ignore ra/rb/rd/imm (but still encode them as given)
-    if op_l == "iret":
-        opc = OPCODES["iret"]
-        word = ((opc & 0x3F) << 26) \
-             | ((ra  & 0x1F) << 21) \
-             | ((rb  & 0x1F) << 16) \
-             | ((rd  & 0x1F) << 11) \
-             | ( imm & 0x7FF)
-        return word
-
-    # Normal R/R/I encoding
-    opc = OPCODES[op_l]
     word = ((opc & 0x3F) << 26) \
          | ((ra  & 0x1F) << 21) \
          | ((rb  & 0x1F) << 16) \
          | ((rd  & 0x1F) << 11) \
          | ( imm & 0x7FF)
+
     return word
 
+# ===================== NOPS =====================
 NOP_BUBBLE = ((OPCODES["addi"] & 0x3F) << 26)
 NOP_BUBBLE_COMMENT = "NOP (addi r0 r0 r0 0)"
 NOP_END = 0x00000000
-NOP_END_COMMENT = "NOP (end of program)"
+NOP_END_COMMENT = "NOP / marker (end of program)"
 
-# =====================================================================
-#  FUNCTION 1: assemble_file (NO CAP)
-# =====================================================================
+# ===================== ASSEMBLE FILE =====================
 def assemble_file(in_path: pathlib.Path) -> List[Tuple[int, str]]:
-    """
-    Assemble the input .s file with NO instruction cap.
-
-    Always appends:
-      - 1 NOP bubble (as you had)
-      - 1 final NOP_END
-    """
     lines = in_path.read_text().splitlines()
     assembled: List[Tuple[int, str]] = []
 
-    for _ in range(1):
-        assembled.append((NOP_BUBBLE, NOP_BUBBLE_COMMENT))
+    # Initial bubble
+    assembled.append((NOP_BUBBLE, NOP_BUBBLE_COMMENT))
 
     for i, line in enumerate(lines, start=1):
         try:
@@ -146,12 +140,11 @@ def assemble_file(in_path: pathlib.Path) -> List[Tuple[int, str]]:
             print(f"ERROR line {i}: {e}", file=sys.stderr)
             sys.exit(1)
 
+    # Final marker
     assembled.append((NOP_END, NOP_END_COMMENT))
     return assembled
 
-# =====================================================================
-#  PAGE TABLE LOGIC
-# =====================================================================
+# ===================== PAGE TABLE LOGIC =====================
 VA_WIDTH          = 32
 PC_BITS           = 20
 PAGE_OFFSET_WIDTH = 12
@@ -168,81 +161,72 @@ DATA_SIZE  = 0x00020000
 def vpns_for_region(base_va: int, size_bytes: int) -> Set[int]:
     if size_bytes <= 0:
         return set()
-    first_vpn = base_va >> PAGE_OFFSET_WIDTH
-    last_vpn  = (base_va + size_bytes - 1) >> PAGE_OFFSET_WIDTH
-    return set(range(first_vpn, last_vpn + 1))
+    first = base_va >> PAGE_OFFSET_WIDTH
+    last  = (base_va + size_bytes - 1) >> PAGE_OFFSET_WIDTH
+    return set(range(first, last + 1))
 
 def compute_used_vpns(num_instrs: int) -> Set[int]:
-    used_vpns: Set[int] = set()
-
+    used = set()
     if num_instrs > 0:
-        used_vpns |= vpns_for_region(START_PC, num_instrs * 4)
+        used |= vpns_for_region(START_PC, num_instrs * 4)
+    used |= vpns_for_region(DATA_BASE, DATA_SIZE)
+    return used
 
-    used_vpns |= vpns_for_region(DATA_BASE, DATA_SIZE)
-
-    for vpn in used_vpns:
-        if vpn >= (1 << PPN_WIDTH):
-            raise ValueError(f"VPN {vpn} exceeds physical PPN capacity")
-
-    return used_vpns
-
-def make_pte(ppn: int, valid: bool = True) -> int:
-    return (ppn << PAGE_OFFSET_WIDTH) | (1 if valid else 0)
+def make_pte(ppn: int) -> int:
+    return (ppn << PAGE_OFFSET_WIDTH) | 1
 
 def build_page_tables(used_vpns: Set[int]) -> Dict[int, int]:
-    mem_words: Dict[int, int] = {}
+    mem = {}
+    l1_base = (ROOT_PPN << PAGE_OFFSET_WIDTH) >> 2
+    l2_map = {}
+    next_l2 = L2_PPN_BASE
 
-    l1_base_word_idx = (ROOT_PPN << PAGE_OFFSET_WIDTH) >> 2
-    l2_ppn_for_vpn1: Dict[int, int] = {}
-    next_l2_ppn = L2_PPN_BASE
-
-    vpn_groups: Dict[int, Set[int]] = {}
+    groups = {}
     for vpn in used_vpns:
         vpn1 = (vpn >> 10) & 0x3FF
         vpn0 = vpn & 0x3FF
-        vpn_groups.setdefault(vpn1, set()).add(vpn0)
+        groups.setdefault(vpn1, set()).add(vpn0)
 
-    for vpn1, vpn0s in vpn_groups.items():
-        if vpn1 not in l2_ppn_for_vpn1:
-            l2_ppn_for_vpn1[vpn1] = next_l2_ppn
-            next_l2_ppn += 1
+    for vpn1, vpn0s in groups.items():
+        if vpn1 not in l2_map:
+            l2_map[vpn1] = next_l2
+            next_l2 += 1
 
-        l2_ppn = l2_ppn_for_vpn1[vpn1]
-        mem_words[l1_base_word_idx + vpn1] = make_pte(l2_ppn)
+        l2_ppn = l2_map[vpn1]
+        mem[l1_base + vpn1] = make_pte(l2_ppn)
+        l2_base = (l2_ppn << PAGE_OFFSET_WIDTH) >> 2
 
-        l2_base_word_idx = (l2_ppn << PAGE_OFFSET_WIDTH) >> 2
         for vpn0 in vpn0s:
-            vpn = (vpn1 << 10) | vpn0
-            mem_words[l2_base_word_idx + vpn0] = make_pte(vpn)
+            mem[l2_base + vpn0] = make_pte((vpn1 << 10) | vpn0)
 
-    return mem_words
+    return mem
 
+# ===================== WRITE OUTPUT =====================
 def write_program_with_pagetables(
     assembled: List[Tuple[int, str]],
     out_path: pathlib.Path
 ) -> None:
-    num_instrs = len(assembled)
-    used_vpns = compute_used_vpns(num_instrs)
+    used_vpns = compute_used_vpns(len(assembled))
     mem_words = build_page_tables(used_vpns)
 
     with out_path.open("w") as f:
-        for idx, (w, original) in enumerate(assembled):
-            f.write(f"{w:08x}    // [step {idx*4}] {original}\n")
+        for idx, (w, comment) in enumerate(assembled):
+            f.write(f"{w:08x}    // [PC {idx*4}] {comment}\n")
 
         if mem_words:
-            current = None
+            cur = None
             for idx in sorted(mem_words):
-                if current is None or idx != current + 1:
+                if cur is None or idx != cur + 1:
                     f.write(f"@{idx:X}\n")
                 f.write(f"{mem_words[idx]:08X}\n")
-                current = idx
+                cur = idx
 
-    print(f"Wrote {num_instrs} instructions + {len(mem_words)} PTE words to {out_path}")
+    print(f"Wrote {len(assembled)} instructions + {len(mem_words)} PTE words to {out_path}")
 
-# ============================= main ================================
+# ===================== MAIN =====================
 def main():
     ap = argparse.ArgumentParser(
-        description="Assembler + region-based page table generator")
+        description="Assembler with marker instruction + page tables")
     ap.add_argument("input", help="assembly source")
     ap.add_argument("-o", "--output", default="program.hex")
     args = ap.parse_args()

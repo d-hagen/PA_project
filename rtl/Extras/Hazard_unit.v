@@ -87,7 +87,7 @@ module Hazard_unit #(
 
   // Load-use stall (keep this)
   // NOTE: For renamed operands, you should rely on regfile's RF_stall instead.
-  assign stall_D = (EX_ld && (ex_hit_ra || ex_hit_rb));
+  assign stall_D = 0;
 
   assign EX_D_bp  = { (ex_hit_ra  && !EX_ld),
                       (ex_hit_rb  && !EX_ld),

@@ -265,7 +265,8 @@ module dcache #(
             // -------------------------
             // Store-hit case (complete immediately)
             // -------------------------
-            if (1) begin
+            if (!op_active_load && !mem_needs_translation && !ptw_busy &&
+                store_request && !MEM_mem_valid && !sb_store_wait && !load_wait) begin
                 if (store_hit) begin
                     if (store_byte) begin
                         case (store_bsel)
@@ -291,7 +292,7 @@ module dcache #(
 
         // defaults
         dcache_stall      = 1'b0;
-        MEM_data_mem      = 32'd333;
+        MEM_data_mem      = MEM_alu_out;
 
         Dc_mem_req        = 1'b0;
         Dc_mem_addr       = addr_line;
