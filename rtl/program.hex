@@ -3,83 +3,64 @@
 @2000
 20000000    // [VA PC 0] NOP (addi r0 r0 r0 0)
 00000000    // [VA PC 4] marker
-2000100c    // [VA PC 8] addi r0  r0  r2   12          # r2 = 12 (for <<12)
-20002848    // [VA PC 12] addi r0  r0  r5   72          # r5 = 0x48
-18a22800    // [VA PC 16] shl  r5  r2  r5   0           # r5 = 0x48000
-2000305c    // [VA PC 20] addi r0  r0  r6   92          # r6 = 0x5C
-18c23000    // [VA PC 24] shl  r6  r2  r6   0           # r6 = 0x5C000
-20003870    // [VA PC 28] addi r0  r0  r7   112         # r7 = 0x70
-18e23800    // [VA PC 32] shl  r7  r2  r7   0           # r7 = 0x70000  (C base stays SAME)
-20006804    // [VA PC 36] addi r0  r0  r13  4           # r13 = N = 4
-20007002    // [VA PC 40] addi r0  r0  r14  2           # r14 = shamt=2  (mult by 4)
-20005000    // [VA PC 44] addi r0  r0  r10  0           # i = 0
-20005800    // [VA PC 48] addi r0  r0  r11  0           # j = 0
-194e7800    // [VA PC 52] shl  r10 r14 r15  0           # i_row = i*4
-01eb0800    // [VA PC 56] add  r15 r11 r1   0           # idx = i_row + j
-182e9000    // [VA PC 60] shl  r1  r14 r18  0           # byteoff = idx*4
-00b22000    // [VA PC 64] add  r5  r18 r4   0           # ptrA = baseA + byteoff
-30810000    // [VA PC 68] store r4  r1  r0   0          # A[idx] = idx
-216b5801    // [VA PC 72] addi r11 r11 r11  1           # j++
-356d17ec    // [VA PC 76] blt  r11 r13 r0  -20          # back to A_J_TOP (PC+imm)
-214a5001    // [VA PC 80] addi r10 r10 r10  1           # i++
-354d17dc    // [VA PC 84] blt  r10 r13 r0  -36          # back to A_I_TOP (PC+imm)
-20005000    // [VA PC 88] addi r0  r0  r10  0           # i = 0
-20005800    // [VA PC 92] addi r0  r0  r11  0           # j = 0
-194e7800    // [VA PC 96] shl  r10 r14 r15  0           # i_row = i*4
-01eb0800    // [VA PC 100] add  r15 r11 r1   0           # idx = i_row + j
-182e9000    // [VA PC 104] shl  r1  r14 r18  0           # byteoff = idx*4
-00d22000    // [VA PC 108] add  r6  r18 r4   0           # ptrB = baseB + byteoff
-30810000    // [VA PC 112] store r4  r1  r0   0          # B[idx] = idx
-216b5801    // [VA PC 116] addi r11 r11 r11  1           # j++
-356d17ec    // [VA PC 120] blt  r11 r13 r0  -20          # back to B_J_TOP (PC+imm)
-214a5001    // [VA PC 124] addi r10 r10 r10  1           # i++
-354d17dc    // [VA PC 128] blt  r10 r13 r0  -36          # back to B_I_TOP (PC+imm)
-20006804    // [VA PC 132] addi r0  r0  r13  4
-20007002    // [VA PC 136] addi r0  r0  r14  2
-20005000    // [VA PC 140] addi r0  r0  r10  0
-20005800    // [VA PC 144] addi r0  r0  r11  0
-194e7800    // [VA PC 148] shl  r10 r14 r15  0
-2000b000    // [VA PC 152] addi r0  r0  r22  0
-20006000    // [VA PC 156] addi r0  r0  r12  0
-01ec8800    // [VA PC 160] add  r15 r12 r17  0
-1a2e9000    // [VA PC 164] shl  r17 r14 r18  0
-00b29800    // [VA PC 168] add  r5  r18 r19  0
-2e60a000    // [VA PC 172] load r19 r0  r20  0
-198e8000    // [VA PC 176] shl  r12 r14 r16  0
-020b8800    // [VA PC 180] add  r16 r11 r17  0
-1a2e9000    // [VA PC 184] shl  r17 r14 r18  0
-00d29800    // [VA PC 188] add  r6  r18 r19  0
-2e60a800    // [VA PC 192] load r19 r0  r21  0
-02d4b000    // [VA PC 196] add  r22 r20 r22  0
-02d5b000    // [VA PC 200] add  r22 r21 r22  0
-218c6001    // [VA PC 204] addi r12 r12 r12  1
-358d17d0    // [VA PC 208] blt  r12 r13 r0  -48
-01eb8800    // [VA PC 212] add  r15 r11 r17  0
-1a2e9000    // [VA PC 216] shl  r17 r14 r18  0
-00f29800    // [VA PC 220] add  r7  r18 r19  0
-32760000    // [VA PC 224] store r19 r22 r0  0
-216b5801    // [VA PC 228] addi r11 r11 r11  1
-356d17b0    // [VA PC 232] blt  r11 r13 r0  -80
-214a5001    // [VA PC 236] addi r10 r10 r10  1
-354d17a0    // [VA PC 240] blt  r10 r13 r0  -96
-2ce05000    // [VA PC 244] load r7  r0  r10  0
-2ce05804    // [VA PC 248] load r7  r0  r11  4
-2ce06008    // [VA PC 252] load r7  r0  r12  8
-2ce0680c    // [VA PC 256] load r7  r0  r13  12
-2ce07010    // [VA PC 260] load r7  r0  r14  16
-2ce07814    // [VA PC 264] load r7  r0  r15  20
-2ce08018    // [VA PC 268] load r7  r0  r16  24
-2ce0881c    // [VA PC 272] load r7  r0  r17  28
-2ce09020    // [VA PC 276] load r7  r0  r18  32
-2ce09824    // [VA PC 280] load r7  r0  r19  36
-2ce0a028    // [VA PC 284] load r7  r0  r20  40
-2ce0a82c    // [VA PC 288] load r7  r0  r21  44
-2ce0b030    // [VA PC 292] load r7  r0  r22  48
-2ce0b834    // [VA PC 296] load r7  r0  r23  52
-2ce0c038    // [VA PC 300] load r7  r0  r24  56
-2ce0c83c    // [VA PC 304] load r7  r0  r25  60
-00000000    // [VA PC 308] end
-00000000    // [VA PC 312] NOP / marker (end of program)
+2000100c    // [VA PC 8] addi r0  r0  r2   12          # r2 = 12
+20002848    // [VA PC 12] addi r0  r0  r5   72
+18a22800    // [VA PC 16] shl  r5  r2  r5   0           # r5 = 0x48000 (A)
+2000305c    // [VA PC 20] addi r0  r0  r6   92
+18c23000    // [VA PC 24] shl  r6  r2  r6   0           # r6 = 0x5C000 (B)
+20003870    // [VA PC 28] addi r0  r0  r7   112
+18e23800    // [VA PC 32] shl  r7  r2  r7   0           # r7 = 0x70000 (C)
+2000f002    // [VA PC 36] addi r0  r0  r30  2           # r30 = log2(4 bytes)  (idx->byte shift)
+20006808    // [VA PC 40] addi r0  r0  r13  8          # r13 = N
+20007003    // [VA PC 44] addi r0  r0  r14  3          # r14 = log2(N)  (for *N)
+01dee000    // [VA PC 48] add  r14 r30 r28  0     # r28 = log2(N) + log2(4) = log2(N*4)
+19bed800    // [VA PC 52] shl  r13 r30 r27  0           # r27 = strideBytes = N*4
+19ae1800    // [VA PC 56] shl  r13 r14 r3   0           # r3  = total = N*N
+20000800    // [VA PC 60] addi r0  r0  r1   0           # idx = 0
+20a02000    // [VA PC 64] addi r5  r0  r4   0           # ptrA = baseA
+30810000    // [VA PC 68] store r4  r1  r0   0
+20842004    // [VA PC 72] addi  r4  r4  r4   4
+20210801    // [VA PC 76] addi  r1  r1  r1   1
+342317f4    // [VA PC 80] blt   r1  r3  r0  -12          # back 3 instr
+20000800    // [VA PC 84] addi r0  r0  r1   0           # idx = 0
+20c02000    // [VA PC 88] addi r6  r0  r4   0           # ptrB = baseB
+30810000    // [VA PC 92] store r4  r1  r0   0
+20842004    // [VA PC 96] addi  r4  r4  r4   4
+20210801    // [VA PC 100] addi  r1  r1  r1   1
+342317f4    // [VA PC 104] blt   r1  r3  r0  -12          # back 3 instr
+20005000    // [VA PC 108] addi r0  r0  r10  0           # i = 0
+195c7800    // [VA PC 112] shl  r10 r28 r15  0           # rowByteOff = i*(N*4)
+00af8000    // [VA PC 116] add  r5  r15 r16  0           # rowA_base  = baseA + rowByteOff
+00ef8800    // [VA PC 120] add  r7  r15 r17  0           # rowC_base  = baseC + rowByteOff
+20005800    // [VA PC 124] addi r0  r0  r11  0           # j = 0
+197e9000    // [VA PC 128] shl  r11 r30 r18  0           # colByteOff = j*4
+22009800    // [VA PC 132] addi r16 r0  r19  0           # ptrA = rowA_base
+00d2a000    // [VA PC 136] add  r6  r18 r20  0           # ptrB = baseB + colByteOff
+0232a800    // [VA PC 140] add  r17 r18 r21  0           # ptrC = rowC_base + colByteOff
+2000b000    // [VA PC 144] addi r0  r0  r22  0           # acc = 0
+20006000    // [VA PC 148] addi r0  r0  r12  0           # k = 0
+2e60b800    // [VA PC 152] load r19 r0  r23  0
+2e80c000    // [VA PC 156] load r20 r0  r24  0
+02f8c800    // [VA PC 160] add  r23 r24 r25  0
+02d9b000    // [VA PC 164] add  r22 r25 r22  0
+22739804    // [VA PC 168] addi r19 r19 r19  4
+029ba000    // [VA PC 172] add  r20 r27 r20  0
+2e60b800    // [VA PC 176] load r19 r0  r23  0
+2e80c000    // [VA PC 180] load r20 r0  r24  0
+02f8c800    // [VA PC 184] add  r23 r24 r25  0
+02d9b000    // [VA PC 188] add  r22 r25 r22  0
+22739804    // [VA PC 192] addi r19 r19 r19  4
+029ba000    // [VA PC 196] add  r20 r27 r20  0
+218c6002    // [VA PC 200] addi r12 r12 r12  2
+358d17cc    // [VA PC 204] blt  r12 r13 r0  -52          # back 13 instr (13*4=52)
+32b60000    // [VA PC 208] store r21 r22 r0  0
+216b5801    // [VA PC 212] addi r11 r11 r11  1
+356d17a8    // [VA PC 216] blt  r11 r13 r0  -88          # back 22 instr (22*4=88)
+214a5001    // [VA PC 220] addi r10 r10 r10  1
+354d1794    // [VA PC 224] blt  r10 r13 r0  -108         # back 27 instr (27*4=108)
+2ce05000    // [VA PC 228] load r7  r0  r10  0           # r10 = C[0][0]
+00000000    // [VA PC 232] end
+00000000    // [VA PC 236] NOP / marker (end of program)
 @C000
 00031001
 @C400

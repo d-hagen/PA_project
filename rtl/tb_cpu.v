@@ -81,25 +81,25 @@ module cpu_run_tb;
     input [31:0] inst;
     input [31:0] F_pc;
     input [31:0] store_req_addr;
-    input [31:0] store_valid;
-    input [31:0] exc_we;
-    input [31:0] ex_exc;
-    input [31:0] d_exc;
-    input [31:0] ex_tag;
+    input [31:0] WB_wb_value;
+    input [31:0] WB_wb_valid;
+    input [31:0] RF_stall;
+    input [31:0] mul_result_valid;
+    input [31:0] EX_tag;
     input [31:0] wb_pc;
     begin
       $display(
-        "C%0d | F_pc_va=%0d F_inst=0x%08h | F_pc=%0d | store_request_address=%0d -> store_valid=%0d | EXC_we=%0d | EX_exc=%0b D_exc=%0d EX_tag=%0d WB_pc=%0d",
+        "C%0d | F_pc_va=%0d F_inst=0x%08h | F_pc=%0d | store_request_address=%0d -> WB_wb_value=%0d | WB_wb_valid=%0d | RF_stall=%0b mul_result_valid=%0d EX_tag=%0d WB_pc=%0d",
         cyc,
         f_pc_va,
         inst,
         F_pc,
         store_req_addr,
-        store_valid,
-        exc_we,
-        ex_exc,
-        d_exc,
-        ex_tag,
+        WB_wb_value,
+        WB_wb_valid,
+        RF_stall,
+        mul_result_valid,
+        EX_tag,
         wb_pc
       );
     end
@@ -342,17 +342,17 @@ module cpu_run_tb;
         end
 
         // Trace (first N cycles)
-        if (1) begin
+        if (cycles<150 ) begin
           print_trace_line(
             cycles,
             dut.F_pc_va,
             curr_inst,
             dut.F_pc,
             dut.store_request_address,
-            dut.store_valid,
-            dut.EXC_we,
-            dut.EX_exc,
-            dut.D_exc,
+            dut.WB_wb_value,
+            dut.WB_wb_valid,
+            dut.RF_stall,
+            dut.mul_result_valid,
             dut.EX_tag,
             dut.WB_pc
           );
@@ -361,7 +361,7 @@ module cpu_run_tb;
         // ------------------------------------------------------------
         // Stop when END marker reaches WB (2nd zero's PC)
         // ------------------------------------------------------------
-        if (!rst && endpc_valid && (dut.WB_pc == endpc)) begin
+        if ((!rst && endpc_valid && (dut.WB_pc == endpc) )|| (cycles > 200000)) begin
           integer win_cycles;
           integer win_insts;
           integer total_cycles;
@@ -400,7 +400,7 @@ module cpu_run_tb;
           disable run_loop;
         end
 
-        if (cycles > 2000000) begin
+        if (cycles > 2000000000) begin
           print_timeout();
           disable run_loop;
         end

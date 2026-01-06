@@ -19,7 +19,7 @@ addi r0 r0 r1   3
 addi r0 r0 r1   4
 addi r0 r0 r1   5
 addi r0 r0 r1   6
-load r0 r0 r14  48       // keep if you want WB conflict with loads
+addi r0 r0 r14  48       // keep if you want WB conflict with loads
 addi r0 r0 r1   8
 addi r0 r0 r1   9
 

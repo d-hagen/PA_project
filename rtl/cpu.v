@@ -969,7 +969,7 @@ module cpu #(
     .MEM_data_mem   (MEM_data_mem),
     .dcache_stall   (dcache_stall),
 
-    .sb_hit    (sb_hit),
+    .sb_load_miss    (sb_load_miss),
     .store_request   (store_request),
     .store_request_address (store_request_address),
     .store_request_value (store_request_value),
@@ -1023,6 +1023,8 @@ module cpu #(
   // =======================
   // MEM → WB pipeline register (tag mux)
   // =======================
+  wire load_valid = ((sb_hit || (sb_load_miss && dcache_data_valid)) || !MEM_ld);
+
   mem_to_wb_reg #(
     .XLEN    (XLEN),
     .PC_BITS (PC_BITS),
@@ -1039,7 +1041,11 @@ module cpu #(
 
     .MEM_tag      (MEM_tag),
 
-    .MEM_ld_valid (dcache_data_valid),
+    .dcache_stall (dcache_stall), 
+    .Dtlb_stall   (Dtlb_stall),
+    .sb_stall    (sb_stall),
+
+    .MEM_ld_valid (load_valid || mul_result_valid),
 
     .sb_hit       (sb_hit),
     .sb_data      (sb_data),

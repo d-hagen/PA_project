@@ -21,10 +21,10 @@ Memory/ROB.v
 
 
 # ==== Pipeline registers ====
-pipeline_brakes/fetch.v
-pipeline_brakes/memory.v
-pipeline_brakes/execute.v
-pipeline_brakes/d_to_f.v
+pipeline_brakes/F_to_D.v
+pipeline_brakes/MEM_to_WB.v
+pipeline_brakes/EX_to_MEM.v
+pipeline_brakes/D_to_EX.v
 
 
 # ==== Add ons====

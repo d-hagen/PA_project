@@ -67,7 +67,9 @@ module store_buffer #(
     // Pipeline advancing qualifier
     wire no_stall = (!dcache_stall) && (!Dtlb_stall);
 
-    assign sb_stall = no_stall && Dtlb_addr_valid && MEM_str && sb_full;
+    wire sb_load_conflict = MEM_ld && Dtlb_addr_valid && line_present && !sb_hit;
+
+    assign sb_stall = ((no_stall && Dtlb_addr_valid && MEM_str && sb_full) || sb_load_conflict) ;
 
     // -----------------------------
     // Pointer helpers

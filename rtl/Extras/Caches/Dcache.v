@@ -15,7 +15,7 @@ module dcache #(
     output reg                  dcache_stall,
 
     // From Store Buffer (line-filter)
-    input  wire                 sb_hit,
+    input  wire                 sb_load_miss,
 
     // Store-buffer drain request (lowest priority)
     input  wire                 store_request,
@@ -75,9 +75,11 @@ module dcache #(
     wire [LINE_BITS-1:0]  ptw_line  = Ptw_addr[19:4];
 
     // Only do cache load when SB says miss
-    wire op_active_load        = MEM_ld && !sb_hit && Dtlb_addr_valid;
-    wire do_cache_access_load  = op_active_load && Dtlb_addr_valid;
-    wire mem_needs_translation = op_active_load && !Dtlb_addr_valid;
+    // Only let cache/mem serve load when translation is valid AND SB has no older store to that line
+    wire op_active_load        = MEM_ld && Dtlb_addr_valid && sb_load_miss;
+    wire do_cache_access_load  = op_active_load;
+    wire mem_needs_translation = MEM_ld && !Dtlb_addr_valid;   // independent of SB now
+
 
     assign Dc_busy = dcache_stall | ptw_busy;
 
