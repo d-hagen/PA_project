@@ -36,8 +36,8 @@ shl  r7  r2  r7   0           # r7 = 0x70000 (C)
 # -----------------------------
 addi r0  r0  r30  2           # r30 = log2(4 bytes)  (idx->byte shift)
 
-addi r0  r0  r13  8          # r13 = N
-addi r0  r0  r14  3          # r14 = log2(N)  (for *N)
+addi r0  r0  r13  128          # r13 = N
+addi r0  r0  r14  7        # r14 = log2(N)  (for *N)
 
 add  r14 r30 r28  0     # r28 = log2(N) + log2(4) = log2(N*4)
 shl  r13 r30 r27  0           # r27 = strideBytes = N*4
@@ -93,7 +93,7 @@ addi r0  r0  r12  0           # k = 0
 # ---- k ----
 load r19 r0  r23  0
 load r20 r0  r24  0
-add  r23 r24 r25  0
+mul  r23 r24 r25  0         ## add/mul a*+b
 add  r22 r25 r22  0
 addi r19 r19 r19  4
 add  r20 r27 r20  0
@@ -101,7 +101,7 @@ add  r20 r27 r20  0
 # ---- k+1 ----
 load r19 r0  r23  0
 load r20 r0  r24  0
-add  r23 r24 r25  0
+mul  r23 r24 r25  0          ## add/mul a*+b
 add  r22 r25 r22  0
 addi r19 r19 r19  4
 add  r20 r27 r20  0

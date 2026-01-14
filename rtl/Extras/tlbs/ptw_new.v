@@ -24,20 +24,20 @@ module ptw_2level #(
     output reg                  Dtlb_ptw_valid,   // 1-cycle pulse
     output reg [PPN_WIDTH-1:0]  Dtlb_ptw_pa,
 
-    // ---------- Word-level memory interface ----------
+    // ---------- Word-level memory interface (to dcache) ----------
     output reg                  Ptw_mem_req,
     output reg  [PC_BITS-1:0]   Ptw_mem_addr,
     input       [31:0]          Ptw_mem_rdata,
     input                       Ptw_mem_valid,
 
-    // ---------- Busy from dcache ----------
-    input                       dcache_stall
+    // ---------- NEW: one-cycle pulse when dcache accepts PTW request ----------
+    input                       accepted
 );
 
     // ============================================================
     // Hard-coded root page table PPN
     // ============================================================
-    localparam [PPN_WIDTH-1:0] ROOT_PPN = 8'h30;  // 0x30 << 12 = 0x30000 (196,608)
+    localparam [PPN_WIDTH-1:0] ROOT_PPN = 8'h30;  // 0x30 << 12 = 0x30000
 
     // ============================================================
     // VPN split
@@ -47,7 +47,6 @@ module ptw_2level #(
     wire [9:0] vpn0 = vpn_q[9:0];
 
     reg [PPN_WIDTH-1:0] l1_ppn_q;
-    reg [PPN_WIDTH-1:0] l2_ppn_q;
 
     wire [PPN_WIDTH-1:0] pte_ppn =
         Ptw_mem_rdata[PPN_WIDTH + PAGE_OFFSET_WIDTH - 1 : PAGE_OFFSET_WIDTH];
@@ -77,7 +76,6 @@ module ptw_2level #(
             state           <= S_IDLE;
             vpn_q           <= {VPN_WIDTH{1'b0}};
             l1_ppn_q        <= {PPN_WIDTH{1'b0}};
-            l2_ppn_q        <= {PPN_WIDTH{1'b0}};
             serving_itlb    <= 1'b1;
 
             Itlb_ptw_valid  <= 1'b0;
@@ -90,12 +88,14 @@ module ptw_2level #(
         end else begin
             state <= next_state;
 
+            // defaults (safe)
+            Itlb_ptw_valid <= 1'b0;
+            Dtlb_ptw_valid <= 1'b0;
+
             case (state)
                 // ---------------- IDLE ----------------
                 S_IDLE: begin
-                    Itlb_ptw_valid <= 1'b0;
-                    Dtlb_ptw_valid <= 1'b0;
-                    Ptw_mem_req    <= 1'b0;
+                    Ptw_mem_req <= 1'b0;
 
                     if (Itlb_pa_request) begin
                         vpn_q        <= Itlb_va;
@@ -107,49 +107,33 @@ module ptw_2level #(
                 end
 
                 // ---------------- L1_REQ ----------------
+                // Hold req high until dcache asserts accepted.
                 S_L1_REQ: begin
-                    Itlb_ptw_valid <= 1'b0;
-                    Dtlb_ptw_valid <= 1'b0;
-
-                    if (!dcache_stall) begin
-                        Ptw_mem_req  <= 1'b1;
-                        Ptw_mem_addr <= {ROOT_PPN, vpn1, 2'b00};
-                    end else begin
-                        Ptw_mem_req  <= 1'b0;
-                    end
+                    Ptw_mem_req  <= 1'b1;
+                    Ptw_mem_addr <= {ROOT_PPN, vpn1, 2'b00};
                 end
 
                 // ---------------- L1_WAIT ----------------
                 S_L1_WAIT: begin
-                    Ptw_mem_req    <= 1'b0;
-                    Itlb_ptw_valid <= 1'b0;
-                    Dtlb_ptw_valid <= 1'b0;
+                    Ptw_mem_req <= 1'b0;
 
-                    if (Ptw_mem_valid)
+                    if (Ptw_mem_valid) begin
                         l1_ppn_q <= pte_ppn;
+                    end
                 end
 
                 // ---------------- L2_REQ ----------------
+                // Hold req high until dcache asserts accepted.
                 S_L2_REQ: begin
-                    Itlb_ptw_valid <= 1'b0;
-                    Dtlb_ptw_valid <= 1'b0;
-
-                    if (!dcache_stall) begin
-                        Ptw_mem_req  <= 1'b1;
-                        Ptw_mem_addr <= {l1_ppn_q, vpn0, 2'b00};
-                    end else begin
-                        Ptw_mem_req  <= 1'b0;
-                    end
+                    Ptw_mem_req  <= 1'b1;
+                    Ptw_mem_addr <= {l1_ppn_q, vpn0, 2'b00};
                 end
 
                 // ---------------- L2_WAIT ----------------
                 S_L2_WAIT: begin
-                    Ptw_mem_req    <= 1'b0;
-                    Itlb_ptw_valid <= 1'b0;
-                    Dtlb_ptw_valid <= 1'b0;
+                    Ptw_mem_req <= 1'b0;
 
                     if (Ptw_mem_valid) begin
-                        l2_ppn_q <= pte_ppn;
                         if (serving_itlb) begin
                             Itlb_ptw_pa    <= pte_ppn;
                             Itlb_ptw_valid <= 1'b1;
@@ -162,8 +146,11 @@ module ptw_2level #(
 
                 // ---------------- RESP ----------------
                 S_RESP: begin
-                    Itlb_ptw_valid <= 1'b0;
-                    Dtlb_ptw_valid <= 1'b0;
+                    Ptw_mem_req <= 1'b0;
+                end
+
+                default: begin
+                    Ptw_mem_req <= 1'b0;
                 end
             endcase
         end
@@ -175,12 +162,40 @@ module ptw_2level #(
     always @(*) begin
         next_state = state;
         case (state)
-            S_IDLE:    if (Itlb_pa_request || Dtlb_pa_request) next_state = S_L1_REQ;
-            S_L1_REQ:  if (!dcache_stall)                         next_state = S_L1_WAIT;
-            S_L1_WAIT: if (Ptw_mem_valid)                      next_state = S_L2_REQ;
-            S_L2_REQ:  if (!dcache_stall)                         next_state = S_L2_WAIT;
-            S_L2_WAIT: if (Ptw_mem_valid)                      next_state = S_RESP;
-            S_RESP:                                             next_state = S_IDLE;
+            S_IDLE: begin
+                if (Itlb_pa_request || Dtlb_pa_request)
+                    next_state = S_L1_REQ;
+            end
+
+            // Only advance when dcache tells us it accepted the request
+            S_L1_REQ: begin
+                if (accepted)
+                    next_state = S_L1_WAIT;
+            end
+
+            S_L1_WAIT: begin
+                if (Ptw_mem_valid)
+                    next_state = S_L2_REQ;
+            end
+
+            // Only advance when dcache tells us it accepted the request
+            S_L2_REQ: begin
+                if (accepted)
+                    next_state = S_L2_WAIT;
+            end
+
+            S_L2_WAIT: begin
+                if (Ptw_mem_valid)
+                    next_state = S_RESP;
+            end
+
+            S_RESP: begin
+                next_state = S_IDLE;
+            end
+
+            default: begin
+                next_state = S_IDLE;
+            end
         endcase
     end
 

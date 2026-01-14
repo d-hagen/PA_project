@@ -44,9 +44,13 @@ module dcache #(
     output reg  [31:0]          Ptw_rdata,
     output reg                  Ptw_valid,
 
+    // Busy indicator (ONLY when issuing or waiting for memory)
     output wire                 Dc_busy,
 
-    // NEW: "valid wire": 0 only when op_active_load && output not valid, else always 1
+    // PTW accepted pulse (1-cycle) when we actually accept/latch PTW req
+    output wire                 Ptw_accepted,
+
+    // "valid wire": 0 only when op_active_load && output not valid, else always 1
     output reg                  dcache_data_valid
 );
 
@@ -75,13 +79,9 @@ module dcache #(
     wire [LINE_BITS-1:0]  ptw_line  = Ptw_addr[19:4];
 
     // Only do cache load when SB says miss
-    // Only let cache/mem serve load when translation is valid AND SB has no older store to that line
     wire op_active_load        = MEM_ld && Dtlb_addr_valid && sb_load_miss;
     wire do_cache_access_load  = op_active_load;
-    wire mem_needs_translation = MEM_ld && !Dtlb_addr_valid;   // independent of SB now
-
-
-    assign Dc_busy = dcache_stall | ptw_busy;
+    wire mem_needs_translation = MEM_ld && !Dtlb_addr_valid;
 
     integer i;
 
@@ -128,6 +128,47 @@ module dcache #(
     reg [LINE_BITS-1:0] load_miss_line_q;
     reg                 load_wait;
 
+    // ============================================================
+    // Dc_busy
+    // ============================================================
+    wire mem_waiting = ptw_busy | sb_store_wait | load_wait;
+    assign Dc_busy   = Dc_mem_req | mem_waiting | MEM_mem_valid;
+
+    // ============================================================
+    // Arbitration intent signals (PTW has highest priority)
+    // ============================================================
+    wire ptw_can_issue =
+        (!MEM_mem_valid) &&
+        (!ptw_busy) &&
+        Ptw_req &&
+        (!sb_store_wait) &&
+        (!load_wait);
+
+    // If PTW is requesting, it completely blocks other new issues.
+    // Loads and stores may still be *waiting* (load_wait/sb_store_wait),
+    // but we won't accept a new PTW unless the port is free (above condition).
+    wire load_can_issue =
+        (!MEM_mem_valid) &&
+        (!ptw_can_issue) &&
+        op_active_load &&
+        Dtlb_addr_valid &&
+        (!hit);
+
+    wire store_can_issue =
+        (!MEM_mem_valid) &&
+        (!ptw_can_issue) &&
+        (!load_can_issue) &&
+        store_need_service &&
+        (!sb_store_wait) &&
+        (!load_wait) &&
+        (!ptw_busy);
+
+    // ============================================================
+    // PTW accepted pulse: exactly when PTW wins arbitration.
+    // ============================================================
+    reg ptw_accepted_r;
+    assign Ptw_accepted = ptw_accepted_r;
+
     // ===================== Sequential logic ==========================
     always @(posedge clk) begin
         if (rst) begin
@@ -158,34 +199,36 @@ module dcache #(
 
             load_wait        <= 1'b0;
             load_miss_line_q <= {LINE_BITS{1'b0}};
+
+            ptw_accepted_r   <= 1'b0;
         end else begin
             // default pulses
-            Dc_wb_we    <= 1'b0;
-            Ptw_valid   <= 1'b0;
-            store_valid <= 1'b0;
+            Dc_wb_we        <= 1'b0;
+            Ptw_valid       <= 1'b0;
+            store_valid     <= 1'b0;
+            ptw_accepted_r  <= 1'b0;
 
             // -------------------------
-            // PTW bookkeeping (only if nothing else needs memory)
+            // Accept PTW when it wins arbitration
             // -------------------------
-            if (!ptw_busy && !MEM_mem_valid && Ptw_req &&
-                (!op_active_load || mem_needs_translation) &&
-                !sb_store_wait && !load_wait) begin
-                ptw_busy   <= 1'b1;
-                ptw_addr_q <= Ptw_addr;
+            if (ptw_can_issue) begin
+                ptw_busy       <= 1'b1;
+                ptw_addr_q     <= Ptw_addr;
+                ptw_accepted_r <= 1'b1; // 1-cycle pulse
             end
 
             // -------------------------
-            // Latch when we launch memory requests
+            // Latch when we launch memory requests (load/store miss)
             // -------------------------
             if (Dc_mem_req && !MEM_mem_valid) begin
                 // Load miss request launched
-                if (op_active_load && Dtlb_addr_valid && !hit) begin
+                if (load_can_issue) begin
                     load_wait        <= 1'b1;
                     load_miss_line_q <= addr_line;
                 end
 
                 // Store miss request launched
-                if (!op_active_load && !ptw_busy && store_need_service && !sb_store_wait && !load_wait) begin
+                if (store_can_issue) begin
                     sb_store_wait   <= 1'b1;
                     sb_store_line_q <= store_line;
 
@@ -243,7 +286,7 @@ module dcache #(
                             data[fifo_ptr][sb_store_word_q] <= sb_store_val_q[31:0];
                         end
 
-                        store_valid   <= 1'b1;   // acknowledge SB head store done
+                        store_valid   <= 1'b1;
                         sb_store_wait <= 1'b0;
 
                         fifo_ptr <= fifo_ptr + 1'b1;
@@ -265,7 +308,7 @@ module dcache #(
             end
 
             // -------------------------
-            // Store-hit case (complete immediately)
+            // Store-hit case (complete immediately) -- still allowed
             // -------------------------
             if (!op_active_load && !mem_needs_translation && !ptw_busy &&
                 store_request && !MEM_mem_valid && !sb_store_wait && !load_wait) begin
@@ -299,7 +342,6 @@ module dcache #(
         Dc_mem_req        = 1'b0;
         Dc_mem_addr       = addr_line;
 
-        // default: ALWAYS 1, except the one bad case you described
         dcache_data_valid = 1'b1;
 
         // Load cache lookup
@@ -312,50 +354,44 @@ module dcache #(
             end
         end
 
-        // ---------------- Loads (highest priority) ----------------
-        if (op_active_load) begin
-            if (!Dtlb_addr_valid) begin
-                dcache_stall = 1'b0; // DTLB stalls elsewhere
-            end else begin
-                if (hit) begin
-                    tmp_load_word = data[hit_idx][addr_word];
-                    if (MEM_byt) begin
-                        case (addr_byte)
-                            2'b00: MEM_data_mem = {24'b0, tmp_load_word[7:0]};
-                            2'b01: MEM_data_mem = {24'b0, tmp_load_word[15:8]};
-                            2'b10: MEM_data_mem = {24'b0, tmp_load_word[23:16]};
-                            2'b11: MEM_data_mem = {24'b0, tmp_load_word[31:24]};
-                        endcase
-                    end else begin
-                        MEM_data_mem = tmp_load_word;
-                    end
-                end else begin
-                    // load miss: request line
-                    dcache_stall = 1'b1;
-                    Dc_mem_req   = (!MEM_mem_valid) ? 1'b1 : 1'b0;
-                    Dc_mem_addr  = addr_line;
-                end
-            end
-        end else begin
-            // ---------------- PTW (middle priority) ----------------
-            if (!MEM_mem_valid && !ptw_busy && Ptw_req && !sb_store_wait && !load_wait) begin
-                Dc_mem_req  = 1'b1;
-                Dc_mem_addr = ptw_line;
-            end
-            // ---------------- Store miss fetch (lowest priority) ----------------
-            else if (!MEM_mem_valid && store_need_service && !sb_store_wait && !ptw_busy && !load_wait) begin
-                Dc_mem_req  = 1'b1;
-                Dc_mem_addr = store_line; // request the line of the store
-            end
+        // ----------------------------------------------------------
+        // Memory port arbitration (PTW FIRST)
+        // ----------------------------------------------------------
+        if (ptw_can_issue) begin
+            Dc_mem_req  = 1'b1;
+            Dc_mem_addr = ptw_line;
+        end else if (load_can_issue) begin
+            Dc_mem_req  = 1'b1;
+            Dc_mem_addr = addr_line;
+        end else if (store_can_issue) begin
+            Dc_mem_req  = 1'b1;
+            Dc_mem_addr = store_line;
         end
 
         // ----------------------------------------------------------
-        // VALID FLAG (your exact rule):
-        // 0 only when op_active_load AND the output isn't valid.
-        // Otherwise ALWAYS 1.
-        //
-        // Here, "valid output" for loads means: translated addr valid AND hit.
+        // Load datapath behavior (still highest “functional” priority),
+        // but PTW can block new load-miss issues by arbitration above.
         // ----------------------------------------------------------
+        if (op_active_load) begin
+            if (hit) begin
+                tmp_load_word = data[hit_idx][addr_word];
+                if (MEM_byt) begin
+                    case (addr_byte)
+                        2'b00: MEM_data_mem = {24'b0, tmp_load_word[7:0]};
+                        2'b01: MEM_data_mem = {24'b0, tmp_load_word[15:8]};
+                        2'b10: MEM_data_mem = {24'b0, tmp_load_word[23:16]};
+                        2'b11: MEM_data_mem = {24'b0, tmp_load_word[31:24]};
+                    endcase
+                end else begin
+                    MEM_data_mem = tmp_load_word;
+                end
+            end else begin
+                // load miss: stall (request is controlled by arbitration)
+                dcache_stall = 1'b1;
+            end
+        end
+
+        // VALID FLAG:
         if (op_active_load && !(Dtlb_addr_valid && hit))
             dcache_data_valid = 1'b0;
         else

@@ -440,7 +440,7 @@ module cpu #(
     .Ptw_mem_rdata   (Ptw_mem_rdata),
     .Ptw_mem_valid   (Ptw_mem_valid),
 
-    .dcache_stall    (dcache_stall)
+    .accepted    (Ptw_accepted)
   );
 
   // =======================
@@ -955,6 +955,8 @@ module cpu #(
   // =======================
   // D-Cache
   // =======================
+
+  wire Ptw_accepted;
   dcache #(
     .XLEN(XLEN)
   ) u_dcache (
@@ -992,7 +994,9 @@ module cpu #(
     .Ptw_rdata      (Ptw_mem_rdata),
     .Ptw_valid      (Ptw_mem_valid),
 
-    .dcache_data_valid (dcache_data_valid)
+    .dcache_data_valid (dcache_data_valid),
+
+    .Ptw_accepted (Ptw_accepted)
   );
 
   // =======================
