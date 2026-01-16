@@ -33,10 +33,9 @@ module cpu #(
   wire                 F_stall;
 
   // ===== ITLB / PTW wires =====
-  wire F_admin = 1'b0;
-
   wire               Itlb_ptw_valid;
   wire [7:0]         Itlb_ptw_pa;
+  wire               Itlb_ptw_fault;        // NEW: PTW says ITLB walk faulted
 
   wire               Itlb_stall;
   wire               Itlb_pa_request;
@@ -45,6 +44,7 @@ module cpu #(
   // ===== DTLB / PTW wires =====
   wire               Dtlb_ptw_valid;
   wire [7:0]         Dtlb_ptw_pa;
+  wire               Dtlb_ptw_fault;        // NEW: PTW says DTLB walk faulted
 
   wire               Dtlb_pa_request;
   wire [19:0]        Dtlb_va;
@@ -58,6 +58,7 @@ module cpu #(
   wire [19:0] Ptw_mem_addr;
   wire [31:0] Ptw_mem_rdata;
   wire        Ptw_mem_valid;
+  wire        Ptw_accepted;                 // NEW: handshake from dcache
 
   // Decode stage / F→D reg
   wire [XLEN-1:0]     D_inst;
@@ -77,6 +78,9 @@ module cpu #(
 
   wire               D_BP_taken;
   wire [VPC_BITS-1:0] D_BP_target_pc;
+
+  // NEW: carry ITLB PTW fault into D stage
+  wire               D_itlb_ptw_fault;
 
   // Decoder outputs
   wire [5:0]         D_opc;
@@ -294,11 +298,11 @@ module cpu #(
 
   // ============================================================
   // PC redirect mux:
-  //  - exception commit -> 0x4000
-  //  - iret commit      -> rm1 (r33)
+  //  - exception commit -> 0x0FA0
+  //  - iret commit      -> rm1 + 4
   // ============================================================
   wire                  redir_valid = EXC_we | IRET_we;
-  wire [VPC_BITS-1:0]   redir_pc    = EXC_we ? 32'h0000_0FA0 : rm1+4;
+  wire [VPC_BITS-1:0]   redir_pc    = EXC_we ? 32'h0000_0FA0 : rm1 + 32'd4;
 
   // ============================================================
   // Global stall with ROB/RF
@@ -374,7 +378,7 @@ module cpu #(
     .clk            (clk),
     .rst            (rst),
     .va_in          (F_pc_va),
-    .F_admin        (F_admin),
+    .admin          (admin),
 
     .Itlb_ptw_valid    (Itlb_ptw_valid),
     .Itlb_ptw_pa       (Itlb_ptw_pa),
@@ -396,6 +400,8 @@ module cpu #(
   ) u_dtlb (
     .clk             (clk),
     .rst             (rst),
+
+    .admin           (admin),
 
     .va_in           (MEM_alu_out),
     .MEM_ld          (MEM_ld),
@@ -428,19 +434,21 @@ module cpu #(
 
     .Itlb_ptw_valid  (Itlb_ptw_valid),
     .Itlb_ptw_pa     (Itlb_ptw_pa),
+    .Itlb_ptw_fault  (Itlb_ptw_fault),   // FIXED: wire to ITLB fault
 
     .Dtlb_pa_request (Dtlb_pa_request),
     .Dtlb_va         (Dtlb_va),
 
     .Dtlb_ptw_valid  (Dtlb_ptw_valid),
     .Dtlb_ptw_pa     (Dtlb_ptw_pa),
+    .Dtlb_ptw_fault  (Dtlb_ptw_fault),
 
     .Ptw_mem_req     (Ptw_mem_req),
     .Ptw_mem_addr    (Ptw_mem_addr),
     .Ptw_mem_rdata   (Ptw_mem_rdata),
     .Ptw_mem_valid   (Ptw_mem_valid),
 
-    .accepted    (Ptw_accepted)
+    .accepted        (Ptw_accepted)
   );
 
   // =======================
@@ -476,6 +484,9 @@ module cpu #(
     .F_BP_taken     (F_BP_taken),
     .F_BP_target_pc (F_BP_target_pc),
 
+    // NEW: pass the ITLB PTW fault into D stage
+    .Itlb_ptw_fault (Itlb_ptw_fault),
+
     .stall_D        (stall_allD),
     .dcache_stall   (dcache_stall),
     .sb_stall       (sb_stall),
@@ -491,7 +502,10 @@ module cpu #(
     .D_pc           (D_pc),
     .D_inst         (D_inst),
     .D_BP_taken     (D_BP_taken),
-    .D_BP_target_pc (D_BP_target_pc)
+    .D_BP_target_pc (D_BP_target_pc),
+
+    // NEW: registered fault output
+    .D_itlb_ptw_fault (D_itlb_ptw_fault)
   );
 
   // =======================
@@ -607,20 +621,21 @@ module cpu #(
   );
 
   // =======================
-  // Exception handler (exceptions tied off for now)
-  // Branch flush goes through here
+  // Exception handler (branch flush goes through here)
   // =======================
   wire [TAG_W-1:0] D_exc_tag = RN_alloc_tag;
 
-// Only assert decode-exception when the instruction is actually being allocated
-  wire D_exc_fire = D_exc & rob_do_alloc; 
+  // Only assert decode-exception when the instruction is actually being allocated
+  wire rob_do_alloc = RN_alloc & D_fire & ~stall_rob;
+  wire D_exc_fire = D_exc & rob_do_alloc;
+
   exc_handler #(
     .XLEN (XLEN),
     .TAG_W(TAG_W)
   ) u_exc_handler (
-    .EX_exc  (EX_exc), .EX_tag  (EX_tag),         .EX_pc  (EX_pc),
-    .MEM_exc (1'b0), .MEM_tag (MEM_tag),        .MEM_pc (MEM_pc),
-    .WB_exc  (1'b0), .WB_tag  (WB_tag),         .WB_pc  (WB_pc),
+    .EX_exc  (EX_exc), .EX_tag  (EX_tag),   .EX_pc  (EX_pc),
+    .MEM_exc (Dtlb_ptw_fault), .MEM_tag (MEM_tag), .MEM_pc (MEM_pc),
+    .WB_exc  (1'b0),   .WB_tag  (WB_tag),   .WB_pc  (WB_pc),
 
     .EX_taken  (EX_taken),
     .EX_br_tag (EX_tag),
@@ -681,7 +696,7 @@ module cpu #(
   );
 
   // =======================
-  // Regfile with ROB (UPDATED: D_iret + rm1/rm2 + EXC capture)
+  // Regfile with ROB
   // =======================
   regfile_rob #(
     .XLEN      (XLEN),
@@ -702,7 +717,7 @@ module cpu #(
     .D_brn        (D_brn),
     .D_jmp        (D_jmp),
     .D_addi       (D_addi),
-    .D_iret       (D_iret),   // NEW
+    .D_iret       (D_iret),
 
     .RN_ra_is_rob (RN_ra_is_rob),
     .RN_rb_is_rob (RN_rb_is_rob),
@@ -752,7 +767,7 @@ module cpu #(
   );
 
   // =======================
-  // D → EX pipeline register (tag)
+  // D → EX pipeline register (tag + EX_exc ORed with D_itlb_ptw_fault inside)
   // =======================
   d_to_ex_reg #(
     .XLEN     (XLEN),
@@ -783,6 +798,9 @@ module cpu #(
 
     .D_tag          (D_tag),
     .D_exc          (D_exc),
+
+    // NEW: ITLB PTW fault from D stage
+    .D_itlb_ptw_fault (D_itlb_ptw_fault),
 
     .stall_D        (stall_allD),
     .dcache_stall   (dcache_stall),
@@ -955,8 +973,6 @@ module cpu #(
   // =======================
   // D-Cache
   // =======================
-
-  wire Ptw_accepted;
   dcache #(
     .XLEN(XLEN)
   ) u_dcache (
@@ -996,7 +1012,7 @@ module cpu #(
 
     .dcache_data_valid (dcache_data_valid),
 
-    .Ptw_accepted (Ptw_accepted)
+    .Ptw_accepted   (Ptw_accepted)
   );
 
   // =======================
@@ -1045,9 +1061,9 @@ module cpu #(
 
     .MEM_tag      (MEM_tag),
 
-    .dcache_stall (dcache_stall), 
+    .dcache_stall (dcache_stall),
     .Dtlb_stall   (Dtlb_stall),
-    .sb_stall    (sb_stall),
+    .sb_stall     (sb_stall),
 
     .MEM_ld_valid (load_valid || mul_result_valid),
 
@@ -1072,12 +1088,10 @@ module cpu #(
   // ============================================================
   // ROB instance (UPDATED: alloc_iret + IRET_we/tag)
   // ============================================================
-  wire        WB_wb_valid    = (WB_we | WB_jlx) && WB_ld_valid;
+  wire        WB_wb_valid     = (WB_we | WB_jlx) && WB_ld_valid;
   wire [XLEN-1:0] WB_wb_value = WB_jlx ? (WB_pc + 32'd4) : WB_data_mem;
 
-  wire       rec_active;
-
-  wire rob_do_alloc = RN_alloc & D_fire & ~stall_rob;
+  wire rec_active;
 
   rob #(
     .XLEN(XLEN), .ADDR_SIZE(ADDR_SIZE), .ROB_DEPTH(ROB_DEPTH), .TAG_W(TAG_W)
@@ -1090,7 +1104,7 @@ module cpu #(
     .alloc_we      (D_we  & D_fire),
     .alloc_rd_arch (D_rd),
     .alloc_jlx     (D_jlx & D_fire),
-    .alloc_iret    (D_iret & D_fire),   // NEW
+    .alloc_iret    (D_iret & D_fire),
 
     .wb_valid      (WB_wb_valid),
     .wb_tag        (WB_tag),
@@ -1114,7 +1128,7 @@ module cpu #(
     .C_value       (C_value),
     .C_tag         (C_tag),
 
-    // exception mark-in (still driven by exc_handler when you enable real exc signals)
+    // exception mark-in
     .exc_set_valid (exc_set_valid),
     .exc_set_tag   (exc_set_tag),
     .exc_set_pc    (exc_set_pc),

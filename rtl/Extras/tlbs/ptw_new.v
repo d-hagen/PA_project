@@ -19,10 +19,12 @@ module ptw_2level #(
     // ---------- Back to ITLB ----------
     output reg                  Itlb_ptw_valid,   // 1-cycle pulse
     output reg [PPN_WIDTH-1:0]  Itlb_ptw_pa,
+    output reg                  Itlb_ptw_fault,   // 1-cycle pulse
 
     // ---------- Back to DTLB ----------
     output reg                  Dtlb_ptw_valid,   // 1-cycle pulse
     output reg [PPN_WIDTH-1:0]  Dtlb_ptw_pa,
+    output reg                  Dtlb_ptw_fault,   // 1-cycle pulse
 
     // ---------- Word-level memory interface (to dcache) ----------
     output reg                  Ptw_mem_req,
@@ -30,7 +32,7 @@ module ptw_2level #(
     input       [31:0]          Ptw_mem_rdata,
     input                       Ptw_mem_valid,
 
-    // ---------- NEW: one-cycle pulse when dcache accepts PTW request ----------
+    // ---------- one-cycle pulse when dcache accepts PTW request ----------
     input                       accepted
 );
 
@@ -48,6 +50,8 @@ module ptw_2level #(
 
     reg [PPN_WIDTH-1:0] l1_ppn_q;
 
+    // PTE decode (your format: (ppn<<12)|1 )
+    wire                 pte_v   = Ptw_mem_rdata[0];
     wire [PPN_WIDTH-1:0] pte_ppn =
         Ptw_mem_rdata[PPN_WIDTH + PAGE_OFFSET_WIDTH - 1 : PAGE_OFFSET_WIDTH];
 
@@ -55,6 +59,11 @@ module ptw_2level #(
     // Which port is being served
     // ============================================================
     reg serving_itlb;
+
+    // ============================================================
+    // Fault tracking (registered) - does NOT affect no-fault behavior
+    // ============================================================
+    reg l1_fault_pending;
 
     // ============================================================
     // FSM
@@ -73,29 +82,37 @@ module ptw_2level #(
     // ============================================================
     always @(posedge clk) begin
         if (rst) begin
-            state           <= S_IDLE;
-            vpn_q           <= {VPN_WIDTH{1'b0}};
-            l1_ppn_q        <= {PPN_WIDTH{1'b0}};
-            serving_itlb    <= 1'b1;
+            state            <= S_IDLE;
+            vpn_q            <= {VPN_WIDTH{1'b0}};
+            l1_ppn_q         <= {PPN_WIDTH{1'b0}};
+            serving_itlb     <= 1'b1;
+            l1_fault_pending <= 1'b0;
 
-            Itlb_ptw_valid  <= 1'b0;
-            Itlb_ptw_pa     <= {PPN_WIDTH{1'b0}};
-            Dtlb_ptw_valid  <= 1'b0;
-            Dtlb_ptw_pa     <= {PPN_WIDTH{1'b0}};
+            Itlb_ptw_valid   <= 1'b0;
+            Itlb_ptw_pa      <= {PPN_WIDTH{1'b0}};
+            Itlb_ptw_fault   <= 1'b0;
 
-            Ptw_mem_req     <= 1'b0;
-            Ptw_mem_addr    <= {PC_BITS{1'b0}};
+            Dtlb_ptw_valid   <= 1'b0;
+            Dtlb_ptw_pa      <= {PPN_WIDTH{1'b0}};
+            Dtlb_ptw_fault   <= 1'b0;
+
+            Ptw_mem_req      <= 1'b0;
+            Ptw_mem_addr     <= {PC_BITS{1'b0}};
         end else begin
             state <= next_state;
 
-            // defaults (safe)
+            // one-cycle pulses default low
             Itlb_ptw_valid <= 1'b0;
             Dtlb_ptw_valid <= 1'b0;
+            Itlb_ptw_fault <= 1'b0;
+            Dtlb_ptw_fault <= 1'b0;
 
             case (state)
+
                 // ---------------- IDLE ----------------
                 S_IDLE: begin
-                    Ptw_mem_req <= 1'b0;
+                    Ptw_mem_req      <= 1'b0;
+                    l1_fault_pending <= 1'b0;   // clear per-walk
 
                     if (Itlb_pa_request) begin
                         vpn_q        <= Itlb_va;
@@ -107,7 +124,7 @@ module ptw_2level #(
                 end
 
                 // ---------------- L1_REQ ----------------
-                // Hold req high until dcache asserts accepted.
+                // Hold req high until accepted.
                 S_L1_REQ: begin
                     Ptw_mem_req  <= 1'b1;
                     Ptw_mem_addr <= {ROOT_PPN, vpn1, 2'b00};
@@ -118,15 +135,31 @@ module ptw_2level #(
                     Ptw_mem_req <= 1'b0;
 
                     if (Ptw_mem_valid) begin
-                        l1_ppn_q <= pte_ppn;
+                        if (!pte_v) begin
+                            // record L1 fault; do NOT proceed to real L2 fetch
+                            l1_fault_pending <= 1'b1;
+
+                            if (serving_itlb) Itlb_ptw_fault <= 1'b1;
+                            else              Dtlb_ptw_fault <= 1'b1;
+                        end else begin
+                            // old behavior: capture ppn for L2 table
+                            l1_ppn_q <= pte_ppn;
+                        end
                     end
                 end
 
                 // ---------------- L2_REQ ----------------
-                // Hold req high until dcache asserts accepted.
+                // Old PTW always issued the L2 req here.
+                // We keep that IDENTICAL when no L1 fault occurred.
                 S_L2_REQ: begin
-                    Ptw_mem_req  <= 1'b1;
-                    Ptw_mem_addr <= {l1_ppn_q, vpn0, 2'b00};
+                    if (!l1_fault_pending) begin
+                        Ptw_mem_req  <= 1'b1;
+                        Ptw_mem_addr <= {l1_ppn_q, vpn0, 2'b00};
+                    end else begin
+                        // on L1 fault, suppress request (differs only on fault)
+                        Ptw_mem_req  <= 1'b0;
+                        Ptw_mem_addr <= {PC_BITS{1'b0}};
+                    end
                 end
 
                 // ---------------- L2_WAIT ----------------
@@ -134,12 +167,19 @@ module ptw_2level #(
                     Ptw_mem_req <= 1'b0;
 
                     if (Ptw_mem_valid) begin
-                        if (serving_itlb) begin
-                            Itlb_ptw_pa    <= pte_ppn;
-                            Itlb_ptw_valid <= 1'b1;
+                        if (!pte_v) begin
+                            // L2 invalid -> fault
+                            if (serving_itlb) Itlb_ptw_fault <= 1'b1;
+                            else              Dtlb_ptw_fault <= 1'b1;
                         end else begin
-                            Dtlb_ptw_pa    <= pte_ppn;
-                            Dtlb_ptw_valid <= 1'b1;
+                            // success -> IDENTICAL to old: assert ptw_valid here
+                            if (serving_itlb) begin
+                                Itlb_ptw_pa    <= pte_ppn;
+                                Itlb_ptw_valid <= 1'b1;
+                            end else begin
+                                Dtlb_ptw_pa    <= pte_ppn;
+                                Dtlb_ptw_valid <= 1'b1;
+                            end
                         end
                     end
                 end
@@ -167,20 +207,26 @@ module ptw_2level #(
                     next_state = S_L1_REQ;
             end
 
-            // Only advance when dcache tells us it accepted the request
             S_L1_REQ: begin
                 if (accepted)
                     next_state = S_L1_WAIT;
             end
 
+            // IMPORTANT: identical to old when no fault:
+            // on mem_valid, we always advance to L2_REQ.
+            // Fault is handled by suppressing the L2 request in S_L2_REQ.
             S_L1_WAIT: begin
                 if (Ptw_mem_valid)
                     next_state = S_L2_REQ;
             end
 
-            // Only advance when dcache tells us it accepted the request
+            // identical to old: wait for accepted, then go L2_WAIT.
+            // If a fault was detected at L1, we still move on,
+            // but S_L2_REQ will suppress the request and we can exit quickly.
             S_L2_REQ: begin
-                if (accepted)
+                if (l1_fault_pending)
+                    next_state = S_RESP;   // skip L2 access on L1 fault
+                else if (accepted)
                     next_state = S_L2_WAIT;
             end
 
