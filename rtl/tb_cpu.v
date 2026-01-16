@@ -81,24 +81,24 @@ module cpu_run_tb;
     input [31:0] inst;
     input [31:0] F_pc;
     input [31:0] store_req_addr;
-    input [31:0] Ptw_mem_req;
-    input [31:0] Dtlb_stall;
-    input [31:0] Ptw_accepted;
-    input [31:0] Ptw_mem_valid;
+    input [31:0] admin;
+    input [31:0] Itlb_ptw_fault;
+    input [31:0] Dtlb_ptw_fault;
+    input [31:0] D_itlb_ptw_fault;
     input [31:0] EX_tag;
     input [31:0] wb_pc;
     begin
       $display(
-        "C%0d | F_pc_va=%0d F_inst=0x%08h | F_pc=%0d | store_request_address=%0d -> Ptw_mem_req=%0d | Dtlb_stall=%0d | Ptw_accepted=%0b Ptw_mem_valid=%0d EX_tag=%0d WB_pc=%0d",
+        "C%0d | F_pc_va=%0d F_inst=0x%08h | F_pc=%0d | store_request_address=%0d -> admin=%0d | Itlb_ptw_fault=%0d | Dtlb_ptw_fault=%0b D_itlb_ptw_fault=%0d EX_tag=%0d WB_pc=%0d",
         cyc,
         f_pc_va,
         inst,
         F_pc,
         store_req_addr,
-        Ptw_mem_req,
-        Dtlb_stall,
-        Ptw_accepted,
-        Ptw_mem_valid,
+        admin,
+        Itlb_ptw_fault,
+        Dtlb_ptw_fault,
+        D_itlb_ptw_fault,
         EX_tag,
         wb_pc
       );
@@ -176,25 +176,7 @@ module cpu_run_tb;
     end
   endtask
 
-  task dump_dcache;
-    integer k;
-    begin
-      $display("\n==== D-CACHE CONTENT ====");
-      for (k = 0; k < 4; k = k + 1) begin
-        $display("Entry %0d | valid=%0b dirty=%0b tag=%0d",
-                  k,
-                  dut.u_dcache.valid[k],
-                  dut.u_dcache.dirty[k],
-                  dut.u_dcache.tag[k]);
-
-        $display("    DATA: %0d %0d %0d %0d",
-                  dut.u_dcache.data[k][0],
-                  dut.u_dcache.data[k][1],
-                  dut.u_dcache.data[k][2],
-                  dut.u_dcache.data[k][3]);
-      end
-    end
-  endtask
+ 
 
   task dump_store_buffer;
     integer k;
@@ -349,10 +331,10 @@ module cpu_run_tb;
             curr_inst,
             dut.F_pc,
             dut.store_request_address,
-            dut.Ptw_mem_req,
-            dut.Dtlb_stall,
-            dut.Ptw_accepted,
-            dut.Ptw_mem_valid,
+            dut.admin,
+            dut.Itlb_ptw_fault,
+            dut.Dtlb_ptw_fault,
+            dut.D_itlb_ptw_fault,
             dut.EX_tag,
             dut.WB_pc
           );
@@ -418,7 +400,6 @@ module cpu_run_tb;
 
     print_rob();
 
-    dump_dcache();
     dump_store_buffer();
 
     print_end_of_test();

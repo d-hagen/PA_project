@@ -11,7 +11,7 @@
 20003870    // [VA PC 28] addi r0  r0  r7   112
 18e23800    // [VA PC 32] shl  r7  r2  r7   0           # r7 = 0x70000 (C)
 2000f002    // [VA PC 36] addi r0  r0  r30  2           # r30 = log2(4 bytes)  (idx->byte shift)
-20006880    // [VA PC 40] addi r0  r0  r13  128          # r13 = N
+20006880    // [VA PC 40] addi r0  r0  r13  128         # r13 = N
 20007007    // [VA PC 44] addi r0  r0  r14  7        # r14 = log2(N)  (for *N)
 01dee000    // [VA PC 48] add  r14 r30 r28  0     # r28 = log2(N) + log2(4) = log2(N*4)
 19bed800    // [VA PC 52] shl  r13 r30 r27  0           # r27 = strideBytes = N*4

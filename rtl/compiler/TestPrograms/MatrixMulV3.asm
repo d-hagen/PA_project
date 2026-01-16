@@ -36,7 +36,7 @@ shl  r7  r2  r7   0           # r7 = 0x70000 (C)
 # -----------------------------
 addi r0  r0  r30  2           # r30 = log2(4 bytes)  (idx->byte shift)
 
-addi r0  r0  r13  128          # r13 = N
+addi r0  r0  r13  128         # r13 = N
 addi r0  r0  r14  7        # r14 = log2(N)  (for *N)
 
 add  r14 r30 r28  0     # r28 = log2(N) + log2(4) = log2(N*4)

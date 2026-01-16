@@ -11,7 +11,7 @@ module itlb #(
 
     input  [VA_WIDTH-1:0]       va_in,
 
-    input                       F_admin,
+    input                       admin,
 
     // Page table walker interface
     input                       Itlb_ptw_valid,          // like F_mem_valid
@@ -57,7 +57,7 @@ module itlb #(
 
         // Normal mode lookup (skip lookup while PTW is returning,
         // similar to icache skipping tag lookup when F_mem_valid is high)
-        if (!F_admin && !Itlb_ptw_valid) begin
+        if (!admin && !Itlb_ptw_valid) begin
             for (i = 0; i < NUM_ENTRIES; i = i + 1) begin
                 if (!hit && valid[i] && (vpn_buf[i] == va_vpn)) begin
                     hit     = 1'b1;
@@ -72,18 +72,18 @@ module itlb #(
     // - normal hit: PPN from TLB
     // - normal miss: value is irrelevant (stall is high), so drive 0
     assign F_pc =
-        F_admin ? va_in[PPN_WIDTH-1:0] :     // admin mode bypass
+        admin ? va_in[PPN_WIDTH-1:0] :     // admin mode bypass
         hit     ? {hit_ppn, va_in[PAGE_OFFSET_WIDTH-1:0]}  :     // normal hit
                   {PPN_WIDTH{1'b0}};         // normal miss (unused while stalled)
 
     // Stall whenever we are in normal mode and do not hit in the TLB
-    assign Itlb_stall = (!F_admin) && (!hit);
+    assign Itlb_stall = (!admin) && (!hit);
 
     // Request to PTW only when:
     //  - in normal mode
     //  - we don't hit
     //  - PTW is not currently returning a result
-    assign Itlb_pa_request = (!F_admin) && (!hit) && (!Itlb_ptw_valid);
+    assign Itlb_pa_request = (!admin) && (!hit) && (!Itlb_ptw_valid);
 
     // VA sent to PTW (analogous to Ic_mem_addr = pc_line; here we send full VA)
     assign Itlb_va = va_in[VA_WIDTH-1:PAGE_OFFSET_WIDTH]; // VA[31:12]

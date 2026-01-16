@@ -28,11 +28,14 @@ module d_to_ex_reg #(
     input  wire                 D_BP_taken,
     input  wire [VPC_BITS-1:0]  D_BP_target_pc,
 
-    // NEW: ROB tag for this instruction in D
+    // ROB tag for this instruction in D
     input  wire [TAG_W-1:0]     D_tag,
 
-    // NEW: decode exception (to be handled at EX age)
+    // decode exception
     input  wire                 D_exc,
+
+    // NEW: ITLB PTW/page fault indicator coming from D stage
+    input  wire                 D_itlb_ptw_fault,
 
     // Stall/Flush
     input  wire                 stall_D,
@@ -63,10 +66,9 @@ module d_to_ex_reg #(
     output wire [VPC_BITS-1:0]  EX_pc,
     output wire                 EX_jlx,
 
-    // NEW: forwarded ROB tag into EX
     output wire [TAG_W-1:0]     EX_tag,
 
-    // NEW: exception at EX age (flopped from D)
+    // exception at EX age
     output wire                 EX_exc
 );
 
@@ -82,7 +84,6 @@ module d_to_ex_reg #(
 
     reg [TAG_W-1:0]     ex_tag_r;
 
-    // NEW
     reg                 ex_exc_r;
 
     always @(posedge clk) begin
@@ -118,9 +119,12 @@ module d_to_ex_reg #(
             ex_brn_r          <= D_brn;
             ex_bp_taken_r     <= D_BP_taken;
             ex_rd_r           <= D_rd;
-            ex_ld_r           <= D_ld;
-            ex_str_r          <= D_str;
-            ex_byt_r          <= D_byt;
+
+            // If ITLB PTW fault, suppress memory ops in EX
+            ex_ld_r           <= D_itlb_ptw_fault ? 1'b0 : D_ld;
+            ex_str_r          <= D_itlb_ptw_fault ? 1'b0 : D_str;
+            ex_byt_r          <= D_itlb_ptw_fault ? 1'b0 : D_byt;
+
             ex_we_r           <= D_we;
             ex_mul_r          <= D_mul;
             ex_bp_target_pc_r <= D_BP_target_pc;
@@ -128,7 +132,9 @@ module d_to_ex_reg #(
             ex_jlx_r          <= D_jlx;
 
             ex_tag_r          <= D_tag;
-            ex_exc_r          <= D_exc;
+
+            // EX_exc asserted if either decode exception OR ITLB PTW fault
+            ex_exc_r          <= (D_exc || D_itlb_ptw_fault);
         end
         // else: hold regs
     end

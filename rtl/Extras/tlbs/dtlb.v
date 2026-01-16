@@ -14,6 +14,8 @@ module dtlb #(
     input                       MEM_ld,
     input                       MEM_str,
 
+    input                       admin,
+
     // Page table walker interface
     input                       MEM_ptw_valid,   // PTW returning translation
     input  [PPN_WIDTH-1:0]      MEM_ptw_pa,      // translated PPN from PTW
@@ -74,23 +76,23 @@ module dtlb #(
     // - hit: zero-extend PA20 into 32-bit, with PA in low 20 bits
     // - miss: drive 0 (invalid anyway)
     assign Dtlb_addr_out =
-        (!do_mem_access) ? va_in :
+        (!do_mem_access || admin) ? va_in :
         (hit)            ? {12'b0, pa20} :
                            32'b0;
 
     // Valid when:
     // - bypass/admin: always "valid" output (since we’re just passing through)
     // - memory op: valid only on hit
-    assign Dtlb_addr_valid = (!do_mem_access) ? 1'b1 : hit;
+    assign Dtlb_addr_valid = (!do_mem_access || admin) ? 1'b1 : hit;
 
     // Stall only on real memory ops that miss
-    assign Dtlb_stall = (do_mem_access) && (!hit);
+    assign Dtlb_stall = (do_mem_access) && (!hit) && !admin;
 
     // PTW request only when:
     //  - real memory op
     //  - miss
     //  - PTW not currently returning
-    assign Dtlb_pa_request = (do_mem_access) && (!hit) && (!MEM_ptw_valid);
+    assign Dtlb_pa_request = (do_mem_access) && (!hit) && (!MEM_ptw_valid) && !admin;
 
     // Send VPN to PTW
     assign Dtlb_va = va_vpn;
