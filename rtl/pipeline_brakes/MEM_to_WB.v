@@ -50,8 +50,7 @@ module mem_to_wb_reg #(
     reg [TAG_W-1:0]     wb_tag_r;
     reg                 wb_ld_valid_r;
 
-    // If MEM stage is stalled (or translation), prevent advancing this reg.
-    // (Your design uses "insertNOP" rather than hold; keep your behavior.)
+    // If MEM stage ->  prevent advancing this reg.
     wire insertNOP = (dcache_stall || Dtlb_stall) && !mul_done;
 
     always @(posedge clk) begin
@@ -69,13 +68,9 @@ module mem_to_wb_reg #(
                 wb_data_mem_r <= mul_result;
                 wb_rd_r       <= mul_rd;
                 wb_we_r       <= 1'b1;
-
                 wb_pc_r       <= {PC_BITS{1'b0}};
                 wb_jlx_r      <= 1'b0;
-
                 wb_tag_r      <= mul_tag;
-
-                // MUL result is valid
                 wb_ld_valid_r <= 1'b1;
             end else begin
                 // Normal MEM->WB (dcache already merged any SB forwarding)

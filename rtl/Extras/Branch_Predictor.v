@@ -56,6 +56,7 @@ module branch_buffer #(
     wire [PC_BITS-1:0] seq_pc =
         F_pc_va + ( (!F_stall && !dcache_stall && !Itlb_stall && !Dtlb_stall && !sb_stall && !mul_wb_conflict_stall && !mul_issue_stall)  ? {{(PC_BITS-3){1'b0}}, 3'd4} : {PC_BITS{1'b0}} );
         // For PC_BITS = 32 this is effectively: F_pc_va + 32'd4 when not stalled
+        // CHECK : Can remove the stalls pc gets stalled in pc module, rework later
 
     assign F_BP_taken     = taken_on_hit;
     assign F_BP_target_pc = (f_hit && taken_on_hit) ? target_buf[f_hit_idx]
@@ -76,7 +77,7 @@ module branch_buffer #(
         end
     end
 
-    // FIFO insert: shift down, put new at index 0
+    // FIFO insert: shift down,new at index 0
     task automatic fifo_insert_new;
         integer k;
         begin

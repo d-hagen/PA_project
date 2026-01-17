@@ -8,8 +8,6 @@ module f_to_d_reg #(
     input  wire [VPC_BITS-1:0]    F_pc,
     input  wire [XLEN-1:0]        F_inst,
     input  wire                   F_BP_taken,
-
-    // NEW: fault pulse/flag coming from fetch/itlb side (however you generate it)
     input  wire                   Itlb_ptw_fault,
 
     input  wire                   stall_D,
@@ -28,8 +26,6 @@ module f_to_d_reg #(
     output wire [XLEN-1:0]        D_inst,
     output wire                   D_BP_taken,
     output wire [VPC_BITS-1:0]    D_BP_target_pc,
-
-    // NEW: registered fault into D stage
     output wire                   D_itlb_ptw_fault
 );
 
@@ -37,8 +33,6 @@ module f_to_d_reg #(
     reg [XLEN-1:0]      d_inst;
     reg                 d_bp_taken;
     reg [VPC_BITS-1:0]  d_bp_target_pc;
-
-    // NEW flop
     reg                 d_itlb_ptw_fault;
 
     localparam [XLEN-1:0] NOP = 32'b00100000000000000000000000000000;
@@ -58,7 +52,6 @@ module f_to_d_reg #(
             d_bp_target_pc   <= F_BP_target_pc;
             d_itlb_ptw_fault <= Itlb_ptw_fault; // latch
         end
-        // else: hold current D regs (stall)
     end
 
     assign D_pc             = d_pc;

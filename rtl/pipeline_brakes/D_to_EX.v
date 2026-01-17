@@ -34,7 +34,6 @@ module d_to_ex_reg #(
     // decode exception
     input  wire                 D_exc,
 
-    // NEW: ITLB PTW/page fault indicator coming from D stage
     input  wire                 D_itlb_ptw_fault,
 
     // Stall/Flush
@@ -120,7 +119,7 @@ module d_to_ex_reg #(
             ex_bp_taken_r     <= D_BP_taken;
             ex_rd_r           <= D_rd;
 
-            // If ITLB PTW fault, suppress memory ops in EX
+            //ITLB PTW fault, suppress memory ops in EX
             ex_ld_r           <= D_itlb_ptw_fault ? 1'b0 : D_ld;
             ex_str_r          <= D_itlb_ptw_fault ? 1'b0 : D_str;
             ex_byt_r          <= D_itlb_ptw_fault ? 1'b0 : D_byt;
@@ -132,11 +131,8 @@ module d_to_ex_reg #(
             ex_jlx_r          <= D_jlx;
 
             ex_tag_r          <= D_tag;
-
-            // EX_exc asserted if either decode exception OR ITLB PTW fault
             ex_exc_r          <= (D_exc || D_itlb_ptw_fault);
         end
-        // else: hold regs
     end
 
     assign EX_a            = ex_a_r;

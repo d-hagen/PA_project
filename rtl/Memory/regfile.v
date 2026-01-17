@@ -19,7 +19,7 @@ module regfile_rob #(
   input  wire                   D_str,
   input  wire                   D_brn,
   input  wire                   D_jmp,
-  input  wire                   D_iret,   // NEW
+  input  wire                   D_iret,  
   input  wire                   D_addi,
 
   input  wire                   RN_ra_is_rob,
@@ -148,7 +148,6 @@ module regfile_rob #(
   // ------------------------------------
   // FINAL OPERAND SELECTION
   // ------------------------------------
-  // iret uses rm1 (exception return PC = "r33")
   assign D_a =   (D_brn & !D_jmp)    ? D_pc :
                             ra_final;
 

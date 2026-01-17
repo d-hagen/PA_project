@@ -2,10 +2,10 @@
 
 module cpu_run_tb;
 
-  localparam integer XLEN      = 32;
-  localparam integer REG_NUM   = 32;
-  localparam integer ADDR_SIZE = 5;
-  localparam integer PC_BITS   = 20;
+  localparam integer XLEN            = 32;
+  localparam integer REG_NUM         = 32;
+  localparam integer ADDR_SIZE        = 5;
+  localparam integer PC_BITS          = 20;
 
   // progress marker interval (prints ONLY a marker line)
   localparam integer PROGRESS_EVERY   = 500000;
@@ -17,10 +17,10 @@ module cpu_run_tb;
   reg rst = 1'b1;
 
   cpu #(
-    .XLEN(XLEN),
-    .REG_NUM(REG_NUM),
+    .XLEN     (XLEN),
+    .REG_NUM  (REG_NUM),
     .ADDR_SIZE(ADDR_SIZE),
-    .PC_BITS(PC_BITS)
+    .PC_BITS  (PC_BITS)
   ) dut (
     .clk(clk),
     .rst(rst)
@@ -30,10 +30,10 @@ module cpu_run_tb;
 
   // VCD control
   reg dump_on;
-
   initial begin
     $dumpfile("cpu_run_tb.vcd");
-    $dumpvars(0, cpu_run_tb); // dumping stops later via $dumpoff
+    $dumpvars(0, cpu_run_tb);
+    // dumping stops later via $dumpoff
     dump_on = 1'b1;
   end
 
@@ -42,15 +42,14 @@ module cpu_run_tb;
 
   // "instructions finished" counter: increments when WB_pc changes (excluding 0)
   reg [31:0] prev_WB_pc;
-  integer finished_count;
+  integer    finished_count;
 
   // Marker capture:
-  //  - First time we FETCH 0x00000000: start measurement window
-  //  - Second time we FETCH 0x00000000: capture endpc; stop when WB_pc == endpc
+  // - First time we FETCH 0x00000000: start measurement window
+  // - Second time we FETCH 0x00000000: capture endpc; stop when WB_pc == endpc
   reg        start_valid;
   integer    start_cycle;
   integer    start_finished_snap;
-
   reg        endpc_valid;
   reg [31:0] endpc;
 
@@ -59,7 +58,6 @@ module cpu_run_tb;
   integer final_total_cycles;
   integer final_total_insts;
   real    final_total_cpi;
-
   integer final_win_cycles;
   integer final_win_insts;
   real    final_win_cpi;
@@ -67,7 +65,6 @@ module cpu_run_tb;
   // ------------------------------------------------------------
   // PRINT / DUMP TASKS
   // ------------------------------------------------------------
-
   task print_banner;
     begin
       $display("===========================================");
@@ -97,15 +94,14 @@ module cpu_run_tb;
     input integer total_cycles;
     input integer total_insts;
     input real    total_cpi;
-
     input integer marker_cycles;
     input integer marker_insts;
     input real    marker_cpi;
     begin
       $display("");
       $display("CPI SUMMARY");
-      $display("  Total : cycles=%0d insts=%0d CPI=%0f", total_cycles, total_insts, total_cpi);
-      $display("  Marker: cycles=%0d insts=%0d CPI=%0f", marker_cycles, marker_insts, marker_cpi);
+      $display(" Total : cycles=%0d insts=%0d CPI=%0f", total_cycles, total_insts, total_cpi);
+      $display(" Marker: cycles=%0d insts=%0d CPI=%0f", marker_cycles, marker_insts, marker_cpi);
       $display("");
     end
   endtask
@@ -126,12 +122,12 @@ module cpu_run_tb;
     begin
       $display("\n==== MEMORY LINES (0..7) ====");
       for (k = 0; k < 8; k = k + 1) begin
-        $display("Line %0d: %08h  %08h  %08h  %08h",
-                  k,
-                  dut.u_unified_mem.line[k][0],
-                  dut.u_unified_mem.line[k][1],
-                  dut.u_unified_mem.line[k][2],
-                  dut.u_unified_mem.line[k][3]);
+        $display("Line %0d: %08h %08h %08h %08h",
+                 k,
+                 dut.u_unified_mem.line[k][0],
+                 dut.u_unified_mem.line[k][1],
+                 dut.u_unified_mem.line[k][2],
+                 dut.u_unified_mem.line[k][3]);
       end
     end
   endtask
@@ -142,89 +138,85 @@ module cpu_run_tb;
       $display("\n==== BACKING DATA MEMORY (u_data_mem) ====");
       for (k = 8; k < 24; k = k + 1) begin
         $display("Line %0d: %08d %08d %08d %08d",
-                  k,
-                  dut.u_unified_mem.line[k][0],
-                  dut.u_unified_mem.line[k][1],
-                  dut.u_unified_mem.line[k][2],
-                  dut.u_unified_mem.line[k][3]);
+                 k,
+                 dut.u_unified_mem.line[k][0],
+                 dut.u_unified_mem.line[k][1],
+                 dut.u_unified_mem.line[k][2],
+                 dut.u_unified_mem.line[k][3]);
       end
     end
   endtask
 
   task dump_dcache;
-  integer k, b;
-  reg [127:0] line;
-  reg [31:0] w0, w1, w2, w3;
-  begin
-    $display("\n==== D-CACHE CONTENT ====");
-    for (k = 0; k < 4; k = k + 1) begin
-      // pack bytes into a 128b line for convenience
-      line = 128'd0;
-      for (b = 0; b < 16; b = b + 1)
-        line[8*b +: 8] = dut.u_dcache.data_b[k][b];
+    integer    k, b;
+    reg [127:0] line;
+    reg [31:0]  w0, w1, w2, w3;
+    begin
+      $display("\n==== D-CACHE CONTENT ====");
+      for (k = 0; k < 4; k = k + 1) begin
+        // pack bytes into a 128b line for convenience
+        line = 128'd0;
+        for (b = 0; b < 16; b = b + 1)
+          line[8*b +: 8] = dut.u_dcache.data_b[k][b];
 
-      w0 = line[31:0];
-      w1 = line[63:32];
-      w2 = line[95:64];
-      w3 = line[127:96];
+        w0 = line[31:0];
+        w1 = line[63:32];
+        w2 = line[95:64];
+        w3 = line[127:96];
 
-      $display("Entry %0d | valid=%0b dirty=%0b tag(line)=0x%0h",
-               k,
-               dut.u_dcache.valid[k],
-               dut.u_dcache.dirty[k],
-               dut.u_dcache.tag[k]);
+        $display("Entry %0d | valid=%0b dirty=%0b tag(line)=0x%0h",
+                 k, dut.u_dcache.valid[k], dut.u_dcache.dirty[k], dut.u_dcache.tag[k]);
 
-      $display("  bytes [00..15]: %02h %02h %02h %02h  %02h %02h %02h %02h  %02h %02h %02h %02h  %02h %02h %02h %02h",
-               dut.u_dcache.data_b[k][0],  dut.u_dcache.data_b[k][1],
-               dut.u_dcache.data_b[k][2],  dut.u_dcache.data_b[k][3],
-               dut.u_dcache.data_b[k][4],  dut.u_dcache.data_b[k][5],
-               dut.u_dcache.data_b[k][6],  dut.u_dcache.data_b[k][7],
-               dut.u_dcache.data_b[k][8],  dut.u_dcache.data_b[k][9],
-               dut.u_dcache.data_b[k][10], dut.u_dcache.data_b[k][11],
-               dut.u_dcache.data_b[k][12], dut.u_dcache.data_b[k][13],
-               dut.u_dcache.data_b[k][14], dut.u_dcache.data_b[k][15]);
+        $display(" bytes [00..15]: %02h %02h %02h %02h %02h %02h %02h %02h %02h %02h %02h %02h %02h %02h %02h %02h",
+                 dut.u_dcache.data_b[k][0],  dut.u_dcache.data_b[k][1],
+                 dut.u_dcache.data_b[k][2],  dut.u_dcache.data_b[k][3],
+                 dut.u_dcache.data_b[k][4],  dut.u_dcache.data_b[k][5],
+                 dut.u_dcache.data_b[k][6],  dut.u_dcache.data_b[k][7],
+                 dut.u_dcache.data_b[k][8],  dut.u_dcache.data_b[k][9],
+                 dut.u_dcache.data_b[k][10], dut.u_dcache.data_b[k][11],
+                 dut.u_dcache.data_b[k][12], dut.u_dcache.data_b[k][13],
+                 dut.u_dcache.data_b[k][14], dut.u_dcache.data_b[k][15]);
 
-      $display("  words little-endian: W0=0x%08h W1=0x%08h W2=0x%08h W3=0x%08h", w0, w1, w2, w3);
+        $display(" words little-endian: W0=0x%08h W1=0x%08h W2=0x%08h W3=0x%08h",
+                 w0, w1, w2, w3);
+      end
     end
-  end
-endtask
-
+  endtask
 
   task dump_store_buffer;
-  integer k;
-  reg [7:0] b0, b1, b2, b3;
-  begin
-    $display("\n==== STORE BUFFER CONTENT ====");
-    $display("count=%0d head=%0d tail=%0d empty=%0b",
-             dut.u_store_buffer.count,
-             dut.u_store_buffer.head,
-             dut.u_store_buffer.tail,
-             (dut.u_store_buffer.count==0));
+    integer k;
+    reg [7:0] b0, b1, b2, b3;
+    begin
+      $display("\n==== STORE BUFFER CONTENT ====");
+      $display("count=%0d head=%0d tail=%0d empty=%0b",
+               dut.u_store_buffer.count,
+               dut.u_store_buffer.head,
+               dut.u_store_buffer.tail,
+               (dut.u_store_buffer.count==0));
 
-    for (k = 0; k < dut.u_store_buffer.DEPTH; k = k + 1) begin
-      b0 = dut.u_store_buffer.wdata_q[k][7:0];
-      b1 = dut.u_store_buffer.wdata_q[k][15:8];
-      b2 = dut.u_store_buffer.wdata_q[k][23:16];
-      b3 = dut.u_store_buffer.wdata_q[k][31:24];
+      for (k = 0; k < dut.u_store_buffer.DEPTH; k = k + 1) begin
+        b0 = dut.u_store_buffer.wdata_q[k][7:0];
+        b1 = dut.u_store_buffer.wdata_q[k][15:8];
+        b2 = dut.u_store_buffer.wdata_q[k][23:16];
+        b3 = dut.u_store_buffer.wdata_q[k][31:24];
 
-      $display("SB[%0d] addr_w=0x%05h line=0x%04h word_sel=%0d  wmask=%b  wdata=0x%08h  bytes=[%02h %02h %02h %02h]",
-               k,
-               dut.u_store_buffer.addrw_q[k],
-               dut.u_store_buffer.addrw_q[k][19:4],
-               dut.u_store_buffer.addrw_q[k][3:2],
-               dut.u_store_buffer.wmask_q[k],
-               dut.u_store_buffer.wdata_q[k],
-               b0, b1, b2, b3);
+        $display("SB[%0d] addr_w=0x%05h line=0x%04h word_sel=%0d wmask=%b wdata=0x%08h bytes=[%02h %02h %02h %02h]",
+                 k,
+                 dut.u_store_buffer.addrw_q[k],
+                 dut.u_store_buffer.addrw_q[k][19:4],
+                 dut.u_store_buffer.addrw_q[k][3:2],
+                 dut.u_store_buffer.wmask_q[k],
+                 dut.u_store_buffer.wdata_q[k],
+                 b0, b1, b2, b3);
+      end
+
+      // also print current forwarding signals (handy during loads)
+      $display("fwd: sb_fwd_mask=%b sb_fwd_data=0x%08h sb_all_hit=%0b",
+               dut.u_store_buffer.sb_fwd_mask,
+               dut.u_store_buffer.sb_fwd_data,
+               dut.u_store_buffer.sb_all_hit);
     end
-
-    // also print current forwarding signals (handy during loads)
-    $display("fwd: sb_fwd_mask=%b sb_fwd_data=0x%08h sb_all_hit=%0b",
-             dut.u_store_buffer.sb_fwd_mask,
-             dut.u_store_buffer.sb_fwd_data,
-             dut.u_store_buffer.sb_all_hit);
-  end
-endtask
-
+  endtask
 
   task print_rob;
     integer j;
@@ -241,6 +233,7 @@ endtask
                  dut.u_rob.rd[j],
                  dut.u_rob.value[j]);
       end
+
       $display("------------");
     end
   endtask
@@ -248,7 +241,7 @@ endtask
   task print_end_of_test;
     begin
       $display("==========================================");
-      $display("               END OF TEST");
+      $display(" END OF TEST");
       $display("==========================================");
     end
   endtask
@@ -257,23 +250,23 @@ endtask
   task print_mem_line_by_dec_addr;
     input integer addr_dec;
     input         fmt;
-    integer line_idx;
+    integer       line_idx;
     begin
       line_idx = addr_dec / 16;
       if (fmt) begin
         $display("MEM[addr=%0d] -> line %0d : %08h %08h %08h %08h",
-                  addr_dec, line_idx,
-                  dut.u_unified_mem.line[line_idx][0],
-                  dut.u_unified_mem.line[line_idx][1],
-                  dut.u_unified_mem.line[line_idx][2],
-                  dut.u_unified_mem.line[line_idx][3]);
+                 addr_dec, line_idx,
+                 dut.u_unified_mem.line[line_idx][0],
+                 dut.u_unified_mem.line[line_idx][1],
+                 dut.u_unified_mem.line[line_idx][2],
+                 dut.u_unified_mem.line[line_idx][3]);
       end else begin
         $display("MEM[addr=%0d] -> line %0d : %0d %0d %0d %0d",
-                  addr_dec, line_idx,
-                  dut.u_unified_mem.line[line_idx][0],
-                  dut.u_unified_mem.line[line_idx][1],
-                  dut.u_unified_mem.line[line_idx][2],
-                  dut.u_unified_mem.line[line_idx][3]);
+                 addr_dec, line_idx,
+                 dut.u_unified_mem.line[line_idx][0],
+                 dut.u_unified_mem.line[line_idx][1],
+                 dut.u_unified_mem.line[line_idx][2],
+                 dut.u_unified_mem.line[line_idx][3]);
       end
     end
   endtask
@@ -281,37 +274,38 @@ endtask
   // ------------------------------------------------------------
   // MAIN
   // ------------------------------------------------------------
-
   initial begin
     print_banner();
 
     repeat (3) @(posedge clk);
     rst <= 1'b0;
 
-    cycles         = 0;
-    prev_WB_pc     = 32'hFFFF_FFFF;
-    finished_count = 0;
+    cycles              = 0;
+    prev_WB_pc          = 32'hFFFF_FFFF;
+    finished_count      = 0;
 
     start_valid         = 1'b0;
     start_cycle         = 0;
     start_finished_snap = 0;
 
-    endpc_valid    = 1'b0;
-    endpc          = 32'h0;
+    endpc_valid         = 1'b0;
+    endpc               = 32'h0;
 
-    have_results       = 1'b0;
-    final_total_cycles = 0;
-    final_total_insts  = 0;
-    final_total_cpi    = 0.0;
-    final_win_cycles   = 0;
-    final_win_insts    = 0;
-    final_win_cpi      = 0.0;
+    have_results        = 1'b0;
+
+    final_total_cycles  = 0;
+    final_total_insts   = 0;
+    final_total_cpi     = 0.0;
+
+    final_win_cycles    = 0;
+    final_win_insts     = 0;
+    final_win_cpi       = 0.0;
 
     begin : run_loop
       forever begin
         @(posedge clk);
-        cycles = cycles + 1;
 
+        cycles    = cycles + 1;
         curr_inst = dut.F_inst;
 
         // ------------------------------------------------------------
@@ -323,8 +317,7 @@ endtask
               start_valid         <= 1'b1;
               start_cycle         <= cycles;
               start_finished_snap <= finished_count;
-            end
-            else if (!endpc_valid) begin
+            end else if (!endpc_valid) begin
               endpc       <= dut.F_pc_va;
               endpc_valid <= 1'b1;
             end
@@ -343,7 +336,8 @@ endtask
             if (dump_on && (finished_count >= DUMP_STOP_INSTS)) begin
               $dumpoff;
               dump_on = 1'b0;
-              $display("[vcd] dumping OFF at finished_insts=%0d (cycle=%0d)", finished_count, cycles);
+              $display("[vcd] dumping OFF at finished_insts=%0d (cycle=%0d)",
+                       finished_count, cycles);
             end
           end
         end
@@ -428,13 +422,13 @@ endtask
 
           disable run_loop;
         end
+
       end
     end
 
     // ------------------------------------------------------------
     // END-OF-TEST OUTPUTS (ONCE)
     // ------------------------------------------------------------
-
     if (have_results) begin
       print_cpi_summary(
         final_total_cycles, final_total_insts, final_total_cpi,
@@ -442,7 +436,8 @@ endtask
       );
     end else begin
       $display("");
-      $display("NOTE: No results latched (unexpected). cycles=%0d finished_insts=%0d", cycles, finished_count);
+      $display("NOTE: No results latched (unexpected). cycles=%0d finished_insts=%0d",
+               cycles, finished_count);
       $display("");
     end
 

@@ -55,8 +55,7 @@ module itlb #(
         hit     = 1'b0;
         hit_ppn = {PPN_WIDTH{1'b0}};
 
-        // Normal mode lookup (skip lookup while PTW is returning,
-        // similar to icache skipping tag lookup when F_mem_valid is high)
+        // Normal mode lookup 
         if (!admin && !Itlb_ptw_valid) begin
             for (i = 0; i < NUM_ENTRIES; i = i + 1) begin
                 if (!hit && valid[i] && (vpn_buf[i] == va_vpn)) begin
@@ -76,16 +75,16 @@ module itlb #(
         hit     ? {hit_ppn, va_in[PAGE_OFFSET_WIDTH-1:0]}  :     // normal hit
                   {PPN_WIDTH{1'b0}};         // normal miss (unused while stalled)
 
-    // Stall whenever we are in normal mode and do not hit in the TLB
+    // Stall  in normal mode and  no hit
     assign Itlb_stall = (!admin) && (!hit);
 
-    // Request to PTW only when:
+    // Request to PTW :
     //  - in normal mode
-    //  - we don't hit
+    //  - no hit
     //  - PTW is not currently returning a result
     assign Itlb_pa_request = (!admin) && (!hit) && (!Itlb_ptw_valid);
 
-    // VA sent to PTW (analogous to Ic_mem_addr = pc_line; here we send full VA)
+    // VA sent to PTW 
     assign Itlb_va = va_in[VA_WIDTH-1:PAGE_OFFSET_WIDTH]; // VA[31:12]
 
     // ----------------------------------------------------------------

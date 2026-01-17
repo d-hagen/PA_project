@@ -84,7 +84,7 @@ module store_buffer #(
 
     wire need_two_entries = (MEM_str && !MEM_byt && (st_off != 2'b00));
 
-    // stall if store wants in but not enough room
+    // store doesnt fit
     assign sb_stall =
         (no_stall && Dtlb_addr_valid && MEM_str) &&
         ( MEM_byt ? !can_enq_1 :
@@ -195,7 +195,7 @@ module store_buffer #(
                         enq1_wmask = 4'd0;  enq2_wmask = 4'd0;
 
                         for (bi = 0; bi < 4; bi = bi + 1) begin
-                            bi2 = bi[1:0]; // some tools allow this; if not, see note below
+                            bi2 = bi[1:0]; 
                             pos = st_off + bi;
 
                             if (pos < 4) begin
@@ -215,9 +215,7 @@ module store_buffer #(
         end
     end
 
-    // NOTE: If your compiler also rejects bi[1:0] because bi is an integer,
-    // replace "bi2 = bi[1:0];" with:
-    //   case (bi) 0:bi2=0; 1:bi2=1; 2:bi2=2; default:bi2=3; endcase
+
 
     // ============================================================
     // Dequeue when cache accepts head
@@ -269,7 +267,7 @@ module store_buffer #(
     end
 
     // ============================================================
-    // Drain head entry to cache
+    // Drain head  to cache
     // ============================================================
     assign store_request        = !sb_empty;
     assign store_request_addr_w = addrw_q[head];
@@ -319,7 +317,7 @@ module store_buffer #(
 
         if (MEM_ld && Dtlb_addr_valid) begin
             for (i = 0; i < (MEM_byt ? 1 : 4); i = i + 1) begin
-                tmp_addr    = ld_addr20 + i;               // i is integer, ok here
+                tmp_addr    = ld_addr20 + i;              
                 want_addr_w = {tmp_addr[19:2], 2'b00};
                 want_lane   = tmp_addr[1:0];
 

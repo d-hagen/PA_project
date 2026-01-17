@@ -4,7 +4,7 @@ module decode #(
   parameter XLEN = 32
 )(
   input  wire              clk,
-  input  wire              admin,     // NEW: privilege bit
+  input  wire              admin,     
   input  wire [XLEN-1:0]   D_inst,
 
   output wire [5:0]        D_opc,
@@ -22,11 +22,11 @@ module decode #(
   output wire              D_brn,
   output wire              D_jmp,
   output wire              D_jlx,
-  output wire              D_iret,   // separate iret opcode
+  output wire              D_iret,   
   output wire              D_addi,
   output wire              D_mul,
 
-  output wire              D_exc     // NEW: decode-time exception (illegal iret)
+  output wire              D_exc     // (illegal iret)
 );
 
   assign D_opc    = D_inst[31:26];
@@ -82,15 +82,15 @@ module decode #(
 
   assign D_mul  = (D_opc == OPC_MUL);
 
-  // write-enable: normal ALU ops, loads, MUL (iret does not write)
+  // write-enable: normal ALU ops, loads, MUL 
   assign D_we   = ((D_opc <= OPC_GT) || D_ld || D_mul);
 
-  // D_brn true for CTRL-family only (branches/jmp/jlx), NOT iret
+  // D_brn true for CTRL-family only (branches/jmp/jlx)
   assign D_brn  = is_ctrl;
 
   assign D_addi = (D_opc == OPC_ADDI);
 
-  // NEW: illegal iret in user mode
+  // illegal iret ?
   assign D_exc  = is_iret && !admin;
 
   // ALU op decode

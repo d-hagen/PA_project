@@ -1,7 +1,7 @@
 module ex_to_mem_reg #(
     parameter XLEN    = 32,
     parameter PC_BITS = 32,
-    parameter TAG_W   = 4     // NEW: ROB tag width
+    parameter TAG_W   = 4     // ROB tag width
 )(
     input  wire                 clk,
     input  wire                 rst,
@@ -22,12 +22,12 @@ module ex_to_mem_reg #(
     input  wire                 sb_stall,
     input  wire                 Dtlb_stall,
 
-    input  wire                 mul_wb_conflict_stall, // hold/freeze (your existing)
+    input  wire                 mul_wb_conflict_stall, // hold/freeze 
 
     input  wire [XLEN-1:0]      EX_pc,
     input  wire                 EX_jlx,
 
-    // NEW: ROB tag coming from EX stage
+    //  ROB tag coming from EX stage
     input  wire [TAG_W-1:0]     EX_tag,
 
     // MEM stage outputs
@@ -42,8 +42,6 @@ module ex_to_mem_reg #(
     output wire                 MEM_byt,
     output wire [XLEN-1:0]      MEM_pc,
     output wire                 MEM_jlx,
-
-    // NEW: ROB tag forwarded into MEM stage
     output wire [TAG_W-1:0]     MEM_tag
 );
 
@@ -52,13 +50,11 @@ module ex_to_mem_reg #(
     reg [4:0]      mem_rd_r;
     reg [XLEN-1:0] mem_pc_r;
     reg            mem_jlx_r;
-
-    // NEW
     reg [TAG_W-1:0] mem_tag_r;
 
     always @(posedge clk) begin
         if (rst || EX_mul) begin
-            // NOOP / bubble (you already bubble on EX_mul)
+            // NOOP / bubble 
             mem_alu_out_r <= {XLEN{1'b0}};
             mem_taken_r   <= 1'b0;
             mem_b2_r      <= {XLEN{1'b0}};
@@ -89,7 +85,6 @@ module ex_to_mem_reg #(
 
             mem_tag_r     <= EX_tag;
         end
-        // else: hold (stall/freeze)
     end
 
     assign MEM_alu_out = mem_alu_out_r;

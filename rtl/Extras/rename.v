@@ -9,8 +9,7 @@ module rename #(
   input  wire                   clk,
   input  wire                   rst,
 
-  // Mispredict flush: undo RAT updates from younger instructions.
-  // Flush semantics match ROB.v: flush everything younger than flush_tag.
+  // undo RAT updates from younger instructions.
   input  wire                   flush_valid,
   input  wire [TAG_W-1:0]       flush_tag,
 
@@ -21,16 +20,16 @@ module rename #(
   input  wire                   D_we,
   input  wire                   D_jlx,
 
-  // instruction really issues/advances this cycle
+  // Instruction advances 
   input  wire                   D_fire,
 
-  // Rename outputs (combinational)
+  // Rename outputs 
   output wire                   ra_is_rob,
   output wire                   rb_is_rob,
   output wire [TAG_W-1:0]       ra_tag,
   output wire [TAG_W-1:0]       rb_tag,
 
-  // Alloc/tag for this instruction
+  //tag for  instruction
   output wire [TAG_W-1:0]       dst_tag,
   output wire                   rob_alloc,
   output wire [TAG_W-1:0]       rob_alloc_tag,
@@ -38,14 +37,14 @@ module rename #(
   // Stall when ROB full
   input  wire                   rob_full_in,
 
-  // Commit feedback to clear RAT mapping
+  // ROB commit -> clear RAT mapping
   input  wire                   C_valid,
   input  wire                   C_we,
   input  wire [ADDR_SIZE-1:0]   C_rd_arch,
   input  wire [TAG_W-1:0]       C_tag
 );
 
-  // Effective dest: JLX -> r31 and force write
+  // JLX -> r31 and  write
   wire [ADDR_SIZE-1:0] dest_arch = D_jlx ? 5'd31 : D_rd;
   wire                 dest_we   = D_we | D_jlx;
 
@@ -53,20 +52,18 @@ module rename #(
   reg                  rat_valid [0:REG_NUM-1];
   reg [TAG_W-1:0]       rat_tag   [0:REG_NUM-1];
 
-  // Tail pointer (next tag to allocate)
+  // Tail pointer 
   reg [TAG_W-1:0] tail_tag;
 
   // ------------------------------------------------------------------
-  // RAT undo-log (one entry per allocated ROB tag)
+  // RAT undo-log 
   // ------------------------------------------------------------------
-  // For every instruction that allocates a ROB tag, we store:
-  //   * which architectural destination it renamed (0..31)
-  //   * whether it actually wrote a destination (dest_we)
-  //   * the previous RAT mapping for that architectural destination
+  // Store:
+  //   * destination renamed 
+  //   * write enable (dest_we)
+  //   * previous RAT mapping for dst
   //
-  // On flush, we walk tags (tail_tag-1) down to (flush_tag+1) and
-  // restore the previous mappings. Walking backwards is critical:
-  // multiple younger instructions may rename the same architectural reg.
+  // flush: (tail_tag-1) ->(flush_tag+1) // walking backwards
   reg [ADDR_SIZE-1:0] undo_arch      [0:ROB_DEPTH-1];
   reg                 undo_we        [0:ROB_DEPTH-1];
   reg                 undo_prev_v    [0:ROB_DEPTH-1];
@@ -92,11 +89,11 @@ module rename #(
   assign ra_tag    = rat_tag[D_ra];
   assign rb_tag    = rat_tag[D_rb];
 
-  // The tag this instruction will use if it allocates this cycle
+  //  next tag 
   assign dst_tag       = tail_tag;
   assign rob_alloc_tag = tail_tag;
 
-  // Allocate only when instruction actually fires and ROB isn't full
+  // only tag if fire 
   assign rob_alloc = D_fire && !rob_full_in;
 
   // --------------------------
@@ -110,7 +107,6 @@ module rename #(
         rat_tag[i]   <= {TAG_W{1'b0}};
       end
 
-      // init undo-log (not strictly required for correctness, but nice)
       for (i = 0; i < ROB_DEPTH; i = i + 1) begin
         undo_arch[i]      <= {ADDR_SIZE{1'b0}};
         undo_we[i]        <= 1'b0;
@@ -119,11 +115,10 @@ module rename #(
       end
     end else begin
       // ------------------------------------------------------------
-      // 1) Flush recovery (priority over new rename updates)
+      // Flush recovery 
       // ------------------------------------------------------------
       if (flush_valid) begin
-        // Undo all younger-than flush_tag allocations:
-        //   idx = tail_tag-1 ... flush_tag+1
+     
         reg [TAG_W-1:0] idx;
         idx = dec_tag(tail_tag);
 
@@ -135,12 +130,9 @@ module rename #(
           idx = dec_tag(idx);
         end
 
-        // Roll back tail to just-after the branch
         tail_tag <= inc_tag(flush_tag);
 
-        // If a commit happens same cycle as a flush, apply it *after*
-        // restoring mappings, otherwise the RAT might keep a stale mapping
-        // to an already-committed tag.
+        // commit after flush
         if (C_valid && C_we && (C_rd_arch != {ADDR_SIZE{1'b0}})) begin
           if (rat_valid[C_rd_arch] && (rat_tag[C_rd_arch] == C_tag)) begin
             rat_valid[C_rd_arch] <= 1'b0;
@@ -150,7 +142,7 @@ module rename #(
       end
       else begin
         // ------------------------------------------------------------
-        // 2) Normal commit: clear mapping if it still points to that tag
+        //Normal commit, clear mapping  pointing to tag
         // ------------------------------------------------------------
         if (C_valid && C_we && (C_rd_arch != {ADDR_SIZE{1'b0}})) begin
           if (rat_valid[C_rd_arch] && (rat_tag[C_rd_arch] == C_tag)) begin

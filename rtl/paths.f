@@ -2,7 +2,7 @@
 # (Do not include .hex or .f files themselves)
 
 
-cpu.v
+cpu/cpu.v
 pc.v
 
 

@@ -14,7 +14,7 @@ module rob #(
   input  wire                   alloc_we,
   input  wire [ADDR_SIZE-1:0]   alloc_rd_arch,
   input  wire                   alloc_jlx,
-  input  wire                   alloc_iret,   // NEW: tag iret in ROB
+  input  wire                   alloc_iret,   
 
   input  wire                   wb_valid,
   input  wire [TAG_W-1:0]       wb_tag,
@@ -46,17 +46,16 @@ module rob #(
 
   output reg                    EXC_we,
   output reg  [XLEN-1:0]        EXC_pc,
-  output reg  [3:0]             EXC_type,   // type=0 for now
+  output reg  [3:0]             EXC_type,   // CHECK: exceptions dont have a type yet all just get skipped -> give them an actuall type in the exc unit
   output reg  [TAG_W-1:0]       EXC_tag,
 
   // --------------------------
-  // NEW: iret commit pulse
-  // (CPU uses this to clear admin and redirect PC to rm1)
+  // iret commit pulse
   // --------------------------
   output reg                    IRET_we,
   output reg  [TAG_W-1:0]       IRET_tag,
 
-  // NEW: stall while exception pending
+  //stall while exception pending
   output wire                   rob_stall,
 
   output wire                   rob_full,
@@ -76,10 +75,10 @@ module rob #(
   reg                   exc_flag [0:ROB_DEPTH-1];
   reg [XLEN-1:0]        exc_pc    [0:ROB_DEPTH-1];
 
-  // NEW: per-entry iret marker
+  // per-entry iret marker
   reg                   iret_flag [0:ROB_DEPTH-1];
 
-  // NEW: sticky "exception pending" (stall) state
+  //sticky "exception pending"  state -> stall aka keine neuen Inst go into pipeline
   reg                   exc_pending;
   reg [TAG_W-1:0]       exc_pending_tag;
   assign rob_stall = exc_pending;
@@ -114,13 +113,13 @@ module rob #(
   wire                 alloc_we_eff = alloc_we | alloc_jlx;
   wire [ADDR_SIZE-1:0] alloc_rd_eff = alloc_jlx ? 5'd31 : alloc_rd_arch;
 
-  // NEW: block alloc while exception pending
+  // block alloc while exception pending -> no new inst into Rob when exception in pipe
   wire do_alloc  = alloc_valid && !rob_full && !flush_valid && !rob_stall;
 
   // Commit when head ready and not flushing
   wire do_commit = head_can_commit && !flush_valid;
 
-  // 1-cycle pulse during flush
+  // 1-cycle pulse  flush
   reg recovering_r;
   assign recovering = recovering_r;
 
@@ -196,7 +195,6 @@ module rob #(
         exc_flag[exc_set_tag] <= 1'b1;
         exc_pc[exc_set_tag]   <= exc_set_pc;
 
-        // once any exception is written, stall until it reaches head or is flushed
         if (!exc_pending) begin
           exc_pending     <= 1'b1;
           exc_pending_tag <= exc_set_tag;
@@ -204,7 +202,7 @@ module rob #(
       end
 
       // --------------------------
-      // Flush (invalidate younger than flush_tag)
+      // Flush 
       // --------------------------
       if (flush_valid) begin
         recovering_r <= 1'b1;
@@ -224,7 +222,7 @@ module rob #(
             exc_pc[idx]    <= {XLEN{1'b0}};
             iret_flag[idx] <= 1'b0;
 
-            // if we flushed the pending exception entry, clear stall
+            // flushed exception -> clear stall
             if (exc_pending && (idx == exc_pending_tag))
               exc_pending <= 1'b0;
 
@@ -250,28 +248,28 @@ module rob #(
 
       end else begin
         // --------------------------
-        // Allocate (new entry)
+        // NEW ENtry
         // --------------------------
         if (do_alloc) begin
           valid[alloc_tag] <= 1'b1;
-          // no-write ops are ready immediately; iret also has no WB, so ready immediately
+          // no-write ops -> ready immediately;
           ready[alloc_tag] <= ((alloc_we_eff == 1'b0) || alloc_iret);
           we[alloc_tag]    <= alloc_we_eff;
           rd[alloc_tag]    <= alloc_rd_eff;
 
-          // clear exception state on allocate
+          // clear exception state 
           exc_flag[alloc_tag]  <= 1'b0;
           exc_pc[alloc_tag]    <= {XLEN{1'b0}};
 
-          // NEW: tag iret
+          // tag iret
           iret_flag[alloc_tag] <= alloc_iret;
 
           tail <= inc_tag(alloc_tag);
         end
 
         // --------------------------
-        // Commit (head)
-        // Priority at head: EXC > IRET > normal commit
+        // Commit 
+        // Priority: EXC > IRET > normal commit
         // --------------------------
         if (do_commit) begin
           if (exc_flag[head]) begin
@@ -281,18 +279,17 @@ module rob #(
             EXC_type <= 4'd0;
             EXC_tag  <= head;
 
-            // clear stall when pending exception reaches head
+            // head exception -> clear stall
             if (exc_pending && (exc_pending_tag == head))
               exc_pending <= 1'b0;
 
             C_valid <= 1'b0;
 
           end else if (iret_flag[head]) begin
-            // iret commit pulse (CPU clears admin + redirects PC to rm1)
+            // iret commit pulse 
             IRET_we  <= 1'b1;
             IRET_tag <= head;
 
-            // no architectural writeback
             C_valid <= 1'b0;
 
           end else begin
@@ -304,7 +301,7 @@ module rob #(
             C_tag     <= head;
           end
 
-          // retire entry either way
+          // retire entry 
           valid[head]     <= 1'b0;
           ready[head]     <= 1'b0;
           exc_flag[head]  <= 1'b0;
@@ -315,7 +312,7 @@ module rob #(
         end
 
         // --------------------------
-        // Count update (single place!)
+        // Count update 
         // --------------------------
         case ({do_alloc, do_commit})
           2'b10: count <= count + {{(CNT_W-1){1'b0}},1'b1};

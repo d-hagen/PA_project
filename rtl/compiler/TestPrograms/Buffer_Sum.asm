@@ -38,7 +38,10 @@ blt   r1  r3  r0  -16       # if (i < 12) repeat sum_loop
 # Store sum
 # 12 elements: sum = 0+1+...+11 = 66
 # -----------------------------
-store r9  r2  r0   1000      # mem[1516] = sum
+store r0  r2  r0  200     ; [200] = sum   (pick any addr you want)
+load  r0  r0  r20 200     ; r20 = sum     (read it back)
+
+store r9  r0  r0   1000      # mem[1516] = sum
 
 
 load r9   r0   r30  1000

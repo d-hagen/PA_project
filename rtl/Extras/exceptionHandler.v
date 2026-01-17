@@ -23,7 +23,7 @@ module exc_handler #(
   // Branch mispredict flush (EX stage)
   // -------------------------
   input  wire                 EX_taken,   // flush request
-  input  wire [TAG_W-1:0]     EX_br_tag,  // typically EX_tag
+  input  wire [TAG_W-1:0]     EX_br_tag,  //  EX_tag
 
   // -------------------------
   // To ROB: mark exception entry (ONLY if exception "wins")
@@ -39,7 +39,6 @@ module exc_handler #(
   output reg  [TAG_W-1:0]     flush_tag,
 
   // per-stage kill/flush (immediate)
-  // NOTE: since exceptions only start at EX or older, F/D flush still happens
   output reg                  F_flush,
   output reg                  D_flush,
   output reg                  EX_flush,
@@ -54,7 +53,7 @@ module exc_handler #(
                    SRC_WB    = 3'd5,
                    SRC_BR_EX = 3'd6;
 
-  // First: pick oldest exception (WB > MEM > EX)
+  // pick oldest exception 
   reg              exc_any;
   reg [2:0]        exc_src;
   reg [TAG_W-1:0]  exc_pick_tag;
@@ -84,11 +83,9 @@ module exc_handler #(
     end
   end
 
-  // Second: choose between exception flush and branch flush
-  // Rule:
+  // Exception or Branch Flush:
   // - WB/MEM exceptions are older than EX_taken -> exception wins
-  // - EX exception wins over EX_taken (your requested priority)
-  // - If no exception -> branch wins if EX_taken
+  // - EX exception  >  EX_taken | branch instruction faulty 
   reg [2:0] chosen_src;
 
   always @* begin
@@ -99,7 +96,7 @@ module exc_handler #(
         chosen_src = exc_src;
       end else begin
         // exc_src == SRC_EX
-        chosen_src = SRC_EX; // exception wins even if EX_taken
+        chosen_src = SRC_EX; 
       end
     end else begin
       chosen_src = (EX_taken) ? SRC_BR_EX : SRC_NONE;
@@ -122,7 +119,7 @@ module exc_handler #(
     WB_flush  = 1'b0;
 
     // -------------------------
-    // Drive outputs by chosen event
+    // Drive outputs
     // -------------------------
     case (chosen_src)
       SRC_WB: begin

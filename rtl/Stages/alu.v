@@ -11,8 +11,6 @@ module alu #(
   input  wire                 EX_brn,
   input  wire                 EX_BP_taken,
   input  wire [VPC_BITS-1:0]  EX_BP_target_pc,
-
-  // NEW: mark this EX-stage instruction as MUL so ALU does nothing
   input  wire                 EX_mul,
 
   output reg  [XLEN-1:0]      EX_alu_out,
@@ -29,8 +27,7 @@ module alu #(
     EX_true_taken  = 1'b0;
     next_pc        = {XLEN{1'b0}};
 
-    // If this instruction is a MUL, the ALU path is unused this cycle.
-    // (MUL goes into your separate M1..M5 pipe.)
+
     if (EX_mul) begin
       EX_alu_out     = {XLEN{1'b0}};
       EX_taken       = 1'b0;

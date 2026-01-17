@@ -7,7 +7,7 @@ module Hazard_unit #(
     input  wire                 clk,
     input  wire                 rst,
 
-    // Arch regs (for your existing rd-based forwarding bits)
+    // regs 
     input  wire [4:0]           D_rd,
     input  wire [ADDR_SIZE-1:0] D_ra,
     input  wire [ADDR_SIZE-1:0] D_rb,
@@ -28,7 +28,7 @@ module Hazard_unit #(
     input  wire                 WB_jlx,
 
     // ---------------------------
-    // NEW: Renamed operand info (from rename/RAT)
+    // regs from Rename 
     // ---------------------------
     input  wire                 RN_ra_is_rob,
     input  wire                 RN_rb_is_rob,
@@ -36,8 +36,7 @@ module Hazard_unit #(
     input  wire [TAG_W-1:0]     RN_rb_tag,
 
     // ---------------------------
-    // NEW: Producer tags/values in the pipe (carry dst_tag in pipeline regs)
-    // These are "this stage is producing a result for ROB tag X"
+    // tag for output reg
     // ---------------------------
     input  wire                 EX_tag_we,
     input  wire [TAG_W-1:0]     EX_dst_tag,
@@ -52,8 +51,7 @@ module Hazard_unit #(
     input  wire [XLEN-1:0]      WB_tag_value,
 
     // ---------------------------
-    // NEW: MUL late result (tag + value)
-    // You said you already have mul_result_valid; you must also output its ROB tag.
+    // mul tag 
     // ---------------------------
     input  wire                 mul_result_valid,
     input  wire [TAG_W-1:0]     mul_result_tag,
@@ -65,7 +63,7 @@ module Hazard_unit #(
     output wire [2:0]           WB_D_bp,
 
     // ---------------------------
-    // NEW: Tag-bypass outputs to regfile
+    //Tag-bypass outputs --> regfile
     // ---------------------------
     output wire                 RA_tag_bp_valid,
     output wire [XLEN-1:0]      RA_tag_bp_value,
@@ -74,7 +72,7 @@ module Hazard_unit #(
 );
 
   // ============================================================
-  // Existing arch-reg forwarding detect (rd compares)
+  // forwarding detect (rd compares)
   // ============================================================
   wire ex_hit_ra  = (EX_we  && (EX_rd  == D_ra)) || (EX_jlx  && (D_ra == 5'd31));
   wire ex_hit_rb  = (EX_we  && (EX_rd  == D_rb)) || (EX_jlx  && (D_rb == 5'd31));
@@ -85,8 +83,7 @@ module Hazard_unit #(
   wire wb_hit_ra  = (WB_we  && (WB_rd  == D_ra)) || (WB_jlx  && (D_ra == 5'd31));
   wire wb_hit_rb  = (WB_we  && (WB_rd  == D_rb)) || (WB_jlx  && (D_rb == 5'd31));
 
-  // Load-use stall (keep this)
-  // NOTE: For renamed operands, you should rely on regfile's RF_stall instead.
+  // Load-use stall 
   assign stall_D = 0;
 
   assign EX_D_bp  = { (ex_hit_ra  && !EX_ld),
@@ -102,9 +99,8 @@ module Hazard_unit #(
                         WB_jlx };
 
   // ============================================================
-  // Tag-based bypass selection for renamed operands
-  // Priority: MUL(done-now) > EX > MEM > WB
-  // (MUL can finish "out of band", so it gets top priority)
+  // Tag-based bypass 
+  // Priority: MUL > EX > MEM > WB
   // ============================================================
 
   // RA matches

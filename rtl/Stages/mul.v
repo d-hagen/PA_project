@@ -3,7 +3,7 @@
 module mul_pipe_single #(
   parameter XLEN    = 32,
   parameter RD_BITS = 5,
-  parameter TAG_W   = 4   // NEW: ROB tag width
+  parameter TAG_W   = 4   
 ) (
   input  wire                 clk,
   input  wire                 rst,
@@ -12,19 +12,19 @@ module mul_pipe_single #(
   input  wire [XLEN-1:0]      EX_mul_a,
   input  wire [XLEN-1:0]      EX_mul_b,
   input  wire [RD_BITS-1:0]   EX_mul_rd,
-  input  wire [TAG_W-1:0]     EX_mul_tag,     // NEW
+  input  wire [TAG_W-1:0]     EX_mul_tag,     
 
   input  wire                 MEM_we,    // normal reg writeback
   input  wire                 MEM_jlx,   // link writeback
 
   output wire                 mul_result_valid,
   output wire [XLEN-1:0]      mul_result,
-  output wire [RD_BITS-1:0]   mul_rd,          // NEW: expose rd at completion
-  output wire [TAG_W-1:0]     mul_result_tag,  // NEW: ROB tag at completion
+  output wire [RD_BITS-1:0]   mul_rd,          // rd at completion
+  output wire [TAG_W-1:0]     mul_result_tag,  // tag at completion
 
   output wire                 mul_busy,
   output wire [RD_BITS-1:0]   mul_busy_rd,
-  output wire [TAG_W-1:0]     mul_busy_tag,    // NEW
+  output wire [TAG_W-1:0]     mul_busy_tag,    
 
   output wire                 mul_wb_conflict_stall,
   output wire                 mul_issue_stall
@@ -37,7 +37,7 @@ module mul_pipe_single #(
   reg [TAG_W-1:0]   t1,  t2,  t3,  t4,  t5;
 
   assign mul_busy    = v1 | v2 | v3 | v4 | v5;
-  assign mul_busy_rd = rd5;          // “current in-flight” (last stage is fine for single in-flight)
+  assign mul_busy_rd = rd5;         
   assign mul_busy_tag= t5;
 
   assign mul_result_valid = v5;

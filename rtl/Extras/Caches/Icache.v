@@ -5,63 +5,76 @@ module icache #(
     input  wire                  clk,
     input  wire                  rst,
 
+    // Fetch inputs
     input  wire [PC_BITS-1:0]    F_pc,
     input  wire [127:0]          F_mem_inst,
     input  wire                  F_mem_valid,
 
+    // Memory request
     output reg                   Ic_mem_req,
     output reg  [LINE_BITS-1:0]  Ic_mem_addr,
 
+    // Fetch outputs
     output reg  [31:0]           F_inst,
     output reg                   F_stall
 );
 
-    // 4-entry FIFO, fully-associative I-cache
+    // ============================================================
+    // Cache arrays (4-line, fully associative, FIFO replace)
+    // ============================================================
     reg                     valid [0:3];
     reg [LINE_BITS-1:0]     tag   [0:3];
-    reg [31:0]              data  [0:3][0:3];
+    reg [31:0]              data  [0:3][0:3]; // 4 words per line
     reg [1:0]               fifo_ptr;
 
     integer i;
 
-    // Address decode
-    wire [LINE_BITS-1:0] pc_line = F_pc[19:4];
-    wire [1:0]           pc_word = F_pc[3:2];
+    // ============================================================
+    // PC decode
+    // ============================================================
+    wire [LINE_BITS-1:0] pc_line = F_pc[19:4]; // cache line
+    wire [1:0]           pc_word = F_pc[3:2];  // word index
 
-    // -----------------------------
-    // FSM for single outstanding req
-    // -----------------------------
-    localparam [1:0] S_IDLE     = 2'd0;
-    localparam [1:0] S_MISSWAIT = 2'd1;
-    localparam [1:0] S_PFWAIT   = 2'd2;
+    // ============================================================
+    // State machine
+    // ============================================================
+    localparam [1:0] S_IDLE     = 2'd0; // no request
+    localparam [1:0] S_MISSWAIT = 2'd1; // demand miss
+    localparam [1:0] S_PFWAIT   = 2'd2; // prefetch
 
-    reg [1:0]           state;
+    reg [1:0] state;
 
-    reg [LINE_BITS-1:0] inflight_line;
-    reg                 inflight_is_pf;
+    // ============================================================
+    // In-flight tracking
+    // ============================================================
+    reg [LINE_BITS-1:0] inflight_line;   // requested line
+    reg                 inflight_is_pf;  // prefetch or demand
 
-    reg [LINE_BITS-1:0] last_loaded_line;
+    // ============================================================
+    // Prefetch tracking
+    // ============================================================
+    reg [LINE_BITS-1:0] last_loaded_line; // last filled line
     reg                 have_last_loaded;
 
-    // If a miss happens during PF, we "remember" that we owe a miss check
-    reg                 pending_miss;
+    reg                 pending_miss;     // miss seen during PF
 
-    // -----------------------------
-    // Lookup helpers
-    // -----------------------------
+    // ============================================================
+    // Lookup results
+    // ============================================================
     reg        hit;
     reg [1:0]  hit_idx;
 
     reg        pf_hit;
-    wire [LINE_BITS-1:0] pf_line = last_loaded_line + {{(LINE_BITS-1){1'b0}},1'b1};
+    wire [LINE_BITS-1:0] pf_line = last_loaded_line + 1'b1; // next line
 
-    // -----------------------------
-    // Combinational lookup
-    // -----------------------------
+    // ============================================================
+    // Cache lookup
+    // ============================================================
     always @(*) begin
         hit     = 1'b0;
         hit_idx = 2'd0;
 
+        // check current PC line
         for (i = 0; i < 4; i = i + 1) begin
             if (valid[i] && (tag[i] == pc_line)) begin
                 hit     = 1'b1;
@@ -69,6 +82,7 @@ module icache #(
             end
         end
 
+        // check prefetch line
         pf_hit = 1'b0;
         if (have_last_loaded) begin
             for (i = 0; i < 4; i = i + 1) begin
@@ -79,9 +93,9 @@ module icache #(
         end
     end
 
-    // -----------------------------
-    // Outputs / request generation
-    // -----------------------------
+    // ============================================================
+    // Outputs and request logic
+    // ============================================================
     always @(*) begin
         // defaults
         F_inst      = 32'h2000_0000; // NOP
@@ -89,58 +103,55 @@ module icache #(
         Ic_mem_req  = 1'b0;
         Ic_mem_addr = pc_line;
 
-        // Provide instruction on hit (even while PF in-flight)
+        // instruction from cache
         if (hit) begin
             F_inst = data[hit_idx][pc_word];
         end
 
         case (state)
-            S_IDLE: begin
-                if (!hit) begin
-                    // Demand miss: request and stall
+            S_IDLE: begin // idle
+                if (!hit) begin // miss
                     F_stall     = 1'b1;
                     Ic_mem_req  = (!F_mem_valid) ? 1'b1 : 1'b0;
                     Ic_mem_addr = pc_line;
-                end else begin
-                    // Hit: no stall. If idle and we have a last_loaded_line, prefetch next line.
+                end else begin // hit
+                    // try prefetch
                     if (have_last_loaded && !pf_hit) begin
-                        // Background prefetch (does NOT stall)
                         Ic_mem_req  = (!F_mem_valid) ? 1'b1 : 1'b0;
                         Ic_mem_addr = pf_line;
                     end
                 end
             end
 
-            S_PFWAIT: begin
-                // Prefetch in flight. Only stall if the current fetch is missing.
-                if (!hit) begin
+            S_PFWAIT: begin // prefetch in flight
+                if (!hit) begin // miss while PF
                     F_stall = 1'b1;
                 end
-                // no new request while busy
+                // no new request
             end
 
-            S_MISSWAIT: begin
-                // Demand miss in flight: always stall
+            S_MISSWAIT: begin // demand miss in flight
                 F_stall = 1'b1;
-                // no new request while busy
+                // no new request
             end
 
-            default: begin
-                // safe fallback
+            default: begin // safe
                 F_stall = 1'b1;
             end
         endcase
     end
 
-    // -----------------------------
-    // Sequential state / refill
-    // -----------------------------
+    // ============================================================
+    // State and refill
+    // ============================================================
     always @(posedge clk) begin
         if (rst) begin
+            // clear cache
             for (i = 0; i < 4; i = i + 1) begin
                 valid[i] <= 1'b0;
                 tag[i]   <= {LINE_BITS{1'b0}};
             end
+
             fifo_ptr         <= 2'd0;
             state            <= S_IDLE;
             inflight_line    <= {LINE_BITS{1'b0}};
@@ -148,58 +159,48 @@ module icache #(
             last_loaded_line <= {LINE_BITS{1'b0}};
             have_last_loaded <= 1'b0;
             pending_miss     <= 1'b0;
+
         end else begin
-            // If we are prefetching and we observe a miss, remember that we owe a miss check.
-            // (F_pc is assumed held stable while F_stall=1; in PFWAIT we assert F_stall on miss)
-            if (state == S_PFWAIT) begin
-                if (!hit) begin
-                    pending_miss <= 1'b1;
-                end
+            // miss seen during PF
+            if (state == S_PFWAIT && !hit) begin
+                pending_miss <= 1'b1;
             end
 
-            // Launch request bookkeeping (only when idle and actually requesting)
-            // Note: Ic_mem_req is combinational, so we latch the chosen line here.
+            // latch request
             if (state == S_IDLE && Ic_mem_req && !F_mem_valid) begin
                 inflight_line  <= Ic_mem_addr;
-                inflight_is_pf <= hit; // In S_IDLE we only issue PF on hit-path; miss otherwise
-                // But be explicit: if hit==0 then it's a miss request; if hit==1 then it's prefetch
-                if (!hit) state <= S_MISSWAIT;
-                else      state <= S_PFWAIT;
+                inflight_is_pf <= hit; // hit=PF, miss=demand
+
+                if (!hit)
+                    state <= S_MISSWAIT;
+                else
+                    state <= S_PFWAIT;
             end
 
-            // Handle memory return: install the line we actually requested (inflight_line)
+            // memory return
             if (F_mem_valid) begin
                 valid[fifo_ptr] <= 1'b1;
                 tag[fifo_ptr]   <= inflight_line;
 
-                data[fifo_ptr][0] <= F_mem_inst[31:0];
-                data[fifo_ptr][1] <= F_mem_inst[63:32];
-                data[fifo_ptr][2] <= F_mem_inst[95:64];
-                data[fifo_ptr][3] <= F_mem_inst[127:96];
+                data[fifo_ptr][0] <= F_mem_inst[31:0];    // word 0
+                data[fifo_ptr][1] <= F_mem_inst[63:32];   // word 1
+                data[fifo_ptr][2] <= F_mem_inst[95:64];   // word 2
+                data[fifo_ptr][3] <= F_mem_inst[127:96];  // word 3
 
                 fifo_ptr <= fifo_ptr + 1'b1;
 
                 last_loaded_line <= inflight_line;
                 have_last_loaded <= 1'b1;
 
-                // After completing any in-flight transaction, go idle.
-                // If a miss was pending during prefetch, the next cycle S_IDLE logic will
-                // either see a hit (resolved) or issue the real miss request.
                 state <= S_IDLE;
 
-                // If the prefetched line happened to fix the miss, pending_miss can drop next cycle.
-                // We can optimistically clear it here ONLY if the inflight line equals current pc_line
-                // OR if we weren't tracking any pending miss.
-                if (pending_miss) begin
-                    // If the demanded line was exactly what we just filled, it is now resolved.
-                    if (inflight_line == pc_line) begin
-                        pending_miss <= 1'b0;
-                    end
-                    // else: leave it set; S_IDLE + lookup will cause a real miss request if still missing
+                // clear pending miss if filled
+                if (pending_miss && inflight_line == pc_line) begin
+                    pending_miss <= 1'b0;
                 end
             end
 
-            // Clear pending_miss once fetch is hitting again in idle
+            // clear pending miss on hit
             if (state == S_IDLE && pending_miss && hit) begin
                 pending_miss <= 1'b0;
             end
