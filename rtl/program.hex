@@ -1,6 +1,20 @@
 @0
-20000000    // [PA 0x00000] forced NOP at physical address 0
+20000000    // [PA 0x0000] forced NOP
+@400
+fc000000    // [PA 0x1000] iret
+20000000    // [PA 0x1004] nop after iret (1/5)
+20000000    // [PA 0x1008] nop after iret (2/5)
+20000000    // [PA 0x100C] nop after iret (3/5)
+20000000    // [PA 0x1010] nop after iret (4/5)
+20000000    // [PA 0x1014] nop after iret (5/5)
 @2000
+fc000000    // [PA 0x8000] iret
+20000000    // [PA 0x8004] nop after iret (1/5)
+20000000    // [PA 0x8008] nop after iret (2/5)
+20000000    // [PA 0x800C] nop after iret (3/5)
+20000000    // [PA 0x8010] nop after iret (4/5)
+20000000    // [PA 0x8014] nop after iret (5/5)
+@2400
 20000000    // [VA PC 0] NOP (addi r0 r0 r0 0)
 00000000    // [VA PC 4] marker
 2000100c    // [VA PC 8] addi r0  r0  r2   12          # r2 = 12

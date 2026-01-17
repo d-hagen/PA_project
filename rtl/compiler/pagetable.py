@@ -74,7 +74,6 @@ def assemble_line(line: str, lineno: int) -> Optional[int]:
 
     parts = re.split(r"[,\s]+", clean)
 
-    # Marker
     if len(parts) == 1:
         op = parts[0].lower()
         if op in MARKER_MNEMONICS:
@@ -110,17 +109,18 @@ def assemble_line(line: str, lineno: int) -> Optional[int]:
 
     return word
 
-# ===================== NOPS =====================
+# ===================== NOPS / FIXED WORDS =====================
 NOP_BUBBLE = ((OPCODES["addi"] & 0x3F) << 26)
 NOP_BUBBLE_COMMENT = "NOP (addi r0 r0 r0 0)"
 NOP_END = 0x00000000
 NOP_END_COMMENT = "NOP / marker (end of program)"
 
+IRET_WORD = (OPCODES["iret"] & 0x3F) << 26
+
 def assemble_file(in_path: pathlib.Path) -> List[Tuple[int, str]]:
     lines = in_path.read_text().splitlines()
     assembled: List[Tuple[int, str]] = []
 
-    # Your existing initial bubble (this is at VA PC=0 in the *logical* program stream)
     assembled.append((NOP_BUBBLE, NOP_BUBBLE_COMMENT))
 
     for i, line in enumerate(lines, start=1):
@@ -142,17 +142,16 @@ PAGE_OFFSET_WIDTH = 12
 VPN_WIDTH         = VA_WIDTH - PAGE_OFFSET_WIDTH
 PPN_WIDTH         = PC_BITS - PAGE_OFFSET_WIDTH  # 8
 
-# Put page tables at ~200k (4 KiB aligned-down): 0x30000
 ROOT_PPN    = 0x30
 L2_PPN_BASE = 0x31
 
-# Demonstration mapping: PA = VA + 0x8000
+# VA -> PA mapping (UNCHANGED)
 VA_TO_PA_BIAS_BYTES = 0x8000
 BIAS_PAGES = VA_TO_PA_BIAS_BYTES >> PAGE_OFFSET_WIDTH  # 8 pages
 
-# Where the program is located physically:
-# VA starts at 0, so PA starts at 0x8000 -> word address 0x2000
-PROGRAM_PA_BASE_BYTES = VA_TO_PA_BIAS_BYTES
+# ===================== PROGRAM PLACEMENT =====================
+# Program is physically written at PA = 0x9000
+PROGRAM_PA_BASE_BYTES = 0x9000
 PROGRAM_PA_BASE_WORD  = PROGRAM_PA_BASE_BYTES >> 2
 
 START_PC_VA   = 0x00000000
@@ -203,7 +202,7 @@ def build_page_tables(used_vpns: Set[int]) -> Dict[int, int]:
 
         for vpn0 in vpn0s:
             vpn = (vpn1 << 10) | vpn0
-            ppn = vpn + BIAS_PAGES  # shift mapping: PA = VA + 0x8000
+            ppn = vpn + BIAS_PAGES
             if ppn >= (1 << PPN_WIDTH):
                 continue
             mem[l2_base_word + vpn0] = make_pte(ppn)
@@ -219,22 +218,28 @@ def write_program_with_pagetables(
     mem_words = build_page_tables(used_vpns)
 
     with out_path.open("w") as f:
-        # ------------------------------------------------------------
-        # ALWAYS place a NOP at physical word address 0 (byte addr 0)
-        # ------------------------------------------------------------
+        # Forced NOP at PA 0
         f.write("@0\n")
-        f.write(f"{NOP_BUBBLE:08x}    // [PA 0x00000] forced NOP at physical address 0\n")
+        f.write(f"{NOP_BUBBLE:08x}    // [PA 0x0000] forced NOP\n")
 
-        # ------------------------------------------------------------
-        # Place program at PA base = 0x8000 -> word @2000
-        # ------------------------------------------------------------
+        # Fixed IRET at PA 0x1000 (@400) + 5 NOPs
+        f.write("@400\n")
+        f.write(f"{IRET_WORD:08x}    // [PA 0x1000] iret\n")
+        for k in range(5):
+            f.write(f"{NOP_BUBBLE:08x}    // [PA 0x{0x1004 + 4*k:04X}] nop after iret ({k+1}/5)\n")
+
+        # Fixed IRET at PA 0x8000 (@2000) + 5 NOPs
+        f.write("@2000\n")
+        f.write(f"{IRET_WORD:08x}    // [PA 0x8000] iret\n")
+        for k in range(5):
+            f.write(f"{NOP_BUBBLE:08x}    // [PA 0x{0x8004 + 4*k:04X}] nop after iret ({k+1}/5)\n")
+
+        # Program at PA 0x9000 (@2400)
         f.write(f"@{PROGRAM_PA_BASE_WORD:X}\n")
         for idx, (w, comment) in enumerate(assembled):
             f.write(f"{w:08x}    // [VA PC {idx*4}] {comment}\n")
 
-        # ------------------------------------------------------------
-        # Emit PTE words with @ markers
-        # ------------------------------------------------------------
+        # Page tables
         if mem_words:
             cur = None
             for idx in sorted(mem_words):
@@ -244,8 +249,9 @@ def write_program_with_pagetables(
                 cur = idx
 
     print(
-        f"Wrote forced NOP at PA 0x0 (word @0), "
-        f"{len(assembled)} instructions at PA 0x{PROGRAM_PA_BASE_BYTES:X} (word @{PROGRAM_PA_BASE_WORD:X}), "
+        f"Wrote NOP @PA 0x0, IRET+5NOPs @0x1000 and @0x8000, "
+        f"{len(assembled)} instructions at PA 0x{PROGRAM_PA_BASE_BYTES:X} "
+        f"(word @{PROGRAM_PA_BASE_WORD:X}), "
         f"+ {len(mem_words)} PTE words to {out_path}\n"
         f"Mapping: PA = VA + 0x{VA_TO_PA_BIAS_BYTES:X} (PPN = VPN + {BIAS_PAGES})"
     )

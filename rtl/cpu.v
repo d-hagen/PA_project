@@ -6,7 +6,7 @@ module cpu #(
   parameter integer ADDR_SIZE = 5,
   parameter integer PC_BITS   = 20,
   parameter integer VPC_BITS  = 32,
-  parameter [VPC_BITS-1:0] RESET_PC = {VPC_BITS{1'b0}}
+  parameter [VPC_BITS-1:0] RESET_PC = 32'h0000_1000
 )(
   input  wire clk,
   input  wire rst
@@ -284,7 +284,7 @@ module cpu #(
   // ============================================================
   reg admin;
   always @(posedge clk) begin
-    if (rst) admin <= 1'b0;
+    if (rst) admin <= 1'b1;
     else if (EXC_we) admin <= 1'b1;
     else if (IRET_we) admin <= 1'b0;
   end
@@ -707,6 +707,7 @@ module cpu #(
     .TAG_W     (TAG_W)
   ) u_regfile (
     .clk          (clk),
+    .rst          (rst),
 
     .D_ra         (D_ra),
     .D_rb         (D_rb),

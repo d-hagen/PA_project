@@ -9,6 +9,7 @@ module regfile_rob #(
   parameter integer TAG_W     = $clog2(ROB_DEPTH)
 )(
   input  wire                   clk,
+  input  wire                   rst,
 
   input  wire [ADDR_SIZE-1:0]   D_ra,
   input  wire [ADDR_SIZE-1:0]   D_rb,
@@ -101,6 +102,10 @@ module regfile_rob #(
       rm1_r <= EXC_pc;
       rm2_r <= {28'd0, EXC_type};
     end
+    if (rst) begin
+      rm1_r <= 32'h0000_1000;
+    end
+
   end
 
   wire [XLEN-1:0] ra_raw = regs[D_ra];
