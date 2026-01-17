@@ -152,46 +152,79 @@ module cpu_run_tb;
   endtask
 
   task dump_dcache;
-    integer k;
-    begin
-      $display("\n==== D-CACHE CONTENT ====");
-      for (k = 0; k < 4; k = k + 1) begin
-        $display("Entry %0d | valid=%0b dirty=%0b tag=%0d",
-                  k,
-                  dut.u_dcache.valid[k],
-                  dut.u_dcache.dirty[k],
-                  dut.u_dcache.tag[k]);
+  integer k, b;
+  reg [127:0] line;
+  reg [31:0] w0, w1, w2, w3;
+  begin
+    $display("\n==== D-CACHE CONTENT ====");
+    for (k = 0; k < 4; k = k + 1) begin
+      // pack bytes into a 128b line for convenience
+      line = 128'd0;
+      for (b = 0; b < 16; b = b + 1)
+        line[8*b +: 8] = dut.u_dcache.data_b[k][b];
 
-        $display("    DATA: %0d %0d %0d %0d",
-                  dut.u_dcache.data[k][0],
-                  dut.u_dcache.data[k][1],
-                  dut.u_dcache.data[k][2],
-                  dut.u_dcache.data[k][3]);
-      end
+      w0 = line[31:0];
+      w1 = line[63:32];
+      w2 = line[95:64];
+      w3 = line[127:96];
+
+      $display("Entry %0d | valid=%0b dirty=%0b tag(line)=0x%0h",
+               k,
+               dut.u_dcache.valid[k],
+               dut.u_dcache.dirty[k],
+               dut.u_dcache.tag[k]);
+
+      $display("  bytes [00..15]: %02h %02h %02h %02h  %02h %02h %02h %02h  %02h %02h %02h %02h  %02h %02h %02h %02h",
+               dut.u_dcache.data_b[k][0],  dut.u_dcache.data_b[k][1],
+               dut.u_dcache.data_b[k][2],  dut.u_dcache.data_b[k][3],
+               dut.u_dcache.data_b[k][4],  dut.u_dcache.data_b[k][5],
+               dut.u_dcache.data_b[k][6],  dut.u_dcache.data_b[k][7],
+               dut.u_dcache.data_b[k][8],  dut.u_dcache.data_b[k][9],
+               dut.u_dcache.data_b[k][10], dut.u_dcache.data_b[k][11],
+               dut.u_dcache.data_b[k][12], dut.u_dcache.data_b[k][13],
+               dut.u_dcache.data_b[k][14], dut.u_dcache.data_b[k][15]);
+
+      $display("  words little-endian: W0=0x%08h W1=0x%08h W2=0x%08h W3=0x%08h", w0, w1, w2, w3);
     end
-  endtask
+  end
+endtask
+
 
   task dump_store_buffer;
-    integer k;
-    begin
-      $display("\n==== STORE BUFFER CONTENT ====");
-      $display("count=%0d head=%0d tail=%0d",
-              dut.u_store_buffer.count,
-              dut.u_store_buffer.head,
-              dut.u_store_buffer.tail);
+  integer k;
+  reg [7:0] b0, b1, b2, b3;
+  begin
+    $display("\n==== STORE BUFFER CONTENT ====");
+    $display("count=%0d head=%0d tail=%0d empty=%0b",
+             dut.u_store_buffer.count,
+             dut.u_store_buffer.head,
+             dut.u_store_buffer.tail,
+             (dut.u_store_buffer.count==0));
 
-      for (k = 0; k < dut.u_store_buffer.DEPTH; k = k + 1) begin
-        $display("SB[%0d] | addr20=0x%0d (line=%0d word=%0d byte=%0d) data=0x%0d byt=%0d",
-                k,
-                dut.u_store_buffer.addr_q[k],
-                dut.u_store_buffer.addr_q[k][19:4],
-                dut.u_store_buffer.addr_q[k][3:2],
-                dut.u_store_buffer.addr_q[k][1:0],
-                dut.u_store_buffer.data_q[k],
-                dut.u_store_buffer.byt_q[k]);
-      end
+    for (k = 0; k < dut.u_store_buffer.DEPTH; k = k + 1) begin
+      b0 = dut.u_store_buffer.wdata_q[k][7:0];
+      b1 = dut.u_store_buffer.wdata_q[k][15:8];
+      b2 = dut.u_store_buffer.wdata_q[k][23:16];
+      b3 = dut.u_store_buffer.wdata_q[k][31:24];
+
+      $display("SB[%0d] addr_w=0x%05h line=0x%04h word_sel=%0d  wmask=%b  wdata=0x%08h  bytes=[%02h %02h %02h %02h]",
+               k,
+               dut.u_store_buffer.addrw_q[k],
+               dut.u_store_buffer.addrw_q[k][19:4],
+               dut.u_store_buffer.addrw_q[k][3:2],
+               dut.u_store_buffer.wmask_q[k],
+               dut.u_store_buffer.wdata_q[k],
+               b0, b1, b2, b3);
     end
-  endtask
+
+    // also print current forwarding signals (handy during loads)
+    $display("fwd: sb_fwd_mask=%b sb_fwd_data=0x%08h sb_all_hit=%0b",
+             dut.u_store_buffer.sb_fwd_mask,
+             dut.u_store_buffer.sb_fwd_data,
+             dut.u_store_buffer.sb_all_hit);
+  end
+endtask
+
 
   task print_rob;
     integer j;

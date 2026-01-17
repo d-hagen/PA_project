@@ -13,15 +13,11 @@ module mem_to_wb_reg #(
     input  wire [XLEN-1:0]      MEM_pc,
     input  wire                 MEM_jlx,
 
-    // NEW: load-valid from MEM stage
+    // load-valid from MEM stage
     input  wire                 MEM_ld_valid,
 
     // ROB tag
     input  wire [TAG_W-1:0]     MEM_tag,
-
-    // Store Buffer forwarding
-    input  wire                 sb_hit,
-    input  wire [XLEN-1:0]      sb_data,
 
     // MUL completion inputs
     input  wire                 mul_done,
@@ -29,10 +25,8 @@ module mem_to_wb_reg #(
     input  wire [4:0]           mul_rd,
     input  wire [TAG_W-1:0]     mul_tag,
 
-    input wire                  dcache_stall,
-    input wire                  Dtlb_stall,    
-    input wire                  sb_stall,    
-    
+    input  wire                 dcache_stall,
+    input  wire                 Dtlb_stall,
 
     // WB stage outputs
     output wire [XLEN-1:0]      WB_data_mem,
@@ -41,8 +35,7 @@ module mem_to_wb_reg #(
     output wire [XLEN-1:0]      WB_pc,
     output wire                 WB_jlx,
 
-
-    // NEW: flopped load-valid to WB
+    // flopped load-valid to WB
     output wire                 WB_ld_valid,
 
     // ROB tag at WB
@@ -57,8 +50,9 @@ module mem_to_wb_reg #(
     reg [TAG_W-1:0]     wb_tag_r;
     reg                 wb_ld_valid_r;
 
-
-    wire insertNOP = (dcache_stall || Dtlb_stall || sb_stall ) && !mul_done;
+    // If MEM stage is stalled (or translation), prevent advancing this reg.
+    // (Your design uses "insertNOP" rather than hold; keep your behavior.)
+    wire insertNOP = (dcache_stall || Dtlb_stall) && !mul_done;
 
     always @(posedge clk) begin
         if (rst || insertNOP) begin
@@ -81,11 +75,11 @@ module mem_to_wb_reg #(
 
                 wb_tag_r      <= mul_tag;
 
-                // MUL is NOT a load
+                // MUL result is valid
                 wb_ld_valid_r <= 1'b1;
             end else begin
-                // Normal MEM->WB
-                wb_data_mem_r <= sb_hit ? sb_data : MEM_data_mem;
+                // Normal MEM->WB (dcache already merged any SB forwarding)
+                wb_data_mem_r <= MEM_data_mem;
                 wb_rd_r       <= MEM_rd;
                 wb_we_r       <= MEM_we;
                 wb_pc_r       <= MEM_pc;

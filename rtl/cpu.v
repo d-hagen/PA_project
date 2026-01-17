@@ -170,19 +170,20 @@ module cpu #(
   wire               dcache_data_valid;
 
   // =======================
-  // Store Buffer <-> D$ wires
+  // Store Buffer <-> D$ wires (UPDATED for masked stores + byte forwarding)
   // =======================
-  wire                 sb_load_miss;
 
+  // Drain request from SB -> D$
   wire                 store_request;
-  wire [19:0]          store_request_address;
-  wire [XLEN-1:0]      store_request_value;
-  wire                 store_byte;
-  wire                 store_valid;
+  wire [19:0]          store_request_address; // WORD-ALIGNED PA[19:0] (addr[1:0]==0)
+  wire [31:0]          store_request_wdata;   // masked word data
+  wire [3:0]           store_request_wmask;   // per-byte mask (lane0..lane3)
+  wire                 store_valid;           // D$ accepted/applied head entry
 
-  // Store-buffer load forwarding -> WB mux
-  wire                 sb_hit;
-  wire [XLEN-1:0]      sb_data;
+  // SB -> D$ load forwarding (byte-granular)
+  wire [3:0]           sb_fwd_mask;           // per load byte (bit0 used for byte load)
+  wire [31:0]          sb_fwd_data;           // forwarded bytes in load-lane order
+  wire                 sb_all_hit;            // SB fully satisfies the current load
 
   // Store buffer stall
   wire                 sb_stall;
@@ -550,9 +551,10 @@ module cpu #(
       ( MEM_is_load ? (!dcache_stall && !Dtlb_stall) : 1'b1 );
 
   assign MEM_tag_value =
-    MEM_jlx ? (MEM_pc + 32'd4) :
-    MEM_is_load ? (sb_hit ? sb_data : MEM_data_mem) :
-    MEM_alu_out;
+  MEM_jlx ? (MEM_pc + 32'd4) :
+  MEM_is_load ? MEM_data_mem :
+  MEM_alu_out;
+
 
   assign WB_tag_we    = (WB_we | WB_jlx);
   assign WB_tag_value = WB_jlx ? (WB_pc + 32'd4) : WB_data_mem;
@@ -944,77 +946,89 @@ module cpu #(
   // Store Buffer
   // =======================
   store_buffer #(
-    .XLEN(XLEN)
-  ) u_store_buffer (
-    .clk                  (clk),
-    .rst                  (rst),
+  .XLEN(XLEN)
+) u_store_buffer (
+  .clk             (clk),
+  .rst             (rst),
 
-    .Dtlb_addr            (Dtlb_addr_out),
-    .Dtlb_addr_valid      (Dtlb_addr_valid),
-    .MEM_b2               (MEM_b2),
-    .MEM_ld               (MEM_ld),
-    .MEM_str              (MEM_str),
-    .MEM_byt              (MEM_byt),
+  .Dtlb_addr       (Dtlb_addr_out),
+  .Dtlb_addr_valid (Dtlb_addr_valid),
 
-    .store_valid          (store_valid),
-    .sb_load_miss         (sb_load_miss),
-    .store_request        (store_request),
-    .store_request_address(store_request_address),
-    .store_request_value  (store_request_value),
-    .store_byte           (store_byte),
+  .MEM_b2          (MEM_b2),
+  .MEM_ld          (MEM_ld),
+  .MEM_str         (MEM_str),
+  .MEM_byt         (MEM_byt),
 
-    .sb_hit               (sb_hit),
-    .sb_data              (sb_data),
+  .store_valid     (store_valid),
 
-    .Dtlb_stall           (Dtlb_stall),
-    .dcache_stall         (dcache_stall),
-    .sb_stall             (sb_stall)
-  );
+  // drain to dcache (masked word store)
+  .store_request          (store_request),
+  .store_request_addr_w   (store_request_address),
+  .store_request_wdata    (store_request_wdata),
+  .store_request_wmask    (store_request_wmask),
+
+  // forwarding to dcache
+  .sb_fwd_mask      (sb_fwd_mask),
+  .sb_fwd_data      (sb_fwd_data),
+  .sb_all_hit       (sb_all_hit),
+
+  .Dtlb_stall      (Dtlb_stall),
+  .dcache_stall    (dcache_stall),
+
+  .sb_stall        (sb_stall)
+);
+
 
   // =======================
   // D-Cache
   // =======================
-  dcache #(
-    .XLEN(XLEN)
-  ) u_dcache (
-    .clk            (clk),
-    .rst            (rst),
+ dcache #(
+  .XLEN(XLEN)
+) u_dcache (
+  .clk            (clk),
+  .rst            (rst),
 
-    .MEM_ld         (MEM_ld),
-    .MEM_byt        (MEM_byt),
+  .MEM_ld         (MEM_ld),
+  .MEM_byt        (MEM_byt),
 
-    .MEM_alu_out    (Dtlb_addr_out),
-    .MEM_b2         (MEM_b2),
-    .MEM_data_mem   (MEM_data_mem),
-    .dcache_stall   (dcache_stall),
+  .MEM_alu_out    (Dtlb_addr_out),
+  .MEM_b2         (MEM_b2),
+  .MEM_data_mem   (MEM_data_mem),
+  .dcache_stall   (dcache_stall),
 
-    .sb_load_miss    (sb_load_miss),
-    .store_request   (store_request),
-    .store_request_address (store_request_address),
-    .store_request_value (store_request_value),
-    .store_byte      (store_byte),
-    .store_valid     (store_valid),
+  // NEW: SB forwarding inputs
+  .sb_fwd_mask    (sb_fwd_mask),
+  .sb_fwd_data    (sb_fwd_data),
+  .sb_all_hit     (sb_all_hit),
 
-    .Dtlb_addr_valid(Dtlb_addr_valid),
+  // NEW: masked store drain inputs
+  .store_request          (store_request),
+  .store_request_address  (store_request_address),
+  .store_request_wdata    (store_request_wdata),
+  .store_request_wmask    (store_request_wmask),
+  .store_valid            (store_valid),
 
-    .Dc_mem_req     (Dc_mem_req),
-    .Dc_mem_addr    (Dc_mem_addr),
-    .MEM_data_line  (MEM_data_line),
-    .MEM_mem_valid  (MEM_mem_valid),
+  .Dtlb_addr_valid(Dtlb_addr_valid),
 
-    .Dc_wb_we       (Dc_wb_we),
-    .Dc_wb_addr     (Dc_wb_addr),
-    .Dc_wb_wline    (Dc_wb_wline),
+  .Dc_mem_req     (Dc_mem_req),
+  .Dc_mem_addr    (Dc_mem_addr),
+  .MEM_data_line  (MEM_data_line),
+  .MEM_mem_valid  (MEM_mem_valid),
 
-    .Ptw_req        (Ptw_mem_req),
-    .Ptw_addr       (Ptw_mem_addr),
-    .Ptw_rdata      (Ptw_mem_rdata),
-    .Ptw_valid      (Ptw_mem_valid),
+  .Dc_wb_we       (Dc_wb_we),
+  .Dc_wb_addr     (Dc_wb_addr),
+  .Dc_wb_wline    (Dc_wb_wline),
 
-    .dcache_data_valid (dcache_data_valid),
+  .Ptw_req        (Ptw_mem_req),
+  .Ptw_addr       (Ptw_mem_addr),
+  .Ptw_rdata      (Ptw_mem_rdata),
+  .Ptw_valid      (Ptw_mem_valid),
 
-    .Ptw_accepted   (Ptw_accepted)
-  );
+  .dcache_data_valid (dcache_data_valid),
+
+  .Ptw_accepted   (Ptw_accepted)
+);
+
 
   // =======================
   // Unified instruction + data memory
@@ -1044,7 +1058,8 @@ module cpu #(
   // =======================
   // MEM → WB pipeline register (tag mux)
   // =======================
-  wire load_valid = ((sb_hit || (sb_load_miss && dcache_data_valid)) || !MEM_ld);
+  wire load_valid = (!MEM_ld) || dcache_data_valid;
+
 
   mem_to_wb_reg #(
     .XLEN    (XLEN),
@@ -1064,12 +1079,8 @@ module cpu #(
 
     .dcache_stall (dcache_stall),
     .Dtlb_stall   (Dtlb_stall),
-    .sb_stall     (sb_stall),
 
     .MEM_ld_valid (load_valid || mul_result_valid),
-
-    .sb_hit       (sb_hit),
-    .sb_data      (sb_data),
 
     .mul_done     (mul_result_valid),
     .mul_result   (mul_result),
