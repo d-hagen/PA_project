@@ -152,7 +152,7 @@ module rename #(
         end
 
         // ------------------------------------------------------------
-        // 3) Normal rename update on issue (log -> update -> advance)
+        //  Normal rename update on issue (log -> update -> advance)
         // ------------------------------------------------------------
         if (D_fire && !rob_full_in) begin
           // Log previous mapping for this tag (even if dest_we=0)

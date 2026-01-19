@@ -162,16 +162,11 @@
     .Itlb_ptw_fault (Itlb_ptw_fault),
 
     .stall_D        (stall_allD),
-    .dcache_stall   (dcache_stall),
-    .sb_stall       (sb_stall),
     .Itlb_stall     (Itlb_stall),
-    .Dtlb_stall     (Dtlb_stall),
 
     // unified flush squash
     .EX_taken       (unified_flush_valid),
 
-    .mul_wb_conflict_stall (mul_wb_conflict_stall),
-    .mul_issue_stall       (mul_issue_stall),
 
     .D_pc           (D_pc),
     .D_inst         (D_inst),

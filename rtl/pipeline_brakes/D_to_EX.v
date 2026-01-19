@@ -38,14 +38,8 @@ module d_to_ex_reg #(
 
     // Stall/Flush
     input  wire                 stall_D,
-    input  wire                 dcache_stall,
-    input  wire                 sb_stall,
-    input  wire                 Dtlb_stall,
     input  wire                 EX_taken,
 
-    // MUL-related stalls
-    input  wire                 mul_wb_conflict_stall,
-    input  wire                 mul_issue_stall,
 
     // EX stage outputs
     output wire [XLEN-1:0]      EX_a,

@@ -49,4 +49,4 @@ Extras/Caches/Icache.v
 Extras/Caches/Dcache.v
 
 # ==== Testbench ====
-tb_fast.v          
+tb_cpu.v          

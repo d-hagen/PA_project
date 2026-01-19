@@ -10,17 +10,12 @@ module f_to_d_reg #(
     input  wire                   F_BP_taken,
     input  wire                   Itlb_ptw_fault,
 
-    input  wire                   stall_D,
-    input  wire                   dcache_stall,
-    input  wire                   sb_stall,
+    input  wire                   stall_D, // this is stall all D 
     input  wire                   Itlb_stall,
-    input  wire                   Dtlb_stall,
 
     input  wire                   EX_taken,
     input  wire [VPC_BITS-1:0]    F_BP_target_pc,
 
-    input  wire                   mul_wb_conflict_stall,
-    input  wire                   mul_issue_stall,          // NEW
 
     output wire [VPC_BITS-1:0]    D_pc,
     output wire [XLEN-1:0]        D_inst,
