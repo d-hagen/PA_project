@@ -14,7 +14,7 @@ module rob #(
   input  wire                   alloc_we,
   input  wire [ADDR_SIZE-1:0]   alloc_rd_arch,
   input  wire                   alloc_jlx,
-  input  wire                   alloc_iret,   
+  input  wire                   alloc_iret,
 
   input  wire                   wb_valid,
   input  wire [TAG_W-1:0]       wb_tag,
@@ -46,7 +46,7 @@ module rob #(
 
   output reg                    EXC_we,
   output reg  [XLEN-1:0]        EXC_pc,
-  output reg  [3:0]             EXC_type,   // CHECK: exceptions dont have a type yet all just get skipped -> give them an actuall type in the exc unit
+  output reg  [3:0]             EXC_type,
   output reg  [TAG_W-1:0]       EXC_tag,
 
   // --------------------------
@@ -55,7 +55,7 @@ module rob #(
   output reg                    IRET_we,
   output reg  [TAG_W-1:0]       IRET_tag,
 
-  //stall while exception pending
+  // stall while exception pending
   output wire                   rob_stall,
 
   output wire                   rob_full,
@@ -71,14 +71,13 @@ module rob #(
   reg [ADDR_SIZE-1:0]   rd    [0:ROB_DEPTH-1];
   reg [XLEN-1:0]        value [0:ROB_DEPTH-1];
 
-  // EXC: per-entry exception state
+  // EXC: per-entry exception state (PC is stored in value[] when exc_flag=1)
   reg                   exc_flag [0:ROB_DEPTH-1];
-  reg [XLEN-1:0]        exc_pc    [0:ROB_DEPTH-1];
 
   // per-entry iret marker
   reg                   iret_flag [0:ROB_DEPTH-1];
 
-  //sticky "exception pending"  state -> stall aka keine neuen Inst go into pipeline
+  // sticky "exception pending" state -> stall
   reg                   exc_pending;
   reg [TAG_W-1:0]       exc_pending_tag;
   assign rob_stall = exc_pending;
@@ -102,24 +101,26 @@ module rob #(
   assign rob_empty = (count == 0);
   assign rob_full  = (count == ROB_DEPTH);
 
-  assign ra_ready = valid[ra_tag] & ready[ra_tag];
+  // Block forwarding from exception entries:
+  // if exc_flag[tag]==1, this tag must not be considered a ready producer
+  assign ra_ready = valid[ra_tag] & ready[ra_tag] & ~exc_flag[ra_tag];
   assign ra_value = value[ra_tag];
 
-  assign rb_ready = valid[rb_tag] & ready[rb_tag];
+  assign rb_ready = valid[rb_tag] & ready[rb_tag] & ~exc_flag[rb_tag];
   assign rb_value = value[rb_tag];
 
   wire head_can_commit = (!rob_empty) && valid[head] && ready[head];
 
   wire                 alloc_we_eff = alloc_we | alloc_jlx;
-  wire [ADDR_SIZE-1:0] alloc_rd_eff = alloc_jlx ? 5'd31 : alloc_rd_arch;
+  wire [ADDR_SIZE-1:0] alloc_rd_eff  = alloc_jlx ? 5'd31 : alloc_rd_arch;
 
-  // block alloc while exception pending -> no new inst into Rob when exception in pipe
+  // block alloc while exception pending -> no new inst into ROB when exception in pipe
   wire do_alloc  = alloc_valid && !rob_full && !flush_valid && !rob_stall;
 
   // Commit when head ready and not flushing
   wire do_commit = head_can_commit && !flush_valid;
 
-  // 1-cycle pulse  flush
+  // 1-cycle pulse flush indicator
   reg recovering_r;
   assign recovering = recovering_r;
 
@@ -161,7 +162,6 @@ module rob #(
         rd[i]        <= {ADDR_SIZE{1'b0}};
         value[i]     <= {XLEN{1'b0}};
         exc_flag[i]  <= 1'b0;
-        exc_pc[i]    <= {XLEN{1'b0}};
         iret_flag[i] <= 1'b0;
       end
 
@@ -183,17 +183,21 @@ module rob #(
       // --------------------------
       // WB (mark ready)
       // --------------------------
-      if (wb_valid && valid[wb_tag]) begin
+      // IMPORTANT: if entry already marked as exception, value[] holds exc PC.
+      // Don't overwrite it with wb_value.
+      if (wb_valid && valid[wb_tag] && !exc_flag[wb_tag]) begin
         value[wb_tag] <= wb_value;
         ready[wb_tag] <= 1'b1;
       end
 
       // --------------------------
       // EXC: mark exception on the entry + raise stall sticky
+      // Store exception PC in value[] and force ready=1 so it can commit.
       // --------------------------
       if (exc_set_valid && valid[exc_set_tag]) begin
         exc_flag[exc_set_tag] <= 1'b1;
-        exc_pc[exc_set_tag]   <= exc_set_pc;
+        value[exc_set_tag]    <= exc_set_pc; // reuse value as exc_pc
+        ready[exc_set_tag]    <= 1'b1;       // ensure it can reach commit
 
         if (!exc_pending) begin
           exc_pending     <= 1'b1;
@@ -202,7 +206,7 @@ module rob #(
       end
 
       // --------------------------
-      // Flush 
+      // Flush
       // --------------------------
       if (flush_valid) begin
         recovering_r <= 1'b1;
@@ -219,7 +223,6 @@ module rob #(
             rd[idx]        <= {ADDR_SIZE{1'b0}};
             value[idx]     <= {XLEN{1'b0}};
             exc_flag[idx]  <= 1'b0;
-            exc_pc[idx]    <= {XLEN{1'b0}};
             iret_flag[idx] <= 1'b0;
 
             // flushed exception -> clear stall
@@ -241,25 +244,25 @@ module rob #(
               if (t == i[TAG_W-1:0]) in_flush_range = 1'b1;
               t = inc_tag(t);
             end
-            if (valid[i] && !in_flush_range) new_count = new_count + {{(CNT_W-1){1'b0}},1'b1};
+            if (valid[i] && !in_flush_range)
+              new_count = new_count + {{(CNT_W-1){1'b0}},1'b1};
           end
           count <= new_count;
         end
 
       end else begin
         // --------------------------
-        // NEW ENtry
+        // NEW entry
         // --------------------------
         if (do_alloc) begin
           valid[alloc_tag] <= 1'b1;
-          // no-write ops -> ready immediately;
+          // no-write ops -> ready immediately
           ready[alloc_tag] <= ((alloc_we_eff == 1'b0) || alloc_iret);
           we[alloc_tag]    <= alloc_we_eff;
           rd[alloc_tag]    <= alloc_rd_eff;
 
-          // clear exception state 
-          exc_flag[alloc_tag]  <= 1'b0;
-          exc_pc[alloc_tag]    <= {XLEN{1'b0}};
+          // clear exception state
+          exc_flag[alloc_tag] <= 1'b0;
 
           // tag iret
           iret_flag[alloc_tag] <= alloc_iret;
@@ -268,14 +271,14 @@ module rob #(
         end
 
         // --------------------------
-        // Commit 
-        // Priority: EXC > IRET > normal commit
+        // Commit
+        // Priority: EXC > IRET > normal
         // --------------------------
         if (do_commit) begin
           if (exc_flag[head]) begin
             // exception commit
             EXC_we   <= 1'b1;
-            EXC_pc   <= exc_pc[head];
+            EXC_pc   <= value[head]; // exception PC stored in value[]
             EXC_type <= 4'd0;
             EXC_tag  <= head;
 
@@ -286,7 +289,7 @@ module rob #(
             C_valid <= 1'b0;
 
           end else if (iret_flag[head]) begin
-            // iret commit pulse 
+            // iret commit pulse
             IRET_we  <= 1'b1;
             IRET_tag <= head;
 
@@ -301,18 +304,17 @@ module rob #(
             C_tag     <= head;
           end
 
-          // retire entry 
+          // retire entry
           valid[head]     <= 1'b0;
           ready[head]     <= 1'b0;
           exc_flag[head]  <= 1'b0;
-          exc_pc[head]    <= {XLEN{1'b0}};
           iret_flag[head] <= 1'b0;
 
           head <= inc_tag(head);
         end
 
         // --------------------------
-        // Count update 
+        // Count update
         // --------------------------
         case ({do_alloc, do_commit})
           2'b10: count <= count + {{(CNT_W-1){1'b0}},1'b1};

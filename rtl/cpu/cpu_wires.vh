@@ -113,9 +113,7 @@
 
   // EX → MEM pipeline register wires
   wire [XLEN-1:0]    MEM_alu_out;
-  wire               MEM_taken;
   wire [XLEN-1:0]    MEM_b2;
-  wire [XLEN-1:0]    MEM_a2;
   wire [4:0]         MEM_rd;
   wire               MEM_we;
   wire               MEM_ld;

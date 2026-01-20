@@ -42,7 +42,29 @@ add  r14 r30 r28  0     # r28 = log2(N) + log2(4) = log2(N*4)
 shl  r13 r30 r27  0           # r27 = strideBytes = N*4
 shl  r13 r14 r3   0           # r3  = total = N*N
 
+# ============================================================
+# Fill A: A[idx] = idx   (1D pointer walk)
+# ============================================================
+addi r0  r0  r1   0           # idx = 0
+addi r5  r0  r4   0           # ptrA = baseA
 
+# A_FILL_LOOP:
+store r4  r1  r0   0
+addi  r4  r4  r4   4
+addi  r1  r1  r1   1
+blt   r1  r3  r0  -12          # back 3 instr
+
+# ============================================================
+# Fill B: B[idx] = idx   (1D pointer walk)
+# ============================================================
+addi r0  r0  r1   0           # idx = 0
+addi r6  r0  r4   0           # ptrB = baseB
+
+# B_FILL_LOOP:
+store r4  r1  r0   0
+addi  r4  r4  r4   4
+addi  r1  r1  r1   1
+blt   r1  r3  r0  -12          # back 3 instr
 
 
 # ============================================================

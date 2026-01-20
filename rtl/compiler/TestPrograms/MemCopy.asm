@@ -19,16 +19,6 @@ addi r0  r0  r7   5        # r7 = 5
 addi r9  r9  r4   0        # r4 = &a[0]
 
 # -----------------------------
-# Loop 1: a[i] = 5
-# -----------------------------
-# fill_a_loop:
-store r4  r7  r0   0        # a[i] = 5
-addi  r4  r4  r4   4        # ptr_a += 4
-addi  r1  r1  r1   1        # i++
-blt   r1  r3  r0  -12       # if (i < 128) repeat
-
-
-# -----------------------------
 # Reset i and pointers
 # -----------------------------
 addi r0  r0  r1   0        # i = 0

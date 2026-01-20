@@ -10,9 +10,9 @@ module cpu_run_tb;
   // ------------------------------------------------------------
   // WAVEFORM CONTROL CONSTANTS
   // ------------------------------------------------------------
-  localparam integer WAVE_START_CYCLE = 10000000;                 // cycle to start dumping
-  localparam integer WAVE_NUM_CYCLES  = 1000;            // number of cycles to dump
-  localparam string  WAVE_FILE        = "MatrixMul.vcd";  // VCD filename
+  localparam integer WAVE_START_CYCLE = 100;                 // cycle to start dumping
+  localparam integer WAVE_NUM_CYCLES  = 1500;            // number of cycles to dump
+  localparam string  WAVE_FILE        = "BufferSum2.vcd";  // VCD filename
 
   // progress marker interval (prints ONLY a marker line)
   localparam integer PROGRESS_EVERY   = 500000;

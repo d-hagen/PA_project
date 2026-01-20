@@ -245,15 +245,11 @@
     .D_itlb_ptw_fault (D_itlb_ptw_fault),
 
     .stall_D        (stall_allD),
-    .dcache_stall   (dcache_stall),
-    .sb_stall       (sb_stall),
-    .Dtlb_stall     (Dtlb_stall),
+  
 
     // unified flush squash
     .EX_taken       (unified_flush_valid),
 
-    .mul_wb_conflict_stall (mul_wb_conflict_stall),
-    .mul_issue_stall       (mul_issue_stall),
 
     .EX_a           (EX_a),
     .EX_a2          (EX_a2),
@@ -345,9 +341,7 @@
     .rst         (rst),
 
     .EX_alu_out  (EX_alu_out),
-    .EX_taken    (EX_taken),
     .EX_b2       (EX_b2),
-    .EX_a2       (EX_a2),
     .EX_rd       (EX_rd),
     .EX_we       (EX_we),
     .EX_ld       (EX_ld),
@@ -367,9 +361,7 @@
     .EX_tag      (EX_tag),
 
     .MEM_alu_out (MEM_alu_out),
-    .MEM_taken   (MEM_taken),
     .MEM_b2      (MEM_b2),
-    .MEM_a2      (MEM_a2),
     .MEM_rd      (MEM_rd),
     .MEM_we      (MEM_we),
     .MEM_ld      (MEM_ld),

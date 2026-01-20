@@ -150,7 +150,7 @@ module regfile_rob #(
   // ------------------------------------
   assign D_a =   (D_brn & !D_jmp)    ? D_pc :
                             ra_final;
-
+  //CHECK: use rd rb to extend offset sizes (str, ld, addi)
   assign D_b =
       (D_str || D_ld || D_addi || D_brn)
         ? {{(XLEN-11){D_imd[10]}}, D_imd}

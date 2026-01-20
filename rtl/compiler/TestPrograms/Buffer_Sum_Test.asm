@@ -4,7 +4,7 @@
 # r4 = ptr (&a[i])
 # r5 = temp (loaded value)
 # r9 = base for large addresses (1000)
-marker
+
 # -----------------------------
 # Array initialization at base = 1004
 # -----------------------------
@@ -13,6 +13,11 @@ addi r3  r3  r3  128     # r 3= 2
 addi r0  r0  r4   1004     # r4 = &a[0]
 addi r0  r0  r9   1000     # r9 = 1000
 
+# fill_loop:
+store r4  r1  r0   0        # a[i] = i
+addi  r4  r4  r4   4        # ptr += 4
+addi  r1  r1  r1   1        # i++
+blt   r1  r3  r0  -12       # if (i < 12) repeat fill_loop
 
 # -----------------------------
 # Sum phase
@@ -37,6 +42,10 @@ load  r0  r0  r20 200     ; r20 = sum     (read it back)
 
 store r9  r0  r0   1000      # mem[1516] = sum
 
+
+load r9   r0   r30  1000
+load r9   r0   r30  1000
+load r9   r0   r30  1000
 
 
 
