@@ -103,10 +103,10 @@ module rob #(
 
   // Block forwarding from exception entries:
   // if exc_flag[tag]==1, this tag must not be considered a ready producer
-  assign ra_ready = valid[ra_tag] & ready[ra_tag] & ~exc_flag[ra_tag];
+  assign ra_ready = valid[ra_tag] & ready[ra_tag] & !exc_flag[ra_tag];
   assign ra_value = value[ra_tag];
 
-  assign rb_ready = valid[rb_tag] & ready[rb_tag] & ~exc_flag[rb_tag];
+  assign rb_ready = valid[rb_tag] & ready[rb_tag] & !exc_flag[rb_tag];
   assign rb_value = value[rb_tag];
 
   wire head_can_commit = (!rob_empty) && valid[head] && ready[head];
@@ -183,8 +183,7 @@ module rob #(
       // --------------------------
       // WB (mark ready)
       // --------------------------
-      // IMPORTANT: if entry already marked as exception, value[] holds exc PC.
-      // Don't overwrite it with wb_value.
+      // entry already marked as exception, value[] holds exc PC.
       if (wb_valid && valid[wb_tag] && !exc_flag[wb_tag]) begin
         value[wb_tag] <= wb_value;
         ready[wb_tag] <= 1'b1;

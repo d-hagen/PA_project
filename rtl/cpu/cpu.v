@@ -15,8 +15,8 @@ module cpu #(
   `include "cpu_localparams.vh"
   `include "cpu_wires.vh"
   `include "cpu_control.vh"
-  `include "cpu_instances_frontend.vh"
-  `include "cpu_instances_backend_mem.vh"
+  `include "cpu_unwrapp.vh"
+  `include "cpu_handle.vh"
 
 
 endmodule

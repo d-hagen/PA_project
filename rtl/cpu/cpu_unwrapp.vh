@@ -30,7 +30,7 @@
     .rst            (rst),
     .F_pc_va        (F_pc_va),
     .EX_brn         (EX_brn),
-    .F_stall        (F_stall),
+    .Icache_stall        (Icache_stall),
     .dcache_stall   (dcache_stall),
     .Itlb_stall     (Itlb_stall),
     .sb_stall       (sb_stall),
@@ -140,7 +140,7 @@
     .Ic_mem_addr (Ic_mem_addr),
 
     .F_inst      (F_inst),
-    .F_stall     (F_stall)
+    .Icache_stall     (Icache_stall)
   );
 
   // =======================

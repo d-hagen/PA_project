@@ -10,7 +10,7 @@
   // Branch Predictor / buffer
   wire                 F_BP_taken;
   wire [VPC_BITS-1:0]  F_BP_target_pc;
-  wire                 F_stall;
+  wire                 Icache_stall;
 
   // ===== ITLB / PTW wires =====
   wire               Itlb_ptw_valid;

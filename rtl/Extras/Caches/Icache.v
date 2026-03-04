@@ -16,7 +16,7 @@ module icache #(
 
     // Fetch outputs
     output reg  [31:0]           F_inst,
-    output reg                   F_stall
+    output reg                   Icache_stall
 );
 
     // ============================================================
@@ -99,7 +99,7 @@ module icache #(
     always @(*) begin
         // defaults
         F_inst      = 32'h2000_0000; // NOP
-        F_stall     = 1'b0;
+        Icache_stall     = 1'b0;
         Ic_mem_req  = 1'b0;
         Ic_mem_addr = pc_line;
 
@@ -111,7 +111,7 @@ module icache #(
         case (state)
             S_IDLE: begin // idle
                 if (!hit) begin // miss
-                    F_stall     = 1'b1;
+                    Icache_stall     = 1'b1;
                     Ic_mem_req  = (!F_mem_valid) ? 1'b1 : 1'b0;
                     Ic_mem_addr = pc_line;
                 end else begin // hit
@@ -125,18 +125,18 @@ module icache #(
 
             S_PFWAIT: begin // prefetch in flight
                 if (!hit) begin // miss while PF
-                    F_stall = 1'b1;
+                    Icache_stall = 1'b1;
                 end
                 // no new request
             end
 
             S_MISSWAIT: begin // demand miss in flight
-                F_stall = 1'b1;
+                Icache_stall = 1'b1;
                 // no new request
             end
 
             default: begin // safe
-                F_stall = 1'b1;
+                Icache_stall = 1'b1;
             end
         endcase
     end

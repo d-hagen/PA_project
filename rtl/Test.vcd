@@ -1,5 +1,5 @@
 $date
-	Tue Jan 20 10:41:41 2026
+	Tue Jan 20 11:51:43 2026
 $end
 $version
 	Icarus Verilog
@@ -12,7 +12,7 @@ $var parameter 32 ! ADDR_SIZE $end
 $var parameter 32 " PC_BITS $end
 $var parameter 32 # PROGRESS_EVERY $end
 $var parameter 32 $ REG_NUM $end
-$var parameter 104 % WAVE_FILE $end
+$var parameter 64 % WAVE_FILE $end
 $var parameter 32 & WAVE_NUM_CYCLES $end
 $var parameter 32 ' WAVE_START_CYCLE $end
 $var parameter 32 ( XLEN $end

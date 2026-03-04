@@ -34,7 +34,7 @@ module decode #(
   assign D_rb     = D_inst[20:16];
   assign D_rd     = D_inst[15:11];
   assign D_imd    = D_inst[10:0];
-
+  // CHECK : exc for unknown
   localparam OPC_ADD   = 6'b000000;
   localparam OPC_SUB   = 6'b000001;
   localparam OPC_AND   = 6'b000010;

@@ -31,7 +31,7 @@
                   | dcache_stall
                   | Dtlb_stall
                   | Itlb_stall
-                  | F_stall
+                  | Icache_stall
                   | sb_stall
                   | mul_wb_conflict_stall
                   | mul_issue_stall
