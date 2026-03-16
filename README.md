@@ -1,30 +1,24 @@
-# Simple 32-bit Out-of-Order RISC CPU
+# 32-bit Out-of-Order RISC CPU
 
-A custom **32-bit RISC-style processor** implementing a small fixed-width ISA together with modern microarchitectural features such as **branch prediction, register renaming, speculative execution, caches, and virtual memory**.
-
----
-
-# ISA Overview
-
-All instructions are **32 bits** wide.
-
-| opcode (6) | ra (5) | rb (5) | rd (5) | imm (11) |
-
-Field description:
-
-- **opcode [31:26]** – instruction opcode  
-- **ra [25:21]** – source register A  
-- **rb [20:16]** – source register B  
-- **rd [15:11]** – destination register or control sub-op  
-- **imm [10:0]** – immediate / offset
+A custom **32-bit RISC-style processor** implementing a fixed-width ISA with modern microarchitectural features including out-of-order execution, branch prediction, register renaming, caches, and virtual memory. Built in SystemVerilog and simulated with Icarus Verilog.
 
 ---
 
-# Register Convention
+# Instruction Set Architecture (ISA)
 
-- **r0 (x0)** is hardwired to **0**
-- Reads always return **0**
-- Writes are ignored
+All instructions are **32 bits** wide with a fixed encoding:
+
+| opcode [31:26] | ra [25:21] | rb [20:16] | rd [15:11] | imm [10:0] |
+|---|---|---|---|---|
+| 6 bits | 5 bits | 5 bits | 5 bits | 11 bits |
+
+- **opcode** – selects the operation
+- **ra** – source register A
+- **rb** – source register B
+- **rd** – destination register (or control sub-op for branches)
+- **imm** – immediate value / memory offset
+
+**r0** is hardwired to zero — reads always return 0, writes are ignored.
 
 ---
 
@@ -32,116 +26,149 @@ Field description:
 
 ## ALU Operations
 
-| Instruction | Opcode | Operation |
-|---|---|---|
-| ADD | 000000 | rd ← ra + rb |
-| SUB | 000001 | rd ← ra − rb |
-| AND | 000010 | rd ← ra & rb |
-| OR  | 000011 | rd ← ra \| rb |
-| XOR | 000100 | rd ← ra ^ rb |
-| NOT | 000101 | rd ← ~ra |
-| SHL | 000110 | rd ← ra << rb[4:0] |
-| SHR | 000111 | rd ← ra >> rb[4:0] |
-| ADDI | 001000 | rd ← ra + imm |
-| LT | 001001 | rd ← (ra < rb) |
-| GT | 001010 | rd ← (ra > rb) |
-
----
+| Instruction | Opcode   | Effect                        |
+|-------------|----------|-------------------------------|
+| ADD         | `000000` | rd ← ra + rb                  |
+| SUB         | `000001` | rd ← ra − rb                  |
+| AND         | `000010` | rd ← ra & rb                  |
+| OR          | `000011` | rd ← ra \| rb                 |
+| XOR         | `000100` | rd ← ra ^ rb                  |
+| NOT         | `000101` | rd ← ~ra                      |
+| SHL         | `000110` | rd ← ra << rb[4:0]            |
+| SHR         | `000111` | rd ← ra >> rb[4:0]            |
+| ADDI        | `001000` | rd ← ra + imm                 |
+| LT          | `001001` | rd ← 1 if ra < rb, else 0    |
+| GT          | `001010` | rd ← 1 if ra > rb, else 0    |
 
 ## Multiply
 
-| Instruction | Opcode | Operation |
-|---|---|---|
-| MUL | 001110 | rd ← ra * rb |
+| Instruction | Opcode   | Effect       |
+|-------------|----------|--------------|
+| MUL         | `001110` | rd ← ra * rb |
 
-Executed in an **independent multiply stage**.
-
----
+Runs in a **dedicated independent multiply stage**, separate from the main ALU pipeline.
 
 ## Memory Operations
 
-Address calculation:
+Address is computed as `addr = ra + imm`.
+`opcode[5]` selects word (`0`) or byte (`1`) access.
 
-```
-addr = ra + imm
-```
-
-| Instruction | Opcode Pattern | Operation |
-|---|---|---|
-| LOAD.W  | 0_01011 | rd ← MEM[addr] |
-| LOAD.B  | 1_01011 | rd ← MEM8[addr] |
-| STORE.W | 0_01100 | MEM[addr] ← rb |
-| STORE.B | 1_01100 | MEM8[addr] ← rb |
-
-`opcode[5]` selects **word or byte access**.
-
----
+| Instruction | Opcode    | Effect                          |
+|-------------|-----------|---------------------------------|
+| LOAD.W      | `0_01011` | rd ← MEM[addr] (32-bit word)   |
+| LOAD.B      | `1_01011` | rd ← MEM[addr] (8-bit byte)    |
+| STORE.W     | `0_01100` | MEM[addr] ← rb (32-bit word)   |
+| STORE.B     | `1_01100` | MEM[addr] ← rb (8-bit byte)    |
 
 ## Control Flow
 
-All control instructions use:
+All branches share `opcode = 001101`. The `rd` field selects the variant.
 
-```
-opcode = 001101
-```
+| rd      | Instruction | Condition          | Effect                            |
+|---------|-------------|--------------------|-----------------------------------|
+| `00000` | JMP         | Unconditional      | PC ← ra + imm                    |
+| `00001` | BEQ         | ra == rb           | PC ← ra + imm if equal           |
+| `00010` | BLT         | ra < rb            | PC ← ra + imm if less than       |
+| `00011` | BGT         | ra > rb            | PC ← ra + imm if greater than    |
+| `1xxxx` | JLx         | Unconditional      | PC ← ra + imm, link return addr  |
 
-| rd | Instruction | Condition |
-|---|---|---|
-| 00000 | JMP | unconditional |
-| 00001 | BEQ | ra == rb |
-| 00010 | BLT | ra < rb |
-| 00011 | BGT | ra > rb |
+## Privileged
 
-### JLx
-
-Variant of `JMP` where:
-
-```
-rd[3:0] = 0000
-rd[4]   = 1
-```
+| Instruction | Opcode   | Effect                                        |
+|-------------|----------|-----------------------------------------------|
+| IRET        | `111111` | Return from interrupt/exception (admin only)  |
 
 ---
 
-## Privileged Instruction
+# Microarchitecture
 
-| Instruction | Opcode | Description |
-|---|---|---|
-| IRET | 111111 | Return from interrupt/exception (admin mode only) |
+## Pipeline
+
+5-stage in-order pipeline with out-of-order execution support:
+
+```
+Fetch → Decode → Execute → Memory → Writeback
+```
+
+Pipeline registers: `F_to_D` → `D_to_EX` → `EX_to_MEM` → `MEM_to_WB`
 
 ---
 
-# Microarchitecture Features
+## Instruction Cache (I-Cache)
 
-### Branch Predictor
-Dynamic **branch prediction** reduces control hazards.
+| Property        | Value                          |
+|-----------------|--------------------------------|
+| Entries         | 4 lines, fully associative     |
+| Line size       | 16 bytes (4 × 32-bit words)    |
+| Total size      | 64 bytes                       |
+| Replacement     | FIFO                           |
+| Prefetch        | Yes — next sequential line prefetched automatically after a fill |
 
-### Instruction Cache
-- **I-Cache**
-- Includes **simple instruction prefetch**
+On a miss the pipeline stalls until the line is fetched from memory. On a hit, the cache immediately issues a prefetch for the next line if it is not already present.
 
-### Data Cache
-- **D-Cache** for load/store operations.
+---
 
-### Virtual Memory
-- **ITLB** – Instruction TLB  
-- **DTLB** – Data TLB  
-- **Hardware Page Table Walker (PTW)**
+## Data Cache (D-Cache)
+
+| Property        | Value                          |
+|-----------------|--------------------------------|
+| Entries         | 4 lines, fully associative     |
+| Line size       | 16 bytes (byte-addressable)    |
+| Total size      | 64 bytes                       |
+| Replacement     | FIFO                           |
+| Write policy    | Write-back with dirty bits     |
+| Writeback       | Dirty lines evicted to memory on replacement |
+| Cross-line load | Supported — word reads spanning two cache lines handled correctly |
+| Store forwarding| Loads can bypass the cache via the store buffer |
+
+---
+
+## Branch Predictor
+
+| Property     | Value                                              |
+|--------------|----------------------------------------------------|
+| Type         | Branch Target Buffer (BTB), fully associative      |
+| Entries      | 8                                                  |
+| Replacement  | FIFO (newest entry at index 0)                     |
+| Direction    | 1-bit last-outcome — remembers taken/not-taken     |
+| Target       | Stores resolved target PC per branch               |
+| Miss default | Predict not-taken, fall through to PC+4            |
+| Update       | Resolved at Execute stage, updates direction and target |
+
+---
+
+## Out-of-Order Execution
 
 ### Register Renaming
-- **Rename Unit** removes false dependencies.
+Eliminates false WAR (write-after-read) and WAW (write-after-write) data dependencies, allowing more instructions to execute in parallel.
 
-### Reorder Buffer
-- **ROB** enables speculative execution and ensures **in-order commit**.
+### Reorder Buffer (ROB)
+Tracks all in-flight instructions and ensures **in-order commit** even when instructions complete out of order. Enables safe speculative execution — mis-speculated instructions are rolled back before committing.
 
-### Independent MUL Stage
-- Dedicated multiply execution unit.
+### Store Buffer
+Pending stores are held in a store buffer and drained to the D-Cache in order. Loads can forward directly from the store buffer without going to the cache.
+
+---
+
+## Virtual Memory
+
+| Component | Description                                              |
+|-----------|----------------------------------------------------------|
+| ITLB      | Instruction TLB — caches virtual-to-physical translations for fetch |
+| DTLB      | Data TLB — caches translations for load/store           |
+| PTW       | Hardware Page Table Walker — automatically walks 2-level page tables on TLB miss |
+
+---
+
+## Hazard Handling
+
+A dedicated **Hazard Unit** detects and resolves data and control hazards, issuing stalls or forwarding signals as needed.
 
 ---
 
 # Assembling Programs
 
-Programs are written in a simple assembly format:
+Programs are written in a plain-text assembly format:
 
 ```
 opcode ra rb rd imm
@@ -155,43 +182,32 @@ add  r2 r1 r1 0
 store r0 r2 r0 0
 ```
 
-The provided **Python assembler**:
+The provided **Python assembler** (`compiler/assembler.py`):
 
-- Encodes instructions
-- Generates required **NOPs and IRET handlers**
-- Builds **2-level page tables**
-- Outputs a **memory image (`program.hex`)**
+- Encodes instructions into 32-bit binary
+- Inserts required NOPs and IRET handlers
+- Builds a 2-level page table
+- Outputs a memory image (`program.hex`) loaded by the simulator
 
-### Compile Assembly
-
-```
+```bash
 python3 compiler/assembler.py program.asm -o rtl/program.hex
 ```
 
-The simulator loads instructions from this file into memory.
-
 ---
 
-# Running the CPU Simulation
+# Running the Simulation
 
-The project uses **Icarus Verilog** with the file list `paths.f`.
+The project uses **Icarus Verilog** with the file list `rtl/paths.f`.
 
-### Compile RTL
-
-```
+```bash
+# Compile RTL
 cd rtl
 iverilog -g2012 -f paths.f -o cpu_sim
-```
 
-### Run Simulation
-
-```
+# Run simulation
 vvp cpu_sim
-```
 
-Optional waveform viewing:
-
-```
+# View waveforms (optional)
 gtkwave dump.vcd
 ```
 
@@ -201,33 +217,21 @@ gtkwave dump.vcd
 
 ```
 rtl/
- ├─ cpu/
- ├─ Stages/
- ├─ Memory/
- ├─ pipeline_brakes/
+ ├─ cpu/                  # Top-level CPU and control wiring
+ ├─ Stages/               # Pipeline stage modules (ALU, Decode, MUL)
+ ├─ Memory/               # Register file, ROB, joined memory
+ ├─ pipeline_brakes/      # Pipeline register modules
  ├─ Extras/
- │   ├─ Branch_Predictor
- │   ├─ rename
- │   ├─ storeBuffer
- │   ├─ exceptionHandler
- │   ├─ tlbs/
- │   └─ Caches/
- ├─ paths.f
- └─ tb_cpu.v
+ │   ├─ Branch_Predictor.v
+ │   ├─ rename.v
+ │   ├─ storeBuffer.v
+ │   ├─ exceptionHandler.v
+ │   ├─ Hazard_unit.v
+ │   ├─ tlbs/             # ITLB, DTLB, PTW
+ │   └─ Caches/           # I-Cache, D-Cache
+ ├─ paths.f               # File list for iverilog
+ └─ tb_cpu.v              # Testbench
+compiler/
+ ├─ assembler.py          # Python assembler
+ └─ TestPrograms/         # Example assembly programs
 ```
-
----
-
-# Summary
-
-Features:
-
-- 32-bit fixed-width ISA
-- Out-of-order execution
-- Register renaming
-- Reorder buffer
-- Branch predictor
-- Instruction cache with prefetch
-- Data cache
-- Virtual memory (ITLB, DTLB, PTW)
-- Independent multiply execution stage
